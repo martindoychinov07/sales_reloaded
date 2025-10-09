@@ -1,5 +1,6 @@
 package com.example.sales.service;
 
+import com.example.sales.DTO.UserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -15,8 +16,11 @@ import com.example.sales.model.User;
 import com.example.sales.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 
 @Service
@@ -201,18 +205,21 @@ public class UserService {
         return Optional.of(user.getRole());
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(u -> new UserDTO(u.getId(), u.getUsername(), u.getRole(), u.getCode()))
+                .collect(Collectors.toList());
     }
 
-    public void migratePasswords() {
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            String raw = user.getPassword();
-            if (!raw.startsWith("$2a$")) {
-                user.setPassword(passwordEncoder.encode(raw));
-                userRepository.save(user);
-            }
-        }
-    }
+//    public void migratePasswords() {
+//        List<User> users = userRepository.findAll();
+//        for (User user : users) {
+//            String raw = user.getPassword();
+//            if (!raw.startsWith("$2a$")) {
+//                user.setPassword(passwordEncoder.encode(raw));
+//                userRepository.save(user);
+//            }
+//        }
+//    }
 }
