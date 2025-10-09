@@ -19,7 +19,7 @@
     </appender>
 
     <!-- Logger only for UserService -->
-    <logger name="com.example.sales.service.UserService" level="INFO" additivity="false">
+    <logger name="com.reloaded.sales.service.UserService" level="INFO" additivity="false">
         <appender-ref ref="LOGIN_FILE"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
