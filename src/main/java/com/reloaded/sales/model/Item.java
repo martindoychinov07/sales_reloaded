@@ -84,7 +84,7 @@ public class Item {
     @NonNull
     @Column(nullable = true)
     @Getter @Setter
-    private long packageVar;
+    private Long packageVar;
 
     @NonNull
     @Column(nullable = true)
