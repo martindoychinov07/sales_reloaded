@@ -29,19 +29,19 @@ public class UserControllerTest {
     void testSignUpSuccess() throws Exception {
         userController.createUser(userInput);
 
-        Mockito.verify(userService).signup(userInput);
+        Mockito.verify(userService).signUp(userInput);
     }
 
     @Test
     void testSignUpFail() throws Exception {
         Mockito.doThrow(new UserExistsException("User already exists"))
-                .when(userService).signup(Mockito.any(User.class));
+                .when(userService).signUp(Mockito.any(User.class));
 
         assertThrows(UserExistsException.class, () -> {
             userController.createUser(userInput);
         });
 
-        Mockito.verify(userService).signup(userInput);
+        Mockito.verify(userService).signUp(userInput);
     }
 
     @Test

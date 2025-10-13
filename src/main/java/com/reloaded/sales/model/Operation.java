@@ -16,67 +16,67 @@ public class Operation {
     private long id;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long docId;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long row;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long itemId;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String barcode;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String code;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String item;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long packageVar;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String measure;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int quantity;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private double price;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private double discount;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private double tax;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int available;
 }

@@ -1,5 +1,7 @@
 package com.reloaded.sales.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import com.reloaded.sales.model.Item;
 import com.reloaded.sales.DTO.ItemEditRequest;
 import com.reloaded.sales.exception.ItemNotFoundException;
 import com.reloaded.sales.repository.ItemRepository;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,8 +59,9 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
-    public List<Item> getAllItems() {
-        return itemRepository.findByRatingNot(0);
+    public List<Item> getAllItems(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findByRatingNot(0, pageable);
     }
 
     @Transactional(readOnly = true)

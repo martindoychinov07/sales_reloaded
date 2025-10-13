@@ -15,118 +15,96 @@ public class Document {
     @Getter
     private long id;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private LocalDateTime docDate = LocalDateTime.now();
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int docType;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String docBook;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String docTemplate;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int docNumber;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long supplierId;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long customerId;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String note;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String docTags;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String rpTags;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String docRefs;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int payment;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int availability;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long authorId;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private long assigneeId;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int rows;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int vat;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String ccy;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int rating;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int total;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int totalTax;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String statusType;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String statusNote;
 }

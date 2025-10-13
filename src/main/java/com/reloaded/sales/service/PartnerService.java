@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import com.example.sales.exception.*;
 import com.reloaded.sales.model.Partner;
 import com.reloaded.sales.DTO.PartnerEditRequest;
 import com.reloaded.sales.repository.PartnerRepository;

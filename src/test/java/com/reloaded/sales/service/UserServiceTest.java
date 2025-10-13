@@ -1,6 +1,5 @@
 package com.reloaded.sales.service;
 
-import com.example.sales.exception.*;
 import com.reloaded.sales.exception.UserAlreadyLoggedInException;
 import com.reloaded.sales.exception.UserAlreadyLoggedOutException;
 import com.reloaded.sales.exception.UserExistsException;
@@ -37,7 +36,7 @@ public class UserServiceTest {
     @Test
     void testSignUpSuccess() {
         User user = new User("test", "pass");
-        userService.signup(user);
+        userService.signUp(user);
 
         User found = userRepository.findByUsername("test");
         assertNotNull(found);
@@ -47,18 +46,18 @@ public class UserServiceTest {
     @Test
     void testSignUpFailExists() throws UserExistsException {
         User user = new User("test", "pass");
-        userService.signup(user);
+        userService.signUp(user);
 
         User duplicate = new User("test", "pass");
         assertThrows(UserExistsException.class, () -> {
-            userService.signup(duplicate);
+            userService.signUp(duplicate);
         });
     }
 
     @Test
     void testLoginSuccess() throws Exception {
         User signupUser = new User("test", "pass");
-        userService.signup(signupUser);
+        userService.signUp(signupUser);
 
         // mock request with fake IP
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
@@ -82,7 +81,7 @@ public class UserServiceTest {
     @Test
     void testLogInAlreadyLoggedIn() throws Exception {
         User signupUser = new User("test", "pass");
-        userService.signup(signupUser);
+        userService.signUp(signupUser);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -99,7 +98,7 @@ public class UserServiceTest {
     @Test
     void testLogOutAlreadyLoggedOut() throws Exception {
         User user = new User("test", "pass");
-        userService.signup(user);
+        userService.signUp(user);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -117,7 +116,7 @@ public class UserServiceTest {
     @Test
     void testDeleteUserSuccess() throws Exception {
         User signupUser = new User("test", "pass");
-        userService.signup(signupUser);
+        userService.signUp(signupUser);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -136,7 +135,7 @@ public class UserServiceTest {
     @Test
     void testDeleteUserFailsWhenLoggedOut() throws Exception {
         User signupUser = new User("test", "pass");
-        userService.signup(signupUser);
+        userService.signUp(signupUser);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getRemoteAddr()).thenReturn("127.0.0.1");

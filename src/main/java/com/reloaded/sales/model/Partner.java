@@ -19,52 +19,52 @@ public class Partner {
     private long refId;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private LocalDateTime version = LocalDateTime.now();;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String code;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String name;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String location;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String address;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String idTags;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String cpTags;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String rcvd;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private String noteProps;
 
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Getter @Setter
     private int rating;
 }
