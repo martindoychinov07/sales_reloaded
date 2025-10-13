@@ -65,6 +65,24 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
+    public List<Item> getByName(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findByName(name, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Item> getByCode(String code, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findByCode(code, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Item> getByBarcode(String barcode, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return itemRepository.findByBarcode(barcode, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Item> getById(long id) {
         return itemRepository.findById(id);
     }

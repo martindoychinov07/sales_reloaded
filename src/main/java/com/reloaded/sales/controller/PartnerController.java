@@ -33,8 +33,23 @@ public class PartnerController {
     }
 
     @GetMapping("/all")
-    public List<Partner> getAllPartners() {
-        return partnerService.getAllPartners();
+    public List<Partner> getAllPartners(@RequestParam int page, @RequestParam int size) {
+        return partnerService.getAllPartners(page, size);
+    }
+
+    @GetMapping("/name")
+    public List<Partner> getByName(@RequestParam String name, @RequestParam int page, @RequestParam int size) {
+        return partnerService.getByName(name, page, size);
+    }
+
+    @GetMapping("/location")
+    public List<Partner> getByLocation(@RequestParam String location, @RequestParam int page, @RequestParam int size) {
+        return partnerService.getByLocation(location, page, size);
+    }
+
+    @GetMapping("/idTags")
+    public List<Partner> getByIdTags(@RequestParam String idTags,@RequestParam int page, @RequestParam int size) {
+        return partnerService.getByIdTags(idTags, page, size);
     }
 
 //    @PostMapping("/name")

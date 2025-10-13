@@ -13,4 +13,7 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Item findByName(String name);
     List<Item> findByRatingNot(int rating, Pageable pageable);
+    List<Item> findByName(String name, Pageable pageable);
+    List<Item> findByCode(String code, Pageable pageable);
+    List<Item> findByBarcode(String barcode, Pageable pageable);
 }

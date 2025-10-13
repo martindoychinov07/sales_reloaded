@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.reloaded.sales.service.DocumentService;
 import com.reloaded.sales.model.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
@@ -33,7 +34,22 @@ public class DocumentController {
     }
 
     @GetMapping("/all")
-    public List<Document> getAllDocuments() {
-        return documentService.getAllDocuments();
+    public List<Document> getAllDocuments(@RequestParam int page, @RequestParam int size) {
+        return documentService.getAllDocuments(page, size);
+    }
+
+    @GetMapping("/customerId")
+    public List<Document> getByCustomerId(@RequestParam long customerId, @RequestParam int page, @RequestParam int size) {
+        return documentService.getByCustomerId(customerId, page, size);
+    }
+
+    @GetMapping("/itemId")
+    public List<Document> getByItemId(@RequestParam long itemId, @RequestParam int page, @RequestParam int size) {
+        return documentService.getByItemId(itemId, page, size);
+    }
+
+    @GetMapping("/date")
+    public List<Document> getByDateBetween(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam int page, @RequestParam int size) {
+        return documentService.getByDateBetween(start, end, page, size);
     }
 }

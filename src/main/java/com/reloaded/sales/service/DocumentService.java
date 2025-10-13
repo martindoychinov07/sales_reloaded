@@ -5,6 +5,8 @@ import com.reloaded.sales.model.Operation;
 import com.reloaded.sales.repository.OperationRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import com.reloaded.sales.repository.PartnerRepository;
 import com.reloaded.sales.model.Partner;
 import com.reloaded.sales.exception.PartnerNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Transactional
@@ -84,7 +87,26 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Document> getAllDocuments() {
-        return documentRepository.findByRatingNot(0);
+    public List<Document> getAllDocuments(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return documentRepository.findByRatingNot(0, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Document> getByCustomerId(long customerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return documentRepository.findByCustomerId(customerId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Document> getByItemId(long itemId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return documentRepository.findByItemId(itemId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Document> getByDateBetween(LocalDateTime start, LocalDateTime end, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return documentRepository.findByDocDateBetween(start, end, pageable);
     }
 }

@@ -28,11 +28,6 @@ public class ItemController {
         return itemService.deleteItem(name.replace("\"", "").trim());
     }
 
-    @GetMapping("/all")
-    public List<Item> getAllItems(@RequestParam int page, @RequestParam int size) {
-        return itemService.getAllItems(page, size);
-    }
-
     @PatchMapping("/edit")
     public ResponseEntity<String> editItem(@RequestBody ItemEditRequest itemEditRequest) {
         return itemService.editItem(itemEditRequest);
@@ -41,5 +36,25 @@ public class ItemController {
     @GetMapping("/id")
     public Optional<Item> getById(@RequestParam long id) {
         return itemService.getById(id);
+    }
+
+    @GetMapping("/all")
+    public List<Item> getAllItems(@RequestParam int page, @RequestParam int size) {
+        return itemService.getAllItems(page, size);
+    }
+
+    @GetMapping("/name")
+    public List<Item> getByName(@RequestParam String name, @RequestParam int page, @RequestParam int size) {
+        return itemService.getByName(name, page, size);
+    }
+
+    @GetMapping("/code")
+    public List<Item> getByCode(@RequestParam String code, @RequestParam int page, @RequestParam int size) {
+        return itemService.getByCode(code, page, size);
+    }
+
+    @GetMapping("/barcode")
+    public List<Item> getByBarcode(@RequestParam String barcode, @RequestParam int page, @RequestParam int size) {
+        return itemService.getByBarcode(barcode, page, size);
     }
 }
