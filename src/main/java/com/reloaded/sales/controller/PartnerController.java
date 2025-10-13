@@ -22,7 +22,7 @@ public class PartnerController {
         return partnerService.createPartner(partner);
     }
 
-    @PatchMapping("/edit")
+    @PutMapping("/edit")
     public ResponseEntity<String> editPartner(@RequestBody PartnerEditRequest partnerEditRequest) {
         return partnerService.editPartner(partnerEditRequest);
     }
@@ -38,17 +38,17 @@ public class PartnerController {
     }
 
     @GetMapping("/name")
-    public List<Partner> getByName(@RequestParam String name, @RequestParam int page, @RequestParam int size) {
+    public List<Partner> getByName(@RequestBody String name, @RequestParam int page, @RequestParam int size) {
         return partnerService.getByName(name, page, size);
     }
 
     @GetMapping("/location")
-    public List<Partner> getByLocation(@RequestParam String location, @RequestParam int page, @RequestParam int size) {
+    public List<Partner> getByLocation(@RequestBody String location, @RequestParam int page, @RequestParam int size) {
         return partnerService.getByLocation(location, page, size);
     }
 
     @GetMapping("/idTags")
-    public List<Partner> getByIdTags(@RequestParam String idTags,@RequestParam int page, @RequestParam int size) {
+    public List<Partner> getByIdTags(@RequestBody String idTags,@RequestParam int page, @RequestParam int size) {
         return partnerService.getByIdTags(idTags, page, size);
     }
 

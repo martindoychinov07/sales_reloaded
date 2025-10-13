@@ -23,7 +23,7 @@ public class DocumentController {
         return documentService.createDocument(documentCreateRequest);
     }
 
-    @PatchMapping("/edit")
+    @PutMapping("/edit")
     public ResponseEntity<String> updateDocument(@RequestBody DocumentRequest documentCreateRequest) {
         return documentService.editDocument(documentCreateRequest);
     }
@@ -39,17 +39,17 @@ public class DocumentController {
     }
 
     @GetMapping("/customerId")
-    public List<Document> getByCustomerId(@RequestParam long customerId, @RequestParam int page, @RequestParam int size) {
+    public List<Document> getByCustomerId(@RequestBody long customerId, @RequestParam int page, @RequestParam int size) {
         return documentService.getByCustomerId(customerId, page, size);
     }
 
     @GetMapping("/itemId")
-    public List<Document> getByItemId(@RequestParam long itemId, @RequestParam int page, @RequestParam int size) {
+    public List<Document> getByItemId(@RequestBody long itemId, @RequestParam int page, @RequestParam int size) {
         return documentService.getByItemId(itemId, page, size);
     }
 
     @GetMapping("/date")
-    public List<Document> getByDateBetween(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam int page, @RequestParam int size) {
+    public List<Document> getByDateBetween(@RequestBody LocalDateTime start, @RequestBody LocalDateTime end, @RequestParam int page, @RequestParam int size) {
         return documentService.getByDateBetween(start, end, page, size);
     }
 }
