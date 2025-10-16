@@ -10,6 +10,7 @@ import com.reloaded.sales.model.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
@@ -43,9 +44,9 @@ public class DocumentController {
         return documentService.getByCustomerId(customerId, page, size);
     }
 
-    @GetMapping("/itemId")
-    public List<Document> getByItemId(@RequestBody long itemId, @RequestParam int page, @RequestParam int size) {
-        return documentService.getByItemId(itemId, page, size);
+    @GetMapping("/id")
+    public Optional<Document> getById(@RequestParam long id) {
+        return documentService.getById(id);
     }
 
     @GetMapping("/date")

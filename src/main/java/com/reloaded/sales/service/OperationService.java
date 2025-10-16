@@ -2,6 +2,8 @@ package com.reloaded.sales.service;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import com.reloaded.sales.model.Document;
 import com.reloaded.sales.model.Item;
 import com.reloaded.sales.repository.DocumentRepository;
 import com.reloaded.sales.repository.ItemRepository;
+
+import java.util.List;
 
 @Transactional
 @Service
@@ -68,6 +72,12 @@ public class OperationService {
         operationRepository.save(operation);
 
         return ResponseEntity.ok("Operation edited successfully");
+    }
+
+    @Transactional(readOnly = true)
+    public List<Document> getByItemId(long itemId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return operationRepository.findByItemId(itemId, pageable);
     }
 
 //    public ResponseEntity<String> deleteOperation(long id)

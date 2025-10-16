@@ -13,6 +13,5 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByRatingNot(int rating, Pageable pageable);
     List<Document> findByCustomerId(long customerId, Pageable pageable);
-    List<Document> findByItemId(long itemId, Pageable pageable);
     List<Document> findByDocDateBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
 }

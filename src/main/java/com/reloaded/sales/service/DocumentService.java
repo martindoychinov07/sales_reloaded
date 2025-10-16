@@ -20,6 +20,7 @@ import com.reloaded.sales.exception.PartnerNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -99,14 +100,13 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Document> getByItemId(long itemId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return documentRepository.findByItemId(itemId, pageable);
-    }
-
-    @Transactional(readOnly = true)
     public List<Document> getByDateBetween(LocalDateTime start, LocalDateTime end, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return documentRepository.findByDocDateBetween(start, end, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Document> getById(long id) {
+        return documentRepository.findById(id);
     }
 }
