@@ -98,11 +98,6 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.18.0</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -126,25 +121,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>4.31.1</version>
-				<configuration>
-					<!-- Path to your master changelog -->
-					<changeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</changeLogFile>
-
-					<!-- Database connection -->
-					<url>jdbc:postgresql://localhost:5432/sales</url>
-					<username>postgres</username>
-					<password>martin123</password>
-					<driver>org.postgresql.Driver</driver>
-
-					<!-- Optional: logging -->
-					<logLevel>info</logLevel>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
