@@ -43,7 +43,7 @@ public class OrderFormController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public OrderFormDto getById(@PathVariable int id) {
-        return orderFormService.getById(id);
+        return toDto(orderFormService.getById(id));
     }
 
     @GetMapping("/findAll")

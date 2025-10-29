@@ -36,4 +36,8 @@ public class OrderFormService {
 
         orderFormRepository.delete(orderForm);
     }
+
+    public OrderForm getById(Integer id) {
+        return orderFormRepository.findById(id).orElseThrow(() -> new NotFound("Order form not found"));
+    }
 }
