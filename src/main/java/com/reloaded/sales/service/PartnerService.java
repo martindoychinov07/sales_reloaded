@@ -58,7 +58,7 @@ public class PartnerService {
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(Partner.Fields.name, match.ignoreCase().contains())
+      .withMatcher(Partner.Fields.name, match.contains().ignoreCase())
       .withMatcher(Partner.Fields.location, match.contains().ignoreCase())
       .withMatcher(Partner.Fields.code, match.contains().ignoreCase())
       .withMatcher(Partner.Fields.partnerState, match.exact());

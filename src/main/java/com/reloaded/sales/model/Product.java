@@ -108,8 +108,4 @@ public class Product {
 
   @Column(name = "price9", precision = 16, scale = 4)
   private BigDecimal price9;
-
-  @Column(name = "ware_id", length = 40)
-  private String wareId;
-
 }

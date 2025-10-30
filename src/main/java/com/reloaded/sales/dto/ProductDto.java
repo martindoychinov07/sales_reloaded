@@ -35,5 +35,4 @@ public final class ProductDto {
     private BigDecimal price7;
     private BigDecimal price8;
     private BigDecimal price9;
-    private String wareId;
 }

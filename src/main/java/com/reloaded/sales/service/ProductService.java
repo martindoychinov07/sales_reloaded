@@ -55,7 +55,7 @@ public class ProductService {
     ExampleMatcher matcher = ExampleMatcher
             .matchingAll()
             .withIgnoreNullValues()
-            .withMatcher(Partner.Fields.name, match.ignoreCase().contains())
+            .withMatcher(Partner.Fields.name, match.contains().ignoreCase())
             .withMatcher(Partner.Fields.code, match.contains().ignoreCase());
 
     Example<Product> example = Example.of(probe, matcher);
