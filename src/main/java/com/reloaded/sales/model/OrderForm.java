@@ -80,5 +80,4 @@ public class OrderForm {
 
   @Column(name = "total_tax", precision = 16, scale = 4)
   private BigDecimal totalTax;
-
 }

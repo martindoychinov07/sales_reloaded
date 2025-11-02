@@ -46,11 +46,11 @@ public class OrderFormController {
         return toDto(orderFormService.getById(id));
     }
 
-    @GetMapping("/findAll")
-    @ResponseStatus(HttpStatus.OK)
-    public List<OrderForm> findAllBy() {
-        return orderFormService.findAllBy();
-    }
+//    @GetMapping("/findAll")
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<OrderForm> findAllById() {
+//        return orderFormService.findAllById();
+//    }
 
     private OrderForm toEntity(OrderFormDto dto) {
         return modelMapper.map(

@@ -40,4 +40,8 @@ public class OrderFormService {
     public OrderForm getById(Integer id) {
         return orderFormRepository.findById(id).orElseThrow(() -> new NotFound("Order form not found"));
     }
+
+//    public OrderFormDto findAllById() {
+//
+//    }
 }
