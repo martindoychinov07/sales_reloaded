@@ -3,6 +3,7 @@ package com.reloaded.sales.controller;
 import com.reloaded.sales.dto.ProductDto;
 import com.reloaded.sales.model.Product;
 import com.reloaded.sales.service.ProductService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Tag(name = "product", description = "product service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/product")

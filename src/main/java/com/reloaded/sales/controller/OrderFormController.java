@@ -3,13 +3,14 @@ package com.reloaded.sales.controller;
 import com.reloaded.sales.dto.OrderFormDto;
 import com.reloaded.sales.model.OrderForm;
 import com.reloaded.sales.service.OrderFormService;
-import org.apache.coyote.Request;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
+
+@Tag(name = "orderForm", description = "orderForm service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/order")
@@ -17,9 +18,9 @@ public class OrderFormController {
     final OrderFormService orderFormService;
     private final ModelMapper modelMapper;
 
-    OrderFormController(OrderFormService orderFormService, ModelMapper modelMapper) {
+    OrderFormController(OrderFormService orderFormService) {
         this.orderFormService = orderFormService;
-        this.modelMapper = modelMapper;
+        this.modelMapper = new ModelMapper();
     }
 
     @PostMapping("/create")

@@ -4,6 +4,7 @@ import com.reloaded.sales.dto.UserDto;
 import com.reloaded.sales.exception.AlreadyReported;
 import com.reloaded.sales.model.User;
 import com.reloaded.sales.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+
+@Tag(name = "user", description = "user service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/user")
