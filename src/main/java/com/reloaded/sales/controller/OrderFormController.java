@@ -1,10 +1,13 @@
 package com.reloaded.sales.controller;
 
+import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.reloaded.sales.dto.OrderFormDto;
 import com.reloaded.sales.model.OrderForm;
+import com.reloaded.sales.model.Partner;
 import com.reloaded.sales.service.OrderFormService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/order")
 public class OrderFormController {
-    final OrderFormService orderFormService;
+    private final OrderFormService orderFormService;
     private final ModelMapper modelMapper;
 
     OrderFormController(OrderFormService orderFormService) {
@@ -54,10 +57,17 @@ public class OrderFormController {
 //    }
 
     private OrderForm toEntity(OrderFormDto dto) {
-        return modelMapper.map(
-                dto,
-                OrderForm.class
-        );
+        OrderForm entity = modelMapper.map(dto, OrderForm.class);
+
+        if (dto.getSupplier() != null) {
+            entity.setSupplier(modelMapper.map(dto.getSupplier(), Partner.class));
+        }
+
+        if (dto.getCustomer() != null) {
+            entity.setCustomer(modelMapper.map(dto.getCustomer(), Partner.class));
+        }
+
+        return entity;
     }
 
     private OrderFormDto toDto(OrderForm entity) {

@@ -2,10 +2,13 @@ package com.reloaded.sales.dto;
 
 import com.reloaded.sales.model.OrderEntry;
 import com.reloaded.sales.model.Partner;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
+@Data
 public final class OrderFormDto {
     private Integer id;
     private Integer orderState;
@@ -15,8 +18,8 @@ public final class OrderFormDto {
     private Integer orderType;
     private String orderView;
     private Integer userId;
-    private Partner supplier;
-    private Partner customer;
+    private PartnerDto supplier;
+    private PartnerDto customer;
     private String note;
     private String orderTags;
     private String paymentTags;
@@ -27,5 +30,5 @@ public final class OrderFormDto {
     private BigDecimal rate;
     private BigDecimal total;
     private BigDecimal totalTax;
-    private List<OrderEntry> orders;
+    private List<OrderEntryDto> orders;
 }

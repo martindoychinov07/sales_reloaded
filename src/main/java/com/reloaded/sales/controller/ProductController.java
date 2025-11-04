@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequestMapping("/product")
 public class ProductController {
 
-  final ProductService productService;
+  private final ProductService productService;
   private final ModelMapper modelMapper;
 
   public ProductController(ProductService productService) {
@@ -50,7 +50,7 @@ public class ProductController {
   }
 
   @GetMapping("/findAll")
-  public Page<ProductDto> findAll(
+  public Page<ProductDto> findProduct(
           @RequestParam String name,
           @RequestParam Optional<String> code,
           Pageable paging) {

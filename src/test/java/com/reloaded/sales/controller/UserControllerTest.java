@@ -1,5 +1,7 @@
 package com.reloaded.sales.controller;
 
+import com.reloaded.sales.dto.UserDto;
+import com.reloaded.sales.exception.AlreadyReported;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.reloaded.sales.exception.UserExistsException;
 import com.reloaded.sales.service.UserService;
 import com.reloaded.sales.model.User;
 
@@ -21,23 +22,23 @@ public class UserControllerTest {
     @Mock
     private UserService userService;
 
-    User userInput = new User("test", "pass");
+    UserDto userInputDto = new UserDto(1, "test", "role", 1L);
     Long userId = 1L;
 
 
     @Test
     void testSignUpSuccess() throws Exception {
-        userController.createUser(userInput);
+        userController.createUser(userInputDto);
 
         Mockito.verify(userService).signUp(userInput);
     }
 
     @Test
     void testSignUpFail() throws Exception {
-        Mockito.doThrow(new UserExistsException("User already exists"))
+        Mockito.doThrow(new AlreadyReported("User already exists"))
                 .when(userService).signUp(Mockito.any(User.class));
 
-        assertThrows(UserExistsException.class, () -> {
+        assertThrows(AlreadyReported.class, () -> {
             userController.createUser(userInput);
         });
 

@@ -20,7 +20,7 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserController {
 
-    final UserService userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
 
     public UserController(UserService userService) {

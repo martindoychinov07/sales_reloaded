@@ -64,7 +64,7 @@ public class PartnerController {
           produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public Page<PartnerDto> findAll(
+  public Page<PartnerDto> findPartner(
           @RequestParam String name,
           @RequestParam Optional<String> location,
           @RequestParam Optional<String> code,
