@@ -1,0 +1,115 @@
+package com.reloaded.sales.controller;
+
+import com.reloaded.sales.dto.PartnerDto;
+import com.reloaded.sales.model.Partner;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import com.reloaded.sales.service.PartnerService;
+
+import java.util.Optional;
+
+@Tag(name = "partner", description = "partner service")
+@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
+@RestController
+@RequestMapping("/partner")
+public class PartnerController {
+
+  private final PartnerService partnerService;
+  private final ModelMapper modelMapper;
+
+  public PartnerController(
+          PartnerService partnerService
+  ) {
+    this.partnerService = partnerService;
+    this.modelMapper = new ModelMapper();
+  }
+
+  @PostMapping(
+          value = "/createPartner",
+          consumes = "application/json",
+          produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.CREATED)
+  public PartnerDto createPartner(@RequestBody PartnerDto partnerDto) {
+    return toDto(partnerService.create(toEntity(partnerDto)));
+  }
+
+  @PutMapping(
+          value = "/updatePartner",
+          consumes = "application/json",
+          produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public PartnerDto updatePartner(@RequestBody PartnerDto partnerDto) {
+    return toDto(partnerService.update(toEntity(partnerDto)));
+  }
+
+  @DeleteMapping(
+          value = "/deletePartner",
+          consumes = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public void deletePartner(@RequestBody int id) {
+    partnerService.delete(id);
+  }
+
+  @GetMapping(
+          value = "/findAll",
+          produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public Page<PartnerDto> findPartner(
+          @RequestParam String name,
+          @RequestParam Optional<String> location,
+          @RequestParam Optional<String> code,
+          @RequestParam Optional<Integer> page,
+          @RequestParam Optional<Integer> size,
+          @RequestParam Optional<String> sort,
+          @RequestParam Optional<Sort.Direction> direction
+  ) {
+    PageRequest paging = PageRequest.ofSize(size.orElse(20));
+    if (page.isPresent()) {
+      paging = paging.withPage(page.get());
+    }
+    if (sort.isPresent()) {
+      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
+    }
+    return partnerService
+            .findAllByNameLocationCode(
+                    name,
+                    location.orElse(null),
+                    code.orElse(null),
+                    paging.toOptional().get()
+            ).map(this::toDto);
+  }
+
+  @GetMapping(
+          value = "/{id}",
+          produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public PartnerDto getPartnerById(@PathVariable int id) {
+    return toDto(partnerService.getById(id));
+  }
+
+  private Partner toEntity(PartnerDto dto) {
+    return modelMapper.map(
+            dto,
+            Partner.class
+    );
+  }
+
+  private PartnerDto toDto(Partner entity) {
+    return modelMapper.map(
+            entity,
+            PartnerDto.class
+    );
+  }
+
+}
