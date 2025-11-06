@@ -1,10 +1,10 @@
 package com.reloaded.sales.repository;
 
-import com.reloaded.sales.model.OrderForm;
+import com.reloaded.sales.model.Exchange;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderFormRepository extends JpaRepository<OrderForm, Integer> {
+public interface ExchangeRepository extends JpaRepository<Exchange, Integer> {
 
 }

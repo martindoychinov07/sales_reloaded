@@ -26,7 +26,7 @@ public class LanguageService {
         Language exists = languageRepository.findById(language.getLangCode())
                 .orElseThrow(() -> new NotFound("Language not found"));
 
-        BeanUtils.copyProperties(language, exists, "landCode");
+        BeanUtils.copyProperties(language, exists, "langCode");
 
         return languageRepository.save(exists);
     }
