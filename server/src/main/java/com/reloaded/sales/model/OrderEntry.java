@@ -1,62 +1,82 @@
 package com.reloaded.sales.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
+@FieldNameConstants
 @Entity
 @Table(name = "order_entry")
 public class OrderEntry {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_entry_id_gen")
-  @SequenceGenerator(name = "order_entry_id_gen", sequenceName = "entry_sequence", allocationSize = 1)
-  @Column(name = "entry_id", nullable = false)
+  @SequenceGenerator(name = "order_entry_id_gen", sequenceName = "order_entry_sequence", allocationSize = 1)
+  @Column(name = "e_id", nullable = false)
   private Integer entryId;
 
-  @Column(name = "order_id")
-  private Integer orderId;
+  @Column(name = "e_version")
+  private Integer entryVersion;
 
-  @Column(name = "order_row")
-  private Integer orderRow;
+  @NotNull
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
+  @JoinColumn(name = "e_order_id", nullable = false)
+  private OrderForm entryOrder;
 
-  @Column(name = "product_id")
-  private Integer productId;
+  @Column(name = "e_row")
+  private Integer entryRow;
 
-  @Column(name = "barcode", length = 50)
-  private String barcode;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "e_product_id")
+  private Product entryProduct;
 
-  @Column(name = "code", length = 50)
-  private String code;
+  @Size(max = 50)
+  @Column(name = "e_barcode", length = 50)
+  private String entryBarcode;
 
-  @Column(name = "label", length = 200)
-  private String label;
+  @Size(max = 50)
+  @Column(name = "e_code", length = 50)
+  private String entryCode;
 
-  @Column(name = "units")
-  private Integer units;
+  @Size(max = 200)
+  @Column(name = "e_label", length = 200)
+  private String entryLabel;
 
-  @Column(name = "measure", length = 30)
-  private String measure;
+  @Column(name = "e_units")
+  private Integer entryUnits;
 
-  @Column(name = "available")
-  private Integer available;
+  @Size(max = 30)
+  @Column(name = "e_measure", length = 30)
+  private String entryMeasure;
 
-  @Column(name = "quantity")
-  private Integer quantity;
+  @Column(name = "e_available")
+  private Integer entryAvailable;
 
-  @Column(name = "price", precision = 16, scale = 4)
-  private BigDecimal price;
+  @Column(name = "e_quantity")
+  private Integer entryQuantity;
 
-  @Column(name = "discount", precision = 16, scale = 4)
-  private BigDecimal discount;
+  @Column(name = "e_price", precision = 16, scale = 4)
+  private BigDecimal entryPrice;
 
-  @Column(name = "tax", precision = 16, scale = 4)
-  private BigDecimal tax;
+  @Column(name = "e_discount", precision = 16, scale = 4)
+  private BigDecimal entryDiscount;
 
-  @Column(name = "ware_id", length = 40)
-  private String wareId;
+  @Column(name = "e_tax", precision = 16, scale = 4)
+  private BigDecimal entryTax;
+
+  @Transient
+  private BigDecimal entrySum;
+
+  @Transient
+  private BigDecimal entryTotal;
 
 }

@@ -20,47 +20,47 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserController {
 
-    private final UserService userService;
-    private final ModelMapper modelMapper;
+  private final UserService userService;
+  private final ModelMapper modelMapper;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-        this.modelMapper = new ModelMapper();
-    }
+  public UserController(UserService userService) {
+    this.userService = userService;
+    this.modelMapper = new ModelMapper();
+  }
 
-    @PostMapping("/signup")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody UserDto user) {
-        return toDto(userService.signUp(toEntity(user)));
-    }
+  @PostMapping("/signup")
+  @ResponseStatus(HttpStatus.CREATED)
+  public UserDto createUser(@RequestBody UserDto user) {
+    return toDto(userService.signUp(toEntity(user)));
+  }
 
-    @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
-    public void logUser(@RequestBody User user, HttpServletRequest request) {
-        userService.login(user, request);
-    }
+  @PostMapping("/login")
+  @ResponseStatus(HttpStatus.OK)
+  public void logUser(@RequestBody User user, HttpServletRequest request) {
+    userService.login(user, request);
+  }
 
-    @GetMapping("/logout")
-    @ResponseStatus(HttpStatus.OK)
-    public void logOutUser() throws AlreadyReported {
-        userService.logout();
-    }
+  @GetMapping("/logout")
+  @ResponseStatus(HttpStatus.OK)
+  public void logOutUser() throws AlreadyReported {
+    userService.logout();
+  }
 
-    @DeleteMapping("/delete")
-    public void deleteUser(@RequestBody String username) {
-        userService.delete(username);
-    }
+  @DeleteMapping("/delete")
+  public void deleteUser(@RequestBody String username) {
+    userService.delete(username);
+  }
 
-    @PatchMapping("/pass")
-    public void changePassword(@RequestBody String password) {
-        userService.changePassword(password);
-    }
+  @PatchMapping("/pass")
+  public void changePassword(@RequestBody String password) {
+    userService.changePassword(password);
+  }
 
-    @PatchMapping("/name")
-    @ResponseStatus(HttpStatus.OK)
-    public void changeUsername(@RequestBody String username) {
-        userService.changeUsername(username);
-    }
+  @PatchMapping("/name")
+  @ResponseStatus(HttpStatus.OK)
+  public void changeUsername(@RequestBody String username) {
+    userService.changeUsername(username);
+  }
 
 //    @PostMapping("/type")
 //    @ResponseStatus(HttpStatus.OK)
@@ -68,29 +68,29 @@ public class UserController {
 //        return userService.getUserRole(username);
 //    }
 
-    @PostMapping("/")
-    public Optional<User> getUserById(@RequestBody String idStr) {
-        Long id = Long.parseLong(idStr.trim());
-        return userService.getUserById(id);
-    }
+  @PostMapping("/")
+  public Optional<User> getUserById(@RequestBody String idStr) {
+    Long id = Long.parseLong(idStr.trim());
+    return userService.getUserById(id);
+  }
 
-    @GetMapping("/findAll")
-    public List<UserDto> findAllUsers() {
-        return userService.findAllUsers();
-    }
+  @GetMapping("/findAll")
+  public List<UserDto> findAllUsers() {
+    return userService.findAllUsers();
+  }
 
-    private User toEntity(UserDto dto) {
-        return modelMapper.map(
-                dto,
-                User.class
-        );
-    }
+  private User toEntity(UserDto dto) {
+    return modelMapper.map(
+      dto,
+      User.class
+    );
+  }
 
-    private UserDto toDto(User entity) {
-        return modelMapper.map(
-                entity,
-                UserDto.class
-        );
-    }
+  private UserDto toDto(User entity) {
+    return modelMapper.map(
+      entity,
+      UserDto.class
+    );
+  }
 }
 

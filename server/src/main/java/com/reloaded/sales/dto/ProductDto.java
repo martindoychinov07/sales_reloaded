@@ -1,38 +1,60 @@
 package com.reloaded.sales.dto;
 
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
+/**
+ * DTO for {@link com.reloaded.sales.model.Product}
+ */
 @Data
-public final class ProductDto {
-    private Integer productId;
-    private Instant version;
-    private String barcode;
-    private String item;
-    private String note;
-    private Integer units;
-    private String measure;
-    private Integer available;
-    private String code;
-    private String code1;
-    private String code2;
-    private String code3;
-    private String code4;
-    private String code5;
-    private String code6;
-    private String code7;
-    private String code8;
-    private String code9;
-    private BigDecimal price;
-    private BigDecimal price1;
-    private BigDecimal price2;
-    private BigDecimal price3;
-    private BigDecimal price4;
-    private BigDecimal price5;
-    private BigDecimal price6;
-    private BigDecimal price7;
-    private BigDecimal price8;
-    private BigDecimal price9;
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductDto {
+  private Integer productId;
+  private Integer productVersion;
+  private Integer productRefId;
+  @Size(max = 50)
+  private String productBarcode;
+  @Size(max = 200)
+  private String productName;
+  @Size(max = 200)
+  private String productNote;
+  private Integer productUnits;
+  @Size(max = 30)
+  private String productMeasure;
+  private Integer productAvailable;
+  @Size(max = 50)
+  private String productCode;
+  @Size(max = 50)
+  private String productCode1;
+  @Size(max = 50)
+  private String productCode2;
+  @Size(max = 50)
+  private String productCode3;
+  @Size(max = 50)
+  private String productCode4;
+  @Size(max = 50)
+  private String productCode5;
+  @Size(max = 50)
+  private String productCode6;
+  @Size(max = 50)
+  private String productCode7;
+  @Size(max = 50)
+  private String productCode8;
+  @Size(max = 50)
+  private String productCode9;
+  private BigDecimal productPrice;
+  private BigDecimal productPrice1;
+  private BigDecimal productPrice2;
+  private BigDecimal productPrice3;
+  private BigDecimal productPrice4;
+  private BigDecimal productPrice5;
+  private BigDecimal productPrice6;
+  private BigDecimal productPrice7;
+  private BigDecimal productPrice8;
+  private BigDecimal productPrice9;
 }

@@ -1,11 +1,12 @@
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.converter.GenericEnumConverter;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,93 +20,108 @@ public class Product {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_id_gen")
   @SequenceGenerator(name = "product_id_gen", sequenceName = "product_sequence", allocationSize = 1)
-  @Column(name = "product_id", nullable = false)
+  @Column(name = "p_id", nullable = false)
   private Integer productId;
 
-  @Column(name = "product_ref_id")
+  @Column(name = "p_version")
+  private Integer productVersion;
+
+  @Column(name = "p_ref_id")
   private Integer productRefId;
 
-  @Column(name = "product_state")
-  private Integer productState;
+  @Column(name = "p_state")
+  private ProductState productState;
 
-  @Column(name = "version")
-  private Instant version;
+  @Size(max = 50)
+  @Column(name = "p_barcode", length = 50)
+  private String productBarcode;
 
-  @Column(name = "barcode", length = 50)
-  private String barcode;
+  @Size(max = 200)
+  @Column(name = "p_name", length = 200)
+  private String productName;
 
-  @Column(name = "item", length = 200)
-  private String item;
+  @Size(max = 200)
+  @Column(name = "p_note", length = 200)
+  private String productNote;
 
-  @Column(name = "note", length = 200)
-  private String note;
+  @Column(name = "p_units")
+  private Integer productUnits;
 
-  @Column(name = "units")
-  private Integer units;
+  @Size(max = 30)
+  @Column(name = "p_measure", length = 30)
+  private String productMeasure;
 
-  @Column(name = "measure", length = 30)
-  private String measure;
+  @Column(name = "p_available")
+  private Integer productAvailable;
 
-  @Column(name = "available")
-  private Integer available;
+  @Size(max = 50)
+  @Column(name = "p_code", length = 50)
+  private String productCode;
 
-  @Column(name = "code", length = 50)
-  private String code;
+  @Size(max = 50)
+  @Column(name = "p_code1", length = 50)
+  private String productCode1;
 
-  @Column(name = "code1", length = 50)
-  private String code1;
+  @Size(max = 50)
+  @Column(name = "p_code2", length = 50)
+  private String productCode2;
 
-  @Column(name = "code2", length = 50)
-  private String code2;
+  @Size(max = 50)
+  @Column(name = "p_code3", length = 50)
+  private String productCode3;
 
-  @Column(name = "code3", length = 50)
-  private String code3;
+  @Size(max = 50)
+  @Column(name = "p_code4", length = 50)
+  private String productCode4;
 
-  @Column(name = "code4", length = 50)
-  private String code4;
+  @Size(max = 50)
+  @Column(name = "p_code5", length = 50)
+  private String productCode5;
 
-  @Column(name = "code5", length = 50)
-  private String code5;
+  @Size(max = 50)
+  @Column(name = "p_code6", length = 50)
+  private String productCode6;
 
-  @Column(name = "code6", length = 50)
-  private String code6;
+  @Size(max = 50)
+  @Column(name = "p_code7", length = 50)
+  private String productCode7;
 
-  @Column(name = "code7", length = 50)
-  private String code7;
+  @Size(max = 50)
+  @Column(name = "p_code8", length = 50)
+  private String productCode8;
 
-  @Column(name = "code8", length = 50)
-  private String code8;
+  @Size(max = 50)
+  @Column(name = "p_code9", length = 50)
+  private String productCode9;
 
-  @Column(name = "code9", length = 50)
-  private String code9;
+  @Column(name = "p_price", precision = 16, scale = 4)
+  private BigDecimal productPrice;
 
-  @Column(name = "price", precision = 16, scale = 4)
-  private BigDecimal price;
+  @Column(name = "p_price1", precision = 16, scale = 4)
+  private BigDecimal productPrice1;
 
-  @Column(name = "price1", precision = 16, scale = 4)
-  private BigDecimal price1;
+  @Column(name = "p_price2", precision = 16, scale = 4)
+  private BigDecimal productPrice2;
 
-  @Column(name = "price2", precision = 16, scale = 4)
-  private BigDecimal price2;
+  @Column(name = "p_price3", precision = 16, scale = 4)
+  private BigDecimal productPrice3;
 
-  @Column(name = "price3", precision = 16, scale = 4)
-  private BigDecimal price3;
+  @Column(name = "p_price4", precision = 16, scale = 4)
+  private BigDecimal productPrice4;
 
-  @Column(name = "price4", precision = 16, scale = 4)
-  private BigDecimal price4;
+  @Column(name = "p_price5", precision = 16, scale = 4)
+  private BigDecimal productPrice5;
 
-  @Column(name = "price5", precision = 16, scale = 4)
-  private BigDecimal price5;
+  @Column(name = "p_price6", precision = 16, scale = 4)
+  private BigDecimal productPrice6;
 
-  @Column(name = "price6", precision = 16, scale = 4)
-  private BigDecimal price6;
+  @Column(name = "p_price7", precision = 16, scale = 4)
+  private BigDecimal productPrice7;
 
-  @Column(name = "price7", precision = 16, scale = 4)
-  private BigDecimal price7;
+  @Column(name = "p_price8", precision = 16, scale = 4)
+  private BigDecimal productPrice8;
 
-  @Column(name = "price8", precision = 16, scale = 4)
-  private BigDecimal price8;
+  @Column(name = "p_price9", precision = 16, scale = 4)
+  private BigDecimal productPrice9;
 
-  @Column(name = "price9", precision = 16, scale = 4)
-  private BigDecimal price9;
 }
