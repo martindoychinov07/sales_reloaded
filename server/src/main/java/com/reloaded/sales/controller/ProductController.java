@@ -28,46 +28,47 @@ public class ProductController {
 
   @PostMapping("/create")
   @ResponseStatus(HttpStatus.CREATED)
-  public ProductDto create(@RequestBody ProductDto productDto) {
+  public ProductDto createProduct(@RequestBody ProductDto productDto) {
     return toDto(productService.create(toEntity(productDto)));
   }
 
   @PutMapping("/update")
   @ResponseStatus(HttpStatus.OK)
-  public ProductDto update(@RequestBody ProductDto productDto) {
+  public ProductDto updateProduct(@RequestBody ProductDto productDto) {
     return toDto(productService.update(toEntity(productDto)));
   }
 
   @DeleteMapping("/delete")
   @ResponseStatus(HttpStatus.OK)
-  public void delete(@RequestBody Integer id) {
+  public void deleteProduct(@RequestBody Integer id) {
     productService.delete(id);
   }
 
   @GetMapping("/{id}")
-  public Optional<Product> getById(@PathVariable int id) {
+  public Optional<Product> getProductById(@PathVariable int id) {
     return productService.getById(id);
   }
 
   @GetMapping("/findAll")
   public Page<ProductDto> findProduct(
-          @RequestParam String name,
-          @RequestParam Optional<String> code,
-          Pageable paging) {
+    @RequestParam String name,
+    @RequestParam Optional<String> code,
+    Pageable paging
+  ) {
     return productService.findAllByNameCode(name, code.orElse(null), paging).map(this::toDto);
   }
 
   private Product toEntity(ProductDto dto) {
     return modelMapper.map(
-            dto,
-            Product.class
+      dto,
+      Product.class
     );
   }
 
   private ProductDto toDto(Product entity) {
     return modelMapper.map(
-            entity,
-            ProductDto.class
+      entity,
+      ProductDto.class
     );
   }
 }

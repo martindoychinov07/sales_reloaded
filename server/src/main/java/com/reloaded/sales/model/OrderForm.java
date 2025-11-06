@@ -1,83 +1,114 @@
 package com.reloaded.sales.model;
 
-import com.reloaded.sales.model.Partner;
+import com.reloaded.sales.converter.GenericEnumConverter;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Set;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
+@FieldNameConstants
 @Entity
 @Table(name = "order_form")
 public class OrderForm {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_form_id_gen")
-  @SequenceGenerator(name = "order_form_id_gen", sequenceName = "order_sequence", allocationSize = 1)
-  @Column(name = "order_id", nullable = false)
-  private Integer id;
+  @SequenceGenerator(name = "order_form_id_gen", sequenceName = "order_form_sequence", allocationSize = 1)
+  @Column(name = "o_id", nullable = false)
+  private Integer orderId;
 
-  @Column(name = "order_ref_id")
+  @Column(name = "o_version")
+  private Integer orderVersion;
+
+  @Column(name = "o_ref_id")
   private Integer orderRefId;
 
-  @Column(name = "order_state")
-  private Integer orderState;
+  @Column(name = "o_state")
+  private OrderState orderState;
 
-  @Column(name = "order_date")
+  @Column(name = "o_date")
   private Instant orderDate;
 
-  @Column(name = "order_book", length = 20)
+  @Size(max = 20)
+  @Column(name = "o_book", length = 20)
   private String orderBook;
 
-  @Column(name = "order_num")
+  @Column(name = "o_num")
   private Long orderNum;
 
-  @Column(name = "order_type")
+  @Column(name = "o_type")
   private Integer orderType;
 
-  @Column(name = "order_view", length = 200)
+  @Size(max = 200)
+  @Column(name = "o_view", length = 200)
   private String orderView;
 
-  @Column(name = "user_id")
-  private Integer userId;
+  @Column(name = "o_user_id")
+  private Integer orderUserId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "supplier_id")
-  private Partner supplier;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "o_supplier_id")
+  private Contact orderSupplier;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id")
-  private Partner customer;
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "o_customer_id")
+  private Contact orderCustomer;
 
-  @Column(name = "note", length = 300)
-  private String note;
+  @Size(max = 300)
+  @Column(name = "o_note", length = 300)
+  private String orderNote;
 
-  @Column(name = "order_tags", length = 500)
-  private String orderTags;
+  @Size(max = 100)
+  @Column(name = "o_tag_vce", length = 100)
+  private String orderTagVce;
 
-  @Column(name = "payment_tags", length = 100)
-  private String paymentTags;
+  @Size(max = 100)
+  @Column(name = "o_tag_rcvd", length = 100)
+  private String orderTagRcvd;
 
-  @Column(name = "availability")
-  private Integer availability;
+  @Size(max = 100)
+  @Column(name = "o_tag_dlvd", length = 100)
+  private String orderTagDlvd;
 
-  @Column(name = "rows")
-  private Integer rows;
+  @Size(max = 100)
+  @Column(name = "o_tag_ref", length = 100)
+  private String orderTagRef;
 
-  @Column(name = "vat", precision = 16, scale = 4)
-  private BigDecimal vat;
+  @Size(max = 100)
+  @Column(name = "o_tag_payment_term", length = 100)
+  private String orderTagPaymentTerm;
 
-  @Column(name = "ccy", length = 7)
-  private String ccy;
+  @Column(name = "o_availability")
+  private Integer orderAvailability;
 
-  @Column(name = "rate", precision = 16, scale = 4)
-  private BigDecimal rate;
+  @Column(name = "o_rows")
+  private Integer orderRows;
 
-  @Column(name = "total", precision = 16, scale = 4)
-  private BigDecimal total;
+  @Column(name = "o_vat", precision = 16, scale = 4)
+  private BigDecimal orderVat;
 
-  @Column(name = "total_tax", precision = 16, scale = 4)
-  private BigDecimal totalTax;
+  @Size(max = 7)
+  @Column(name = "o_ccy", length = 7)
+  private String orderCcy;
+
+  @Column(name = "o_rate", precision = 16, scale = 4)
+  private BigDecimal orderRate;
+
+  @Column(name = "o_total", precision = 16, scale = 4)
+  private BigDecimal orderTotal;
+
+  @Column(name = "o_total_tax", precision = 16, scale = 4)
+  private BigDecimal orderTotalTax;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "e_order_id")
+  private Set<OrderEntry> orderEntries;
 }

@@ -1,8 +1,8 @@
 package com.reloaded.sales.service;
 
 import com.reloaded.sales.exception.NotFound;
-import com.reloaded.sales.model.Partner;
 import com.reloaded.sales.model.Product;
+import com.reloaded.sales.model.ProductState;
 import com.reloaded.sales.repository.ProductRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
@@ -27,8 +27,8 @@ public class ProductService {
 
   public Product update(Product changes) {
     Product entity = productRepository
-            .findById(changes.getProductId())
-            .orElseThrow(() -> new NotFound("Product not found"));
+      .findById(changes.getProductId())
+      .orElseThrow(() -> new NotFound("Product not found"));
 
     BeanUtils.copyProperties(changes, entity, "id");
 
@@ -37,7 +37,7 @@ public class ProductService {
 
   public void delete(Integer id) {
     Product product = productRepository.findById(id)
-            .orElseThrow(() -> new NotFound("Product not found"));
+      .orElseThrow(() -> new NotFound("Product not found"));
 
     productRepository.delete(product);
   }
@@ -48,15 +48,19 @@ public class ProductService {
 
   public Page<Product> findAllByNameCode(String name, String code, Pageable paging) {
     Product probe = Product.builder()
-            .item(name)
-            .code(code).build();
+      .productName(name)
+      .productCode(code)
+      .productState(ProductState.active)
+      .build();
 
-    ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
+    final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
+    final Product.Fields field = new Product.Fields();
     ExampleMatcher matcher = ExampleMatcher
-            .matchingAll()
-            .withIgnoreNullValues()
-            .withMatcher(Partner.Fields.name, match.contains().ignoreCase())
-            .withMatcher(Partner.Fields.code, match.contains().ignoreCase());
+      .matchingAll()
+      .withIgnoreNullValues()
+      .withMatcher(field.productName, match.contains().ignoreCase())
+      .withMatcher(field.productCode, match.contains().ignoreCase())
+      .withMatcher(field.productCode, match.exact());
 
     Example<Product> example = Example.of(probe, matcher);
 
