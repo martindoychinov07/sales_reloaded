@@ -30,7 +30,7 @@ public class ExchangeController {
         return toDto(exchangeService.createExchange(toEntity(exchangeDto)));
     }
 
-    @PatchMapping("/update")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
     public ExchangeDto updateExchange(@RequestBody ExchangeDto exchangeDto) {
         return toDto(exchangeService.updateExchange(toEntity(exchangeDto)));

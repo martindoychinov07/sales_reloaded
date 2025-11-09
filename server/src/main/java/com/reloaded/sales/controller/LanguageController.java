@@ -30,7 +30,7 @@ public class LanguageController {
         return toDto(languageService.createLanguage(toEntity(languageDto)));
     }
 
-    @PatchMapping("/update")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
     public LanguageDto updateLanguage(@RequestBody LanguageDto languageDto) {
         return toDto(languageService.updateLanguage(toEntity(languageDto)));

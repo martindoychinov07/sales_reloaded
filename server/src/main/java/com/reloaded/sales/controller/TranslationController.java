@@ -30,7 +30,7 @@ public class TranslationController {
         return toDto(translationService.createTranslation(toEntity(translationDto)));
     }
 
-    @PatchMapping("/update")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
     public TranslationDto updateTranslation(TranslationDto translationDto) {
         return toDto(translationService.updateTranslation(toEntity(translationDto)));
