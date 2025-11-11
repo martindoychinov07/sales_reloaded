@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 /**
  * DTO for {@link com.reloaded.sales.model.OrderForm}
@@ -51,5 +52,5 @@ public class OrderFormDto {
   private BigDecimal orderRate;
   private BigDecimal orderTotal;
   private BigDecimal orderTotalTax;
-  private List<OrderEntryDto> orderEntries;
+  private Set<OrderEntryDto> orderEntries;
 }

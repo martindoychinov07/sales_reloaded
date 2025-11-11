@@ -1,6 +1,7 @@
 package com.reloaded.sales.model;
 
 import com.reloaded.sales.converter.GenericEnumConverter;
+import com.reloaded.sales.dto.OrderEntryDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -110,5 +111,6 @@ public class OrderForm {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "e_order_id")
-  private Set<OrderEntry> orderEntries;
+  @OrderBy("entryRow asc")
+  private Set<OrderEntryDto> orderEntries;
 }

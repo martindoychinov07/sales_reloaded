@@ -5,6 +5,8 @@ import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Exchange;
 import com.reloaded.sales.repository.ExchangeRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,16 +40,14 @@ public class ExchangeService {
         exchangeRepository.delete(exists);
     }
 
-    public List<ExchangeDto> getExchanges() {
-        return exchangeRepository.findAll()
-                .stream()
+    public Page<ExchangeDto> getExchanges(Pageable paging) {
+        return exchangeRepository.findAll(paging)
                 .map(e -> new ExchangeDto(
                         e.getExchangeId(),
                         e.getExchangeDate(),
                         e.getExchangeBase(),
                         e.getExchangeTarget(),
                         e.getExchangeRate()
-                ))
-                .collect(Collectors.toList());
+                ));
     }
 }

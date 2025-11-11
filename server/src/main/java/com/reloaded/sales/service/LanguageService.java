@@ -5,6 +5,8 @@ import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Language;
 import com.reloaded.sales.repository.LanguageRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,16 +40,14 @@ public class LanguageService {
         languageRepository.delete(exists);
     }
 
-    public List<LanguageDto> getLanguages() {
-        return languageRepository.findAll()
-                .stream()
+    public Page<LanguageDto> getLanguages(Pageable paging) {
+        return languageRepository.findAll(paging)
                 .map(l -> new LanguageDto(
                         l.getLangCode(),
                         l.getLangOrder(),
                         l.getLangName(),
                         l.getLangCountry(),
                         l.getLangVariant()
-                ))
-                .collect(Collectors.toList());
+                ));
     }
 }

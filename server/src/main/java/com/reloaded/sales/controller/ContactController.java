@@ -60,7 +60,7 @@ public class ContactController {
   }
 
   @GetMapping(
-    value = "/findAll",
+    value = "/findContact",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)

@@ -5,6 +5,8 @@ import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Translation;
 import com.reloaded.sales.repository.TranslationRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,16 +40,14 @@ public class TranslationService {
         translationRepository.delete(translation);
     }
 
-    public List<TranslationDto> getTranslations() {
-        return translationRepository.findAll()
-                .stream()
+    public Page<TranslationDto> getTranslations(Pageable paging) {
+        return translationRepository.findAll(paging)
                 .map(t -> new TranslationDto(
                         t.getTranslationId(),
                         t.getTranslationLang(),
                         t.getTranslationKey(),
                         t.getTranslationValue(),
                         t.getTranslationExpired()
-                ))
-                .collect(Collectors.toList());
+                ));
     }
 }
