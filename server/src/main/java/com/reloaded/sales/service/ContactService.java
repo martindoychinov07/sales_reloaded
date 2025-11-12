@@ -23,11 +23,11 @@ public class ContactService {
     this.contactRepository = contactRepository;
   }
 
-  public Contact create(Contact contact) {
+  public Contact createContact(Contact contact) {
     return contactRepository.save(contact);
   }
 
-  public Contact update(Contact changes) {
+  public Contact updateContact(Contact changes) {
     Contact entity = contactRepository
       .findById(changes.getContactId())
       .orElseThrow(() -> new NotFound("Contact not found"));
@@ -37,18 +37,18 @@ public class ContactService {
     return contactRepository.save(entity);
   }
 
-  public void delete(Integer id) {
+  public void deleteContact(Integer id) {
     Contact contact = contactRepository.findById(id)
       .orElseThrow(() -> new NotFound("Contact not found"));
 
     contactRepository.delete(contact);
   }
 
-  public Contact getById(Integer id) {
+  public Contact getContactById(Integer id) {
     return contactRepository.findById(id).orElseThrow(() -> new NotFound("contact"));
   }
 
-  public Page<Contact> findAllByNameLocationCode(String name, String location, String code, Pageable paging) {
+  public Page<Contact> findContactByNameLocationCode(String name, String location, String code, Pageable paging) {
     Contact probe = Contact.builder()
       .contactName(name)
       .contactLocation(location)
@@ -57,38 +57,16 @@ public class ContactService {
       .build();
 
     final GenericPropertyMatchers match = new GenericPropertyMatchers();
-    final Contact.Fields field = new Contact.Fields();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(field.contactName, match.contains().ignoreCase())
-      .withMatcher(field.contactLocation, match.contains().ignoreCase())
-      .withMatcher(field.contactCode, match.contains().ignoreCase())
-      .withMatcher(field.contactState, match.exact());
+      .withMatcher(Contact.Fields.contactName, match.contains().ignoreCase())
+      .withMatcher(Contact.Fields.contactLocation, match.contains().ignoreCase())
+      .withMatcher(Contact.Fields.contactCode, match.contains().ignoreCase())
+      .withMatcher(Contact.Fields.contactState, match.exact());
 
     Example<Contact> example = Example.of(probe, matcher);
     return contactRepository.findAll(example, paging);
   }
-
-//  public <P> Page<P> findAllByNameLocationCode(String name, String location, String code, Pageable paging, Class<P> projection) {
-//    Contact probe = Contact.builder()
-//      .cName(name)
-//      .cLocation(location)
-//      .cCode(code)
-//      .cState(1)
-//      .build();
-//
-//    GenericPropertyMatchers match = new GenericPropertyMatchers();
-//    ExampleMatcher matcher = ExampleMatcher
-//      .matchingAll()
-//      .withIgnoreNullValues()
-//      .withMatcher(Contact.Fields.cName, match.contains().ignoreCase())
-//      .withMatcher(Contact.Fields.cLocation, match.contains().ignoreCase())
-//      .withMatcher(Contact.Fields.cCode, match.contains().ignoreCase())
-//      .withMatcher(Contact.Fields.cState, match.exact());
-//
-//    Example<Contact> example = Example.of(probe, matcher);
-//    return contactRepository.findAllBy(example, paging, projection);
-//  }
 
 }

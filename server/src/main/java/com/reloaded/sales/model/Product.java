@@ -1,6 +1,5 @@
 package com.reloaded.sales.model;
 
-import com.reloaded.sales.converter.GenericEnumConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;

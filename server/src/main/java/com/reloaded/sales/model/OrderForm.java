@@ -112,5 +112,5 @@ public class OrderForm {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "e_order_id")
   @OrderBy("entryRow asc")
-  private Set<OrderEntryDto> orderEntries;
+  private Set<OrderEntry> orderEntries;
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * DTO for {@link com.reloaded.sales.model.Translation}
@@ -18,12 +17,27 @@ import java.time.Instant;
 public class TranslationDto implements Serializable {
   private Integer translationId;
   @NotNull
-  private String translationLang;
-  @NotNull
   @Size(max = 200)
   private String translationKey;
   @NotNull
   @Size(max = 200)
-  private String translationValue;
-  private Instant translationExpired;
+  private String toEn;
+  @NotNull
+  @Size(max = 200)
+  private String toBg;
+  @NotNull
+  @Size(max = 200)
+  private String toT1;
+  @NotNull
+  @Size(max = 200)
+  private String toT2;
+  @NotNull
+  @Size(max = 200)
+  private String toT3;
+  @NotNull
+  @Size(max = 200)
+  private String toT4;
+  @NotNull
+  @Size(max = 200)
+  private String toT5;
 }

@@ -9,87 +9,90 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @Tag(name = "exchange", description = "exchange service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
-@Controller
+@RestController
 @RequestMapping("/exchange")
 public class ExchangeController {
-    private final ExchangeService exchangeService;
-    private final ModelMapper modelMapper;
+  private final ExchangeService exchangeService;
+  private final ModelMapper modelMapper;
 
-    ExchangeController(ExchangeService exchangeService) {
-        this.exchangeService = exchangeService;
-        this.modelMapper = new ModelMapper();
-    }
+  public ExchangeController(ExchangeService exchangeService) {
+    this.exchangeService = exchangeService;
+    this.modelMapper = new ModelMapper();
+  }
 
-    @PostMapping(
-            value = "/createExchange",
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    @ResponseStatus(HttpStatus.CREATED)
-    public ExchangeDto createExchange(@RequestBody ExchangeDto exchangeDto) {
-        return toDto(exchangeService.createExchange(toEntity(exchangeDto)));
-    }
+  @PostMapping(
+    value = "/createExchange",
+    consumes = "application/json",
+    produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.CREATED)
+  public ExchangeDto createExchange(@RequestBody ExchangeDto exchangeDto) {
+    return toDto(exchangeService.createExchange(toEntity(exchangeDto)));
+  }
 
-    @PutMapping(
-            value = "/updateExchange",
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    @ResponseStatus(HttpStatus.OK)
-    public ExchangeDto updateExchange(@RequestBody ExchangeDto exchangeDto) {
-        return toDto(exchangeService.updateExchange(toEntity(exchangeDto)));
-    }
+  @PutMapping(
+    value = "/updateExchange",
+    consumes = "application/json",
+    produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public ExchangeDto updateExchange(@RequestBody ExchangeDto exchangeDto) {
+    return toDto(exchangeService.updateExchange(toEntity(exchangeDto)));
+  }
 
-    @DeleteMapping(
-            value = "/deleteExchange",
-            consumes = "application/json"
-    )
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteExchange(Integer id) {
-        exchangeService.deleteExchange(id);
-    }
+  @DeleteMapping(
+    value = "/deleteExchange",
+    consumes = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public void deleteExchange(Integer id) {
+    exchangeService.deleteExchange(id);
+  }
 
-    @GetMapping(
-            value = "/getExchanges",
-            produces = "application/json"
-    )
-    public Page<ExchangeDto> getExchanges(
-        @RequestParam Optional<Integer> page,
-        @RequestParam Optional<Integer> size,
-        @RequestParam Optional<String> sort,
-        @RequestParam Optional<Sort.Direction> direction
-    ) {
-        PageRequest paging = PageRequest.ofSize(size.orElse(20));
-        if (page.isPresent()) {
-            paging = paging.withPage(page.get());
-        }
-        if (sort.isPresent()) {
-            paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-        }
-        return exchangeService.getExchanges(
-                paging.toOptional().get()
-        );
+  @GetMapping(
+    value = "/findExchange",
+    produces = "application/json"
+  )
+  public Page<ExchangeDto> findExchange(
+    @RequestParam Optional<String> base,
+    @RequestParam Optional<String> target,
+    @RequestParam Optional<Integer> page,
+    @RequestParam Optional<Integer> size,
+    @RequestParam Optional<String> sort,
+    @RequestParam Optional<Sort.Direction> direction
+  ) {
+    PageRequest paging = PageRequest.ofSize(size.orElse(20));
+    if (page.isPresent()) {
+      paging = paging.withPage(page.get());
     }
+    if (sort.isPresent()) {
+      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
+    }
+    return exchangeService
+      .findExchangeByBaseTarget(
+        base.orElse(null),
+        target.orElse(null),
+        paging
+      ).map(this::toDto);
+  }
 
-    private Exchange toEntity(ExchangeDto dto) {
-        return modelMapper.map(
-                dto,
-                Exchange.class
-        );
-    }
+  private Exchange toEntity(ExchangeDto dto) {
+    return modelMapper.map(
+      dto,
+      Exchange.class
+    );
+  }
 
-    private ExchangeDto toDto(Exchange entity) {
-        return modelMapper.map(
-                entity,
-                ExchangeDto.class
-        );
-    }
+  private ExchangeDto toDto(Exchange entity) {
+    return modelMapper.map(
+      entity,
+      ExchangeDto.class
+    );
+  }
 }

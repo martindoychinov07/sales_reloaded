@@ -21,11 +21,11 @@ public class ProductService {
     this.productRepository = productRepository;
   }
 
-  public Product create(Product product) {
+  public Product createProduct(Product product) {
     return productRepository.save(product);
   }
 
-  public Product update(Product changes) {
+  public Product updateProduct(Product changes) {
     Product entity = productRepository
       .findById(changes.getProductId())
       .orElseThrow(() -> new NotFound("Product not found"));
@@ -35,32 +35,32 @@ public class ProductService {
     return productRepository.save(entity);
   }
 
-  public void delete(Integer id) {
+  public void deleteProduct(Integer id) {
     Product product = productRepository.findById(id)
       .orElseThrow(() -> new NotFound("Product not found"));
 
     productRepository.delete(product);
   }
 
-  public Optional<Product> getById(Integer id) {
+  public Optional<Product> getProductById(Integer id) {
     return productRepository.findById(id);
   }
 
-  public Page<Product> findAllByNameCode(String name, String code, Pageable paging) {
+  public Page<Product> findProductByCodeNameNote(String code, String name, String note, Pageable paging) {
     Product probe = Product.builder()
-      .productName(name)
       .productCode(code)
+      .productName(name)
+      .productNote(note)
       .productState(ProductState.active)
       .build();
 
     final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
-    final Product.Fields field = new Product.Fields();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(field.productName, match.contains().ignoreCase())
-      .withMatcher(field.productCode, match.contains().ignoreCase())
-      .withMatcher(field.productCode, match.exact());
+      .withMatcher(Product.Fields.productCode, match.contains().ignoreCase())
+      .withMatcher(Product.Fields.productName, match.contains().ignoreCase())
+      .withMatcher(Product.Fields.productNote, match.contains().ignoreCase());
 
     Example<Product> example = Example.of(probe, matcher);
 

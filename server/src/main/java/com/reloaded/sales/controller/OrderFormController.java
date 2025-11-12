@@ -6,13 +6,8 @@ import com.reloaded.sales.model.OrderForm;
 import com.reloaded.sales.service.OrderFormService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 
 @Tag(name = "orderForm", description = "orderForm service")
@@ -23,15 +18,15 @@ public class OrderFormController {
   private final OrderFormService orderFormService;
   private final ModelMapper modelMapper;
 
-  OrderFormController(OrderFormService orderFormService) {
+  public OrderFormController(OrderFormService orderFormService) {
     this.orderFormService = orderFormService;
     this.modelMapper = new ModelMapper();
   }
 
   @PostMapping(
-          value = "/createOrderForm",
-          consumes = "application/json",
-          produces = "application/json"
+    value = "/createOrderForm",
+    consumes = "application/json",
+    produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
   public OrderFormDto createOrder(@RequestBody OrderFormDto orderFormDto) {
@@ -39,9 +34,9 @@ public class OrderFormController {
   }
 
   @PutMapping(
-          value = "/updateOrderForm",
-          consumes = "application/json",
-          produces = "application/json"
+    value = "/updateOrderForm",
+    consumes = "application/json",
+    produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
   public OrderFormDto updateOrder(@RequestBody OrderFormDto orderFormDto) {
@@ -49,8 +44,8 @@ public class OrderFormController {
   }
 
   @DeleteMapping(
-          value = "/deleteOrderForm",
-          consumes = "application/json"
+    value = "/deleteOrderForm",
+    consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
   public void deleteOrder(@RequestBody Integer id) {
@@ -58,36 +53,36 @@ public class OrderFormController {
   }
 
   @GetMapping(
-          value = "/{id}",
-          produces = "application/json"
+    value = "/{id}",
+    produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
   public OrderFormDto getOrderById(@PathVariable int id) {
     return toDto(orderFormService.getById(id));
   }
 
-  @GetMapping(
-          value = "/getOrderForms",
-          produces = "application/json"
-  )
-    @ResponseStatus(HttpStatus.OK)
-    public Page<OrderFormDto> getOrderForms(
-        @RequestParam Optional<Integer> page,
-        @RequestParam Optional<Integer> size,
-        @RequestParam Optional<String> sort,
-        @RequestParam Optional<Sort.Direction> direction
-  ) {
-    PageRequest paging = PageRequest.ofSize(size.orElse(20));
-    if (page.isPresent()) {
-      paging = paging.withPage(page.get());
-    }
-    if (sort.isPresent()) {
-      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-    }
-        return orderFormService.getOrderForms(
-                paging.toOptional().get()
-        );
-    }
+//  @GetMapping(
+//          value = "/getOrderForms",
+//          produces = "application/json"
+//  )
+//    @ResponseStatus(HttpStatus.OK)
+//    public Page<OrderFormDto> getOrderForms(
+//        @RequestParam Optional<Integer> page,
+//        @RequestParam Optional<Integer> size,
+//        @RequestParam Optional<String> sort,
+//        @RequestParam Optional<Sort.Direction> direction
+//  ) {
+//    PageRequest paging = PageRequest.ofSize(size.orElse(20));
+//    if (page.isPresent()) {
+//      paging = paging.withPage(page.get());
+//    }
+//    if (sort.isPresent()) {
+//      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
+//    }
+//        return orderFormService.getOrderForms(
+//                paging.toOptional().get()
+//        );
+//    }
 
   private OrderForm toEntity(OrderFormDto dto) {
     OrderForm entity = modelMapper.map(dto, OrderForm.class);

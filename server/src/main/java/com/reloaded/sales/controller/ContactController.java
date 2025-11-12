@@ -2,6 +2,7 @@ package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.ContactDto;
 import com.reloaded.sales.model.Contact;
+import com.reloaded.sales.service.ContactService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -9,8 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import com.reloaded.sales.service.ContactService;
 
 import java.util.Optional;
 
@@ -37,7 +36,7 @@ public class ContactController {
   )
   @ResponseStatus(HttpStatus.CREATED)
   public ContactDto createContact(@RequestBody ContactDto contactDto) {
-    return toDto(contactService.create(toEntity(contactDto)));
+    return toDto(contactService.createContact(toEntity(contactDto)));
   }
 
   @PutMapping(
@@ -47,7 +46,7 @@ public class ContactController {
   )
   @ResponseStatus(HttpStatus.OK)
   public ContactDto updateContact(@RequestBody ContactDto contactDto) {
-    return toDto(contactService.update(toEntity(contactDto)));
+    return toDto(contactService.updateContact(toEntity(contactDto)));
   }
 
   @DeleteMapping(
@@ -56,7 +55,7 @@ public class ContactController {
   )
   @ResponseStatus(HttpStatus.OK)
   public void deleteContact(@RequestBody int id) {
-    contactService.delete(id);
+    contactService.deleteContact(id);
   }
 
   @GetMapping(
@@ -81,11 +80,11 @@ public class ContactController {
       paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
     }
     return contactService
-      .findAllByNameLocationCode(
+      .findContactByNameLocationCode(
         name,
         location.orElse(null),
         code.orElse(null),
-        paging.toOptional().get()
+        paging
       ).map(this::toDto);
   }
 
@@ -95,7 +94,7 @@ public class ContactController {
   )
   @ResponseStatus(HttpStatus.OK)
   public ContactDto getContactById(@PathVariable int id) {
-    return toDto(contactService.getById(id));
+    return toDto(contactService.getContactById(id));
   }
 
   private Contact toEntity(ContactDto dto) {

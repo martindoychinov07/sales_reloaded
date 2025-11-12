@@ -1,11 +1,10 @@
-package com.reloaded.sales.model;
+package com.reloaded.sales.dto;
 
+import com.reloaded.sales.model.Product;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * DTO for {@link Product}

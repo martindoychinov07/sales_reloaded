@@ -1,6 +1,5 @@
 package com.reloaded.sales.dto;
 
-import com.reloaded.sales.model.EntryProductDto;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;

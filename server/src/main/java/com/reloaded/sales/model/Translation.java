@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
-import java.time.Instant;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -23,10 +21,6 @@ public class Translation {
   @Column(name = "t_id", nullable = false)
   private Integer translationId;
 
-  @NotNull
-  @Column(name = "t_language_code", nullable = false)
-  private String translationLang;
-
   @Size(max = 200)
   @NotNull
   @Column(name = "t_key", nullable = false, length = 200)
@@ -34,10 +28,37 @@ public class Translation {
 
   @Size(max = 200)
   @NotNull
-  @Column(name = "t_value", nullable = false, length = 200)
-  private String translationValue;
+  @Column(name = "t_en", nullable = false, length = 200)
+  private String toEn;
 
-  @Column(name = "t_expired")
-  private Instant translationExpired;
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_bg", nullable = false, length = 200)
+  private String toBg;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_t1", nullable = false, length = 200)
+  private String toT1;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_t2", nullable = false, length = 200)
+  private String toT2;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_t3", nullable = false, length = 200)
+  private String toT3;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_t4", nullable = false, length = 200)
+  private String toT4;
+
+  @Size(max = 200)
+  @NotNull
+  @Column(name = "t_t5", nullable = false, length = 200)
+  private String toT5;
 
 }
