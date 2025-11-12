@@ -36,15 +36,15 @@ public class UserController {
 
   @PostMapping("/login")
   @ResponseStatus(HttpStatus.OK)
-  public void logUser(@RequestBody User user, HttpServletRequest request) {
-    userService.login(user, request);
+  public String logUser(@RequestBody User user, HttpServletRequest request) {
+    return userService.login(user, request);
   }
-
-  @GetMapping("/logout")
-  @ResponseStatus(HttpStatus.OK)
-  public void logOutUser() throws AlreadyReported {
-    userService.logout();
-  }
+//
+//  @GetMapping("/logout")
+//  @ResponseStatus(HttpStatus.OK)
+//  public void logOutUser() throws AlreadyReported {
+//    userService.logout();
+//  }
 
   @DeleteMapping("/delete")
   public void deleteUser(@RequestBody String username) {
@@ -68,8 +68,8 @@ public class UserController {
 //        return userService.getUserRole(username);
 //    }
 
-  @PostMapping("/")
-  public Optional<User> getUserById(@RequestBody String idStr) {
+  @PostMapping("/{id}")
+  public Optional<User> getUserById(@RequestParam String idStr) {
     Long id = Long.parseLong(idStr.trim());
     return userService.getUserById(id);
   }
