@@ -1,15 +1,14 @@
-FROM maven:3.9.6-eclipse-temurin-17 as build
+# Use JDK image
+FROM eclipse-temurin:17-jdk-alpine
 
+# Set working directory
 WORKDIR /app
 
-COPY pom.xml ./
-RUN mvn dependency:go-offline
+# Copy Spring Boot jar (already contains React dist)
+COPY target/sales-0.0.1-SNAPSHOT.jar app.jar
 
-COPY src ./src
-RUN mvn package -DskipTests
+# Expose port
+EXPOSE 8080
 
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8081
-CMD ["java", "-jar", "app.jar"]
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
