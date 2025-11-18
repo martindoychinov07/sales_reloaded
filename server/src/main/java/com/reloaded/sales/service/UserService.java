@@ -3,11 +3,14 @@ package com.reloaded.sales.service;
 import com.reloaded.sales.dto.UserDto;
 import com.reloaded.sales.exception.*;
 import com.reloaded.sales.model.User;
+import com.reloaded.sales.security.JwtUtil;
 import com.reloaded.sales.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,12 +24,12 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UserService {
-    final UserRepository userRepository;
-    private HttpSession session;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
-    public UserService(UserRepository userRepository, HttpSession session) {
+    public UserService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
-        this.session = session;
+        this.jwtUtil = jwtUtil;
     }
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -38,24 +41,15 @@ public class UserService {
     }
 
     public User signUp(User u) {
-        if (isLoggedIn()) {
-            throw new AlreadyReported("User already logged in");
-        }
-
-        if (userRepository.findByUsername(u.getUsername()) != null) {
+        if (userRepository.findByUsername(u.getUsername()).isPresent()) {
             throw new AlreadyReported("User already exists");
         }
 
         u.setPassword(passwordEncoder.encode(u.getPassword()));
-
         return userRepository.save(u);
     }
 
-    public void login(User u, HttpServletRequest request) {
-        if (isLoggedIn()) {
-            throw new AlreadyReported("User already logged in");
-        }
-
+    public String login(User u, HttpServletRequest request) {
         User dbUser = userRepository.findByUsername(u.getUsername())
                 .orElseThrow(() -> new NotFound("User not found"));
 
@@ -65,65 +59,70 @@ public class UserService {
         if (!check) {
             loginLogger.warn("LOGIN FAILED: user={}, ip={}, time={}",
                     u.getUsername(), clientIp, LocalDateTime.now());
-        } else {
-            session.setAttribute("userId", dbUser.getId());
-            session.setAttribute("username", dbUser.getUsername());
-            session.setMaxInactiveInterval(48 * 3600);
 
-            loginLogger.info("LOGIN SUCCESS: user={}, ip={}, time={}",
-                    dbUser.getUsername(), clientIp, LocalDateTime.now());
-        }
-    }
-
-    public void logout(){
-        if (!isLoggedIn()) {
-            throw new AlreadyReported("User already logged out");
+            throw new AlreadyReported("Invalid credentials");
         }
 
-        session.invalidate();
+        loginLogger.info("LOGIN SUCCESS: user={}, ip={}, time={}",
+        dbUser.getUsername(), clientIp, LocalDateTime.now());
+
+        return jwtUtil.generateToken(dbUser.getUsername(), dbUser.getRole());
     }
+//
+//    public void logout(){
+//        if (!isLoggedIn()) {
+//            throw new AlreadyReported("User already logged out");
+//        }
+//
+//        session.invalidate();
+//    }
 
     public void delete(String username) {
+        String currentUsername = getCurrentUsername();
 
-        if (isLoggedOut()) {
-            throw new AlreadyReported("User already logged out");
+        if (!currentUsername.equals(username)) {
+            throw new AlreadyReported("Cannot delete other users");
         }
 
         User dbUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFound("User not found"));
 
         userRepository.delete(dbUser);
-        session.invalidate();
     }
 
     public void changePassword(String newPassword) {
-        Long userId = Optional.of((Long) session.getAttribute("userId")).orElseThrow(() ->
-                new AlreadyReported("User logged out")
-        );
+        String username = getCurrentUsername();
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFound("User not found"));
 
-        String encodedPassword = passwordEncoder.encode(newPassword);
-
-        user.setPassword(encodedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
     public void changeUsername(String newUsername) {
-        Long userId = Optional.of((Long) session.getAttribute("userId")).orElseThrow(() ->
-                new AlreadyReported("User logged out")
-        );
+        String currentUsername = getCurrentUsername();
 
-        User oldUser = userRepository.findByUsername(String.valueOf(newUsername))
-                .orElseThrow(() -> new AlreadyReported("User already exists"));
+        if (userRepository.findByUsername(newUsername).isPresent()) {
+            throw new AlreadyReported("Username already exists");
+        }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new NotFound("User not found"));
 
         user.setUsername(newUsername);
         userRepository.save(user);
-        logout();
+
+        // Inform frontend: user should request a new JWT after username change
+    }
+
+
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new AlreadyReported("User is not logged in");
+        }
+        return auth.getName();
     }
 
 
@@ -144,14 +143,6 @@ public class UserService {
                 .stream()
                 .map(u -> new UserDto(u.getId(), u.getUsername(), u.getRole(), u.getCode()))
                 .collect(Collectors.toList());
-    }
-
-    public boolean isLoggedIn() {
-        return session.getAttribute("userId") != null;
-    }
-
-    public boolean isLoggedOut() {
-        return session.getAttribute("userId") == null;
     }
 
 //    public Optional<User> getCurrentUser() {
