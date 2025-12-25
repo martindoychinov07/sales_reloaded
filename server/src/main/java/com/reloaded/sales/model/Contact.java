@@ -20,6 +20,7 @@ public class Contact {
   @Column(name = "c_id", nullable = false)
   private Integer contactId;
 
+  @Version
   @Column(name = "c_version")
   private Integer contactVersion;
 
@@ -50,23 +51,23 @@ public class Contact {
   private String contactNote;
 
   @Size(max = 100)
-  @Column(name = "c_tag_uic", length = 100)
-  private String contactTagUic;
+  @Column(name = "c_code_1", length = 100)
+  private String contactCode1;
 
   @Size(max = 100)
-  @Column(name = "c_tag_vat", length = 100)
-  private String contactTagVat;
+  @Column(name = "c_code_2", length = 100)
+  private String contactCode2;
 
   @Size(max = 100)
-  @Column(name = "c_tag_tai", length = 100)
-  private String contactTagTai;
+  @Column(name = "c_code_3", length = 100)
+  private String contactCode3;
 
   @Size(max = 100)
-  @Column(name = "c_tag_own", length = 100)
-  private String contactTagOwn;
+  @Column(name = "c_owner", length = 100)
+  private String contactOwner;
 
   @Size(max = 100)
-  @Column(name = "c_tag_resp", length = 100)
-  private String contactTagResp;
+  @Column(name = "c_resp", length = 100)
+  private String contactResp;
 
 }

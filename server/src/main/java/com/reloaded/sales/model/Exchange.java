@@ -7,7 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class Exchange {
   private Integer exchangeId;
 
   @Column(name = "x_date")
-  private Instant exchangeDate;
+  private OffsetDateTime exchangeDate;
 
   @Size(max = 3)
   @NotNull

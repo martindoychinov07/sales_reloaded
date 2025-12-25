@@ -22,6 +22,7 @@ public class Product {
   @Column(name = "p_id", nullable = false)
   private Integer productId;
 
+  @Version
   @Column(name = "p_version")
   private Integer productVersion;
 
@@ -92,6 +93,10 @@ public class Product {
   @Size(max = 50)
   @Column(name = "p_code9", length = 50)
   private String productCode9;
+
+  @Size(max = 50)
+  @Column(name = "p_cy", length = 3)
+  private String productCy;
 
   @Column(name = "p_price", precision = 16, scale = 4)
   private BigDecimal productPrice;

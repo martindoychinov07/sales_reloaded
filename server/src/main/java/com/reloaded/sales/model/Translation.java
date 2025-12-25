@@ -1,7 +1,6 @@
 package com.reloaded.sales.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
@@ -22,43 +21,35 @@ public class Translation {
   private Integer translationId;
 
   @Size(max = 200)
-  @NotNull
   @Column(name = "t_key", nullable = false, length = 200)
   private String translationKey;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_en", nullable = false, length = 200)
-  private String toEn;
+  @Column(name = "t_en", length = 200)
+  private String en;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_bg", nullable = false, length = 200)
-  private String toBg;
+  @Column(name = "t_bg", length = 200)
+  private String bg;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_t1", nullable = false, length = 200)
-  private String toT1;
+  @Column(name = "t_t1", length = 200)
+  private String t1;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_t2", nullable = false, length = 200)
-  private String toT2;
+  @Column(name = "t_t2", length = 200)
+  private String t2;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_t3", nullable = false, length = 200)
-  private String toT3;
+  @Column(name = "t_t3", length = 200)
+  private String t3;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_t4", nullable = false, length = 200)
-  private String toT4;
+  @Column(name = "t_t4", length = 200)
+  private String t4;
 
   @Size(max = 200)
-  @NotNull
-  @Column(name = "t_t5", nullable = false, length = 200)
-  private String toT5;
+  @Column(name = "t_t5", length = 200)
+  private String t5;
 
 }

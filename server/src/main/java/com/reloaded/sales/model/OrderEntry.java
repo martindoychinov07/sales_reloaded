@@ -27,9 +27,8 @@ public class OrderEntry {
   @Column(name = "e_version")
   private Integer entryVersion;
 
-  @NotNull
-  @ManyToOne(fetch = FetchType.EAGER, optional = false)
-  @JoinColumn(name = "e_order_id", nullable = false)
+  @ManyToOne()
+  @JoinColumn(name = "e_order_id")
   private OrderForm entryOrder;
 
   @Column(name = "e_row")
@@ -67,16 +66,19 @@ public class OrderEntry {
   @Column(name = "e_price", precision = 16, scale = 4)
   private BigDecimal entryPrice;
 
+  @Column(name = "e_discount_pct", precision = 16, scale = 4)
+  private BigDecimal entryDiscountPct;
+
   @Column(name = "e_discount", precision = 16, scale = 4)
   private BigDecimal entryDiscount;
 
   @Column(name = "e_tax", precision = 16, scale = 4)
   private BigDecimal entryTax;
 
-  @Transient
+  @Column(name = "e_sum", precision = 16, scale = 4)
   private BigDecimal entrySum;
 
-  @Transient
+  @Column(name = "e_total", precision = 16, scale = 4)
   private BigDecimal entryTotal;
 
 }
