@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 /**
  * DTO for {@link com.reloaded.sales.model.Exchange}
@@ -19,7 +19,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class ExchangeDto {
   private Integer exchangeId;
-  private Instant exchangeDate;
+  private OffsetDateTime exchangeDate;
   @NotNull
   @Size(max = 3)
   private String exchangeBase;

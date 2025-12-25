@@ -19,25 +19,18 @@ public class TranslationDto implements Serializable {
   @NotNull
   @Size(max = 200)
   private String translationKey;
-  @NotNull
   @Size(max = 200)
-  private String toEn;
-  @NotNull
+  private String en;
   @Size(max = 200)
-  private String toBg;
-  @NotNull
+  private String bg;
   @Size(max = 200)
-  private String toT1;
-  @NotNull
+  private String t1;
   @Size(max = 200)
-  private String toT2;
-  @NotNull
+  private String t2;
   @Size(max = 200)
-  private String toT3;
-  @NotNull
+  private String t3;
   @Size(max = 200)
-  private String toT4;
-  @NotNull
+  private String t4;
   @Size(max = 200)
-  private String toT5;
+  private String t5;
 }

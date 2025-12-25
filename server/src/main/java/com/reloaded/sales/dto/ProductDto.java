@@ -47,6 +47,7 @@ public class ProductDto {
   private String productCode8;
   @Size(max = 50)
   private String productCode9;
+  private String productCy;
   private BigDecimal productPrice;
   private BigDecimal productPrice1;
   private BigDecimal productPrice2;

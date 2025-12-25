@@ -6,10 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 
 /**
  * DTO for {@link com.reloaded.sales.model.OrderForm}
@@ -17,40 +17,48 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderFormDto {
+public class OrderFormDto implements Serializable {
   private Integer orderId;
   private Integer orderVersion;
   private Integer orderRefId;
   private OrderState orderState;
-  private Instant orderDate;
-  @Size(max = 20)
-  private String orderBook;
+  private OffsetDateTime orderDate;
   private Long orderNum;
-  private Integer orderType;
-  @Size(max = 200)
-  private String orderView;
+  private OrderTypeDto orderType;
   private Integer orderUserId;
   private ContactDto orderSupplier;
   private ContactDto orderCustomer;
   @Size(max = 300)
   private String orderNote;
   @Size(max = 100)
-  private String orderTagVce;
+  private String orderResp;
+  private OffsetDateTime orderRespDate;
   @Size(max = 100)
-  private String orderTagRcvd;
+  private String orderDlvd;
+  private OffsetDateTime orderDlvdDate;
   @Size(max = 100)
-  private String orderTagDlvd;
+  private String orderRcvd;
+  private OffsetDateTime orderRcvdDate;
   @Size(max = 100)
-  private String orderTagRef;
+  private String orderRef;
+  @Size(max = 20)
+  private String orderPayment;
+  private OffsetDateTime orderPaymentDate;
+  private Integer orderEval;
+  private OffsetDateTime orderDate1;
+  private OffsetDateTime orderDate2;
   @Size(max = 100)
-  private String orderTagPaymentTerm;
-  private Integer orderAvailability;
+  private String orderText1;
+  @Size(max = 100)
+  private String orderText2;
   private Integer orderRows;
-  private BigDecimal orderVat;
+  private BigDecimal orderTaxPct;
   @Size(max = 7)
-  private String orderCcy;
+  private String orderCcp;
   private BigDecimal orderRate;
+  private BigDecimal orderDiscount;
+  private BigDecimal orderSum;
+  private BigDecimal orderTax;
   private BigDecimal orderTotal;
-  private BigDecimal orderTotalTax;
-  private Set<OrderEntryDto> orderEntries;
+  private List<OrderEntryDto> orderEntries;
 }

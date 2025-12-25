@@ -30,8 +30,8 @@ public class OrderEntryDto {
   private Integer entryAvailable;
   private Integer entryQuantity;
   private BigDecimal entryPrice;
+  private BigDecimal entryDiscountPct;
   private BigDecimal entryDiscount;
-
   private BigDecimal entrySum;
   private BigDecimal entryTax;
   private BigDecimal entryTotal;
