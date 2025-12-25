@@ -1,8 +1,8 @@
 package com.reloaded.sales.model;
 
-import com.reloaded.sales.converter.PersistableEnum;
+import com.reloaded.sales.util.PersistableEnum;
 
-public enum ProductState  implements PersistableEnum<Integer> {
+public enum ProductState implements PersistableEnum<Integer> {
   deleted(0),
   active(1);
 

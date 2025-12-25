@@ -1,6 +1,6 @@
 package com.reloaded.sales.model;
 
-import com.reloaded.sales.converter.PersistableEnum;
+import com.reloaded.sales.util.PersistableEnum;
 
 public enum SettingType implements PersistableEnum<Integer> {
   type_text(0),

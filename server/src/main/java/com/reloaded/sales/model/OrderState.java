@@ -1,6 +1,6 @@
 package com.reloaded.sales.model;
 
-import com.reloaded.sales.converter.PersistableEnum;
+import com.reloaded.sales.util.PersistableEnum;
 
 public enum OrderState implements PersistableEnum<Integer> {
   canceled(0),
