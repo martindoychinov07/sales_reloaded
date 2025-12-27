@@ -11,17 +11,22 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tag(name = "contact", description = "contact service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
-@RequestMapping("/contact")
+@RequestMapping("/api/contact")
 public class ContactController {
 
   private final ContactService contactService;
   private final ModelMapper modelMapper;
 
+  /**
+   *
+   * @param contactService
+   */
   public ContactController(
     ContactService contactService
   ) {
@@ -29,13 +34,20 @@ public class ContactController {
     this.modelMapper = new ModelMapper();
   }
 
+  /**
+   *
+   * @param contactDto
+   * @return
+   */
   @PostMapping(
     value = "/createContact",
     consumes = "application/json",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public ContactDto createContact(@RequestBody ContactDto contactDto) {
+  public ContactDto createContact(
+    @RequestBody ContactDto contactDto
+  ) {
     return toDto(contactService.createContact(toEntity(contactDto)));
   }
 
@@ -45,7 +57,9 @@ public class ContactController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public ContactDto updateContact(@RequestBody ContactDto contactDto) {
+  public ContactDto updateContact(
+    @RequestBody ContactDto contactDto
+  ) {
     return toDto(contactService.updateContact(toEntity(contactDto)));
   }
 
@@ -54,7 +68,9 @@ public class ContactController {
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteContact(@RequestBody int id) {
+  public void deleteContact(
+    @RequestBody int id
+  ) {
     contactService.deleteContact(id);
   }
 
@@ -64,28 +80,46 @@ public class ContactController {
   )
   @ResponseStatus(HttpStatus.OK)
   public Page<ContactDto> findContact(
-    @RequestParam String name,
-    @RequestParam Optional<String> location,
-    @RequestParam Optional<String> code,
+    @RequestParam Optional<String> contactName,
+    @RequestParam Optional<String> contactLocation,
+    @RequestParam Optional<String> contactCode1,
+    @RequestParam Optional<String> contactCode2,
     @RequestParam Optional<Integer> page,
     @RequestParam Optional<Integer> size,
     @RequestParam Optional<String> sort,
     @RequestParam Optional<Sort.Direction> direction
   ) {
-    PageRequest paging = PageRequest.ofSize(size.orElse(20));
-    if (page.isPresent()) {
-      paging = paging.withPage(page.get());
-    }
-    if (sort.isPresent()) {
-      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-    }
+    PageRequest paging = PageRequest.of(
+        page.orElse(0),
+        size.orElse(20),
+        sort.isPresent()
+          ? Sort.by(
+            Sort.by(direction.orElse(Sort.Direction.ASC), sort.get()).getOrderFor(sort.get()),
+            Sort.Order.asc(Contact.Fields.contactId)
+          )
+          : Sort.by(Sort.Order.asc(Contact.Fields.contactId)
+        )
+      );
+
     return contactService
       .findContactByNameLocationCode(
-        name,
-        location.orElse(null),
-        code.orElse(null),
+        contactName.orElse(null),
+        contactLocation.orElse(null),
+        contactCode1.orElse(null),
+        contactCode2.orElse(null),
         paging
       ).map(this::toDto);
+  }
+
+  @GetMapping(
+    value = "/findLocation",
+    produces = "application/json"
+  )
+  @ResponseStatus(HttpStatus.OK)
+  public List<String> findLocation(
+    @RequestParam String contactCode1
+  ) {
+    return contactService.findContactLocation(contactCode1);
   }
 
   @GetMapping(
@@ -93,7 +127,9 @@ public class ContactController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public ContactDto getContactById(@PathVariable int id) {
+  public ContactDto getContactById(
+    @PathVariable int id
+  ) {
     return toDto(contactService.getContactById(id));
   }
 

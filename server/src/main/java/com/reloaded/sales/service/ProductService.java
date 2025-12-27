@@ -1,8 +1,7 @@
 package com.reloaded.sales.service;
 
 import com.reloaded.sales.exception.NotFound;
-import com.reloaded.sales.model.Product;
-import com.reloaded.sales.model.ProductState;
+import com.reloaded.sales.model.*;
 import com.reloaded.sales.repository.ProductRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
@@ -10,10 +9,12 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ProductService {
   final ProductRepository productRepository;
 
@@ -22,6 +23,7 @@ public class ProductService {
   }
 
   public Product createProduct(Product product) {
+    product.setProductState(ProductState.active);
     return productRepository.save(product);
   }
 
@@ -30,7 +32,7 @@ public class ProductService {
       .findById(changes.getProductId())
       .orElseThrow(() -> new NotFound("Product not found"));
 
-    BeanUtils.copyProperties(changes, entity, "id");
+    BeanUtils.copyProperties(changes, entity, Product.Fields.productId, Product.Fields.productState, Product.Fields.productAvailable);
 
     return productRepository.save(entity);
   }
@@ -38,14 +40,15 @@ public class ProductService {
   public void deleteProduct(Integer id) {
     Product product = productRepository.findById(id)
       .orElseThrow(() -> new NotFound("Product not found"));
-
-    productRepository.delete(product);
+    product.setProductState(ProductState.deleted);
+    productRepository.save(product);
   }
 
   public Optional<Product> getProductById(Integer id) {
     return productRepository.findById(id);
   }
 
+  @Transactional(readOnly = true)
   public Page<Product> findProductByCodeNameNote(String code, String name, String note, Pageable paging) {
     Product probe = Product.builder()
       .productCode(code)
@@ -66,4 +69,5 @@ public class ProductService {
 
     return productRepository.findAll(example, paging);
   }
+
 }

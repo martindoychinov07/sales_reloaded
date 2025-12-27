@@ -1,5 +1,6 @@
 package com.reloaded.sales.service;
 
+import com.reloaded.sales.exception.AlreadyExistsException;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Translation;
 import com.reloaded.sales.repository.TranslationRepository;
@@ -9,8 +10,12 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
+@Transactional
 public class TranslationService {
   private final TranslationRepository translationRepository;
 
@@ -19,6 +24,9 @@ public class TranslationService {
   }
 
   public Translation createTranslation(Translation translation) {
+    if (translationRepository.existsTranslationByTranslationKey(translation.getTranslationKey())) {
+      throw new AlreadyExistsException("Translation with this key already exists");
+    }
     return translationRepository.save(translation);
   }
 
@@ -43,22 +51,28 @@ public class TranslationService {
     return translationRepository.findById(id).orElseThrow(() -> new NotFound("translation"));
   }
 
+  @Transactional(readOnly = true)
   public Page<Translation> findTranslationByKeyEnBg(String key, String en, String bg, Pageable paging) {
     Translation probe = Translation.builder()
       .translationKey(key)
-      .toEn(en)
-      .toBg(bg)
+      .en(en)
+      .bg(bg)
       .build();
 
     final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(Translation.Fields.translationKey , match.exact().ignoreCase())
-      .withMatcher(Translation.Fields.toEn, match.contains().ignoreCase())
-      .withMatcher(Translation.Fields.toBg, match.contains().ignoreCase());
+      .withMatcher(Translation.Fields.translationKey , match.contains().ignoreCase())
+      .withMatcher(Translation.Fields.en, match.contains().ignoreCase())
+      .withMatcher(Translation.Fields.bg, match.contains().ignoreCase());
 
     Example<Translation> example = Example.of(probe, matcher);
     return translationRepository.findAll(example, paging);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Translation> findAllTranslations() {
+    return translationRepository.findAll();
   }
 }

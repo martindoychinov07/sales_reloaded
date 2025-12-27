@@ -9,8 +9,10 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class SettingService {
   private final SettingRepository settingRepository;
 
@@ -43,11 +45,16 @@ public class SettingService {
     return settingRepository.findById(id).orElseThrow(() -> new NotFound("setting"));
   }
 
+  public Setting getSettingByKey(String key) {
+    return settingRepository.findBySettingKey(key).orElseThrow(() -> new NotFound("setting"));
+  }
+
+  @Transactional(readOnly = true)
   public Page<Setting> findSettingByKeyGroupNote(String key, String group, String note, Pageable paging) {
     Setting probe = Setting.builder()
       .settingKey(key)
-      .settingNote(group)
-      .settingGroup(note)
+      .settingGroup(group)
+      .settingNote(note)
       .build();
 
     final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();

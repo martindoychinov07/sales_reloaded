@@ -16,7 +16,7 @@ import java.util.Optional;
 @Tag(name = "product", description = "product service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/product")
 public class ProductController {
 
   private final ProductService productService;
@@ -33,7 +33,9 @@ public class ProductController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public ProductDto createProduct(@RequestBody ProductDto productDto) {
+  public ProductDto createProduct(
+    @RequestBody ProductDto productDto
+  ) {
     return toDto(productService.createProduct(toEntity(productDto)));
   }
 
@@ -43,7 +45,9 @@ public class ProductController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public ProductDto updateProduct(@RequestBody ProductDto productDto) {
+  public ProductDto updateProduct(
+    @RequestBody ProductDto productDto
+  ) {
     return toDto(productService.updateProduct(toEntity(productDto)));
   }
 
@@ -52,16 +56,10 @@ public class ProductController {
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteProduct(@RequestBody Integer id) {
+  public void deleteProduct(
+    @RequestBody Integer id
+  ) {
     productService.deleteProduct(id);
-  }
-
-  @GetMapping(
-    value = "/{id}",
-    produces = "application/json"
-  )
-  public Optional<Product> getProductById(@PathVariable int id) {
-    return productService.getProductById(id);
   }
 
   @GetMapping(
@@ -69,27 +67,42 @@ public class ProductController {
     produces = "application/json"
   )
   public Page<ProductDto> findProduct(
-    @RequestParam Optional<String> code,
-    @RequestParam Optional<String> name,
-    @RequestParam Optional<String> note,
+    @RequestParam Optional<String> productCode,
+    @RequestParam Optional<String> productName,
+    @RequestParam Optional<String> productNote,
     @RequestParam Optional<Integer> page,
     @RequestParam Optional<Integer> size,
     @RequestParam Optional<String> sort,
     @RequestParam Optional<Sort.Direction> direction
   ) {
-    PageRequest paging = PageRequest.ofSize(size.orElse(20));
-    if (page.isPresent()) {
-      paging = paging.withPage(page.get());
-    }
-    if (sort.isPresent()) {
-      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-    }
+    PageRequest paging = PageRequest.of(
+      page.orElse(0),
+      size.orElse(20),
+      sort.isPresent()
+        ? Sort.by(
+        Sort.by(direction.orElse(Sort.Direction.ASC), sort.get()).getOrderFor(sort.get()),
+        Sort.Order.asc(Product.Fields.productId)
+      )
+        : Sort.by(Sort.Order.asc(Product.Fields.productId)
+      )
+    );
+
     return productService.findProductByCodeNameNote(
-      code.orElse(null),
-      name.orElse(null),
-      note.orElse(null),
+      productCode.orElse(null),
+      productName.orElse(null),
+      productNote.orElse(null),
       paging
     ).map(this::toDto);
+  }
+
+  @GetMapping(
+    value = "/{id}",
+    produces = "application/json"
+  )
+  public Optional<Product> getProductById(
+    @PathVariable int id
+  ) {
+    return productService.getProductById(id);
   }
 
   private Product toEntity(ProductDto dto) {

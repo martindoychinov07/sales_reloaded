@@ -1,8 +1,8 @@
 package com.reloaded.sales.controller;
 
-import com.reloaded.sales.dto.SettingDto;
-import com.reloaded.sales.model.Setting;
-import com.reloaded.sales.service.SettingService;
+import com.reloaded.sales.dto.OrderTypeDto;
+import com.reloaded.sales.model.OrderType;
+import com.reloaded.sales.service.OrderTypeService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -13,62 +13,59 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-@Tag(name = "setting", description = "setting service")
+@Tag(name = "orderType", description = "orderType service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
-@RequestMapping("/api/setting")
-public class SettingController {
-  private final SettingService settingService;
+@RequestMapping("/api/orderType")
+public class OrderTypeController {
+  private final OrderTypeService orderTypeService;
   private final ModelMapper modelMapper;
 
-  public SettingController(SettingService settingService) {
-    this.settingService = settingService;
+  public OrderTypeController(OrderTypeService orderTypeService) {
+    this.orderTypeService = orderTypeService;
     this.modelMapper = new ModelMapper();
   }
 
   @PostMapping(
-    value = "/createSetting",
+    value = "/createOrderType",
     consumes = "application/json",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public SettingDto createSetting(
-    @RequestBody SettingDto settingDto
+  public OrderTypeDto createOrderType(
+    @RequestBody OrderTypeDto orderTypeDto
   ) {
-    return toDto(settingService.createSetting(toEntity(settingDto)));
+    return toDto(orderTypeService.createOrderType(toEntity(orderTypeDto)));
   }
 
   @PutMapping(
-    value = "/updateSetting",
+    value = "/updateOrderType",
     consumes = "application/json",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public SettingDto updateSetting(
-    @RequestBody SettingDto settingDto
+  public OrderTypeDto updateOrderType(
+    @RequestBody OrderTypeDto orderTypeDto
   ) {
-    return toDto(settingService.updateSetting(toEntity(settingDto)));
+    return toDto(orderTypeService.updateOrderType(toEntity(orderTypeDto)));
   }
 
   @DeleteMapping(
-    value = "/deleteSetting",
+    value = "/deleteOrderType",
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteSetting(
+  public void deleteOrderType(
     @RequestBody Integer id
   ) {
-    settingService.deleteSetting(id);
+    orderTypeService.deleteOrderType(id);
   }
 
   @GetMapping(
-    value = "/findSetting",
+    value = "/findOrderType",
     produces = "application/json"
   )
-  public Page<SettingDto> findSetting(
-    @RequestParam Optional<String> settingKey,
-    @RequestParam Optional<String> settingGroup,
-    @RequestParam Optional<String> settingNote,
+  public Page<OrderTypeDto> findOrderType(
     @RequestParam Optional<Integer> page,
     @RequestParam Optional<Integer> size,
     @RequestParam Optional<String> sort,
@@ -82,25 +79,22 @@ public class SettingController {
       paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
     }
 
-    return settingService.findSettingByKeyGroupNote(
-      settingKey.orElse(null),
-      settingGroup.orElse(null),
-      settingNote.orElse(null),
+    return orderTypeService.findOrderType(
       paging
     ).map(this::toDto);
   }
 
-  private Setting toEntity(SettingDto dto) {
+  private OrderType toEntity(OrderTypeDto dto) {
     return modelMapper.map(
       dto,
-      Setting.class
+      OrderType.class
     );
   }
 
-  private SettingDto toDto(Setting entity) {
+  private OrderTypeDto toDto(OrderType entity) {
     return modelMapper.map(
       entity,
-      SettingDto.class
+      OrderTypeDto.class
     );
   }
 }

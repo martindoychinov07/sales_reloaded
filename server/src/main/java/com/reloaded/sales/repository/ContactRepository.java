@@ -1,15 +1,20 @@
 package com.reloaded.sales.repository;
 
 import com.reloaded.sales.model.Contact;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Integer> {
 
-//  <P, S> Page<P> findAllBy(Example<S> example, Pageable pageable, Class<P> type);
+  List<Contact> findAllByContactNameAndContactAddressAndContactCode1AndContactCode2OrderByContactIdDesc(
+    String contactName,
+    String contactAddress,
+    String contactCode1,
+    String contactCode2
+  );
 
+  List<String> findContactLocationByContactCode1(String contactCode1);
 }

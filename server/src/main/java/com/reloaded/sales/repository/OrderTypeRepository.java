@@ -1,6 +1,6 @@
 package com.reloaded.sales.repository;
 
-import com.reloaded.sales.model.Product;
+import com.reloaded.sales.model.OrderType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,14 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface OrderTypeRepository extends JpaRepository<OrderType, Integer> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT p FROM Product p WHERE p.productId IN :ids")
+  @Query("SELECT s FROM OrderType s WHERE s.typeId = :id")
   @QueryHints(@QueryHint(name="jakarta.persistence.lock.timeout", value="5000"))
-  List<Product> findAllProductForUpdate(List<Integer> ids);
+  OrderType getOrderTypeForUpdate(Integer id);
 
 }

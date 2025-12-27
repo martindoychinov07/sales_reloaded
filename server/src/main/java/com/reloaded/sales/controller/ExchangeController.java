@@ -16,7 +16,7 @@ import java.util.Optional;
 @Tag(name = "exchange", description = "exchange service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
-@RequestMapping("/exchange")
+@RequestMapping("/api/exchange")
 public class ExchangeController {
   private final ExchangeService exchangeService;
   private final ModelMapper modelMapper;
@@ -32,7 +32,9 @@ public class ExchangeController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public ExchangeDto createExchange(@RequestBody ExchangeDto exchangeDto) {
+  public ExchangeDto createExchange(
+    @RequestBody ExchangeDto exchangeDto
+  ) {
     return toDto(exchangeService.createExchange(toEntity(exchangeDto)));
   }
 
@@ -42,7 +44,9 @@ public class ExchangeController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public ExchangeDto updateExchange(@RequestBody ExchangeDto exchangeDto) {
+  public ExchangeDto updateExchange(
+    @RequestBody ExchangeDto exchangeDto
+  ) {
     return toDto(exchangeService.updateExchange(toEntity(exchangeDto)));
   }
 
@@ -51,7 +55,9 @@ public class ExchangeController {
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteExchange(Integer id) {
+  public void deleteExchange(
+    @RequestBody Integer id
+  ) {
     exchangeService.deleteExchange(id);
   }
 
@@ -60,8 +66,8 @@ public class ExchangeController {
     produces = "application/json"
   )
   public Page<ExchangeDto> findExchange(
-    @RequestParam Optional<String> base,
-    @RequestParam Optional<String> target,
+    @RequestParam Optional<String> exchangeBase,
+    @RequestParam Optional<String> exchangeTarget,
     @RequestParam Optional<Integer> page,
     @RequestParam Optional<Integer> size,
     @RequestParam Optional<String> sort,
@@ -76,8 +82,8 @@ public class ExchangeController {
     }
     return exchangeService
       .findExchangeByBaseTarget(
-        base.orElse(null),
-        target.orElse(null),
+        exchangeBase.orElse(null),
+        exchangeTarget.orElse(null),
         paging
       ).map(this::toDto);
   }

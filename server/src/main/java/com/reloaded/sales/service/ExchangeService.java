@@ -9,8 +9,10 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ExchangeService {
   final ExchangeRepository exchangeRepository;
 
@@ -38,6 +40,7 @@ public class ExchangeService {
     exchangeRepository.delete(exists);
   }
 
+  @Transactional(readOnly = true)
   public Page<Exchange> findExchangeByBaseTarget(String base, String target, Pageable paging) {
     Exchange probe = Exchange.builder()
       .exchangeBase(base)

@@ -16,7 +16,7 @@ import java.util.Optional;
 @Tag(name = "translation", description = "translation service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
-@RequestMapping("/translation")
+@RequestMapping("/api/translation")
 public class TranslationController {
   private final TranslationService translationService;
   private final ModelMapper modelMapper;
@@ -32,7 +32,9 @@ public class TranslationController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public TranslationDto createTranslation(TranslationDto translationDto) {
+  public TranslationDto createTranslation(
+    @RequestBody TranslationDto translationDto
+  ) {
     return toDto(translationService.createTranslation(toEntity(translationDto)));
   }
 
@@ -42,7 +44,9 @@ public class TranslationController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public TranslationDto updateTranslation(TranslationDto translationDto) {
+  public TranslationDto updateTranslation(
+    @RequestBody TranslationDto translationDto
+  ) {
     return toDto(translationService.updateTranslation(toEntity(translationDto)));
   }
 
@@ -51,7 +55,9 @@ public class TranslationController {
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteTranslation(Integer id) {
+  public void deleteTranslation(
+    @RequestBody Integer id
+  ) {
     translationService.deleteTranslation(id);
   }
 
@@ -60,7 +66,7 @@ public class TranslationController {
     produces = "application/json"
   )
   public Page<TranslationDto> findTranslation(
-    @RequestParam Optional<String> key,
+    @RequestParam Optional<String> translationKey,
     @RequestParam Optional<String> en,
     @RequestParam Optional<String> bg,
     @RequestParam Optional<Integer> page,
@@ -77,7 +83,7 @@ public class TranslationController {
     }
 
     return translationService.findTranslationByKeyEnBg(
-      key.orElse(null),
+      translationKey.orElse(null),
       en.orElse(null),
       bg.orElse(null),
       paging

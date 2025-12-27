@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
 
 @Service
@@ -24,6 +26,7 @@ public class ContactService {
   }
 
   public Contact createContact(Contact contact) {
+    contact.setContactState(ContactState.active);
     return contactRepository.save(contact);
   }
 
@@ -32,7 +35,7 @@ public class ContactService {
       .findById(changes.getContactId())
       .orElseThrow(() -> new NotFound("Contact not found"));
 
-    BeanUtils.copyProperties(changes, entity,Contact.Fields.contactId, Contact.Fields.contactState);
+    BeanUtils.copyProperties(changes, entity, Contact.Fields.contactId, Contact.Fields.contactState);
 
     return contactRepository.save(entity);
   }
@@ -40,19 +43,32 @@ public class ContactService {
   public void deleteContact(Integer id) {
     Contact contact = contactRepository.findById(id)
       .orElseThrow(() -> new NotFound("Contact not found"));
-
-    contactRepository.delete(contact);
+    contact.setContactState(ContactState.deleted);
+    contactRepository.save(contact);
   }
 
   public Contact getContactById(Integer id) {
     return contactRepository.findById(id).orElseThrow(() -> new NotFound("contact"));
   }
 
-  public Page<Contact> findContactByNameLocationCode(String name, String location, String code, Pageable paging) {
+  @Transactional(readOnly = true)
+  public List<String> findContactLocation(String contactCode1) {
+    return contactRepository.findContactLocationByContactCode1(contactCode1);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<Contact> findContactByNameLocationCode(
+    String contactName,
+    String contactLocation,
+    String contactCode1,
+    String contactCode2,
+    Pageable paging
+  ) {
     Contact probe = Contact.builder()
-      .contactName(name)
-      .contactLocation(location)
-      .contactCode(code)
+      .contactName(contactName)
+      .contactLocation(contactLocation)
+      .contactCode1(contactCode1)
+      .contactCode2(contactCode2)
       .contactState(ContactState.active)
       .build();
 
@@ -62,7 +78,8 @@ public class ContactService {
       .withIgnoreNullValues()
       .withMatcher(Contact.Fields.contactName, match.contains().ignoreCase())
       .withMatcher(Contact.Fields.contactLocation, match.contains().ignoreCase())
-      .withMatcher(Contact.Fields.contactCode, match.contains().ignoreCase())
+      .withMatcher(Contact.Fields.contactCode1, match.contains().ignoreCase())
+      .withMatcher(Contact.Fields.contactCode2, match.contains().ignoreCase())
       .withMatcher(Contact.Fields.contactState, match.exact());
 
     Example<Contact> example = Example.of(probe, matcher);
