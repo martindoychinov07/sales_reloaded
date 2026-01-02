@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-
 @Tag(name = "appUser", description = "user service")
 @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
