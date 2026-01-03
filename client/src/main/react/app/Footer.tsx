@@ -1,0 +1,9 @@
+export function Footer() {
+  return (
+    // <footer className="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-2">
+      <aside>
+        <p>Copyright © {new Date().getFullYear()} - All right reserved by ...</p>
+      </aside>
+    // </footer>
+  )
+}
