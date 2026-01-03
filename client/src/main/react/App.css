@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@source inline("{,lg:,sm:}{grid-cols-,col-span-}{{1..24..1}}");
+@plugin "daisyui";
+
+.checkbox,
+.checkbox::before,
+.checkbox::after,
+.checkbox:checked,
+.checkbox:checked::before,
+.checkbox:checked::after {
+  @apply transition-none animate-none;
+}
+
+* {
+  font-size: 15px;
+  font-family: "Roboto" !important;
+}
+
+.table {
+  @apply border-r border-gray-300 rounded-none;
+  min-width: max-content;
+  width: fit-content;
+
+  & td, & th {
+    @apply border-l border-b border-gray-300 px-[6px] py-[2px] max-w-[3em] align-middle whitespace-nowrap overflow-hidden;
+
+    padding: 4px;
+
+    text-overflow: ellipsis;
+
+    &.hidden {
+      @apply hidden;
+    }
+
+    & > span.text-right {
+      display: block;
+    }
+  }
+
+  & td:has(input),
+  & td:has(select) {
+    padding: 0px;
+
+    & label {
+      padding: 3px;
+    }
+  }
+}
+
+.table thead {
+  @apply z-10 relative;
+
+  & th {
+    @apply overflow-hidden sticky top-0 border-t border-gray-300 text-center bg-gray-200 text-black;
+    font-weight: bold;
+    /*font-variant: petite-caps;*/
+
+    & .resize-handle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 5px;
+      height: 100%;
+      cursor: ew-resize;
+    }
+  }
+
+}
+
+.table tr:hover {
+  @apply bg-gray-200;
+}
+
+.table tr:has(> td:first-child input[type="checkbox"]:checked),
+.table tr:has(> td:first-child input[type="radio"]:checked) {
+  @apply bg-base-100;
+  outline: 2px solid;
+  outline-offset: -2px;
+}
+
+.app-list .table {
+  th, td {
+    @apply p-1;
+  }
+}
+
+.input, .select {
+  &:focus, &:focus-within {
+    @apply -outline-offset-2 shadow-xl;
+  }
+}
+
+.label {
+  &:is(.input > *, .select > *) {
+    &:first-child {
+      @apply min-w-[10rem];
+      @apply max-w-[10rem];
+      font-weight: bold;
+      /*font-variant: petite-caps;*/
+      overflow: hidden;
+    }
+  }
+}
+
+.label {
+  &:is(.input-action > *) {
+    &:last-child {
+      @apply p-0;
+    }
+  }
+}
+
+.field-input[type="number"] {
+  @apply text-right;
+}
+
+.input-compact .field-input[type="number"] {
+  @apply text-left;
+}
+
+.label {
+  &:is(.input-compact > *) {
+    @apply text-black;
+
+    &:first-child {
+      @apply min-w-fit;
+    }
+  }
+}
+
+.select option:not([value]) {
+  display: none;
+}
+
+/*.field-state-touched {*/
+/*    outline-offset: -2px;*/
+/*    outline: 1px solid blue;*/
+/*}*/
+
+/*.field-state-dirty {*/
+/*    outline-offset: -2px;*/
+/*    outline: 1px solid green;*/
+/*}*/
+
+.field-state-invalid {
+  outline-offset: -2px;
+  outline: 2px solid red;
+}
+
+:disabled {
+  cursor: auto;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  display: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}
