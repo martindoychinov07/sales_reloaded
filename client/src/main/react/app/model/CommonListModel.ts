@@ -1,0 +1,122 @@
+import type {LayoutModelItem} from "../../utils/LayoutModel.ts";
+
+export function getCommonActions<T>() {
+  const actions: LayoutModelItem<T>[] = [
+    {
+      span: 2,
+      group: "paging",
+      name: "page",
+      label: "~filter.page",
+      type: "number",
+    },
+    {
+      span: 2,
+      group: "paging",
+      name: "size",
+      label: "~filter.size",
+      type: "select",
+      source: "size",
+    },
+    {
+      span: 2,
+      group: "paging",
+      name: "sort",
+      label: "~filter.sort",
+      type: "select",
+      source: "sort",
+    },
+    {
+      span: 2,
+      group: "paging",
+      name: "direction",
+      label: "~filter.direction",
+      type: "select",
+      source: "direction",
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "create",
+      label: "~action.create",
+      type: "button",
+      enable: ["save", "cancel"],
+      disable: ["create", "copy", "edit", "delete", "search", "close", "confirm", "mode"],
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "copy",
+      label: "~action.copy",
+      type: "button",
+      enable: ["save", "cancel"],
+      disable: ["create", "copy", "edit", "delete", "search", "close", "confirm", "mode"],
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "edit",
+      label: "~action.edit",
+      type: "button",
+      enable: ["save", "cancel"],
+      disable: ["create", "copy", "edit", "delete", "search", "close", "confirm", "mode"],
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "delete",
+      label: "~action.delete",
+      type: "button",
+    },
+    {
+      span: 2,
+      group: "action",
+      label: "",
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "cancel",
+      label: "~action.cancel",
+      type: "button",
+      enable: ["create", "copy", "edit", "delete", "search", "close", "confirm", "mode"],
+      disable: ["save", "cancel"],
+    },
+    {
+      span: 1,
+      group: "action",
+      name: "save",
+      label: "~action.save",
+      type: "submit",
+      enable: ["create", "copy", "edit", "delete", "search", "close", "confirm", "mode"],
+      disable: ["save", "cancel"],
+    },
+    {
+      span: 1,
+      group: "modal",
+      name: "mode",
+      label: "~action.mode",
+      type: "toggle",
+    },
+    {
+      span: 5,
+      group: "modal",
+      label: "",
+    },
+    {
+      span: 1,
+      group: "modal",
+      name: "close",
+      label: "~action.close",
+      type: "button",
+    },
+    {
+      span: 1,
+      group: "modal",
+      name: "confirm",
+      label: "~action.ok",
+      type: "button",
+    },
+  ]
+
+  return actions;
+}
