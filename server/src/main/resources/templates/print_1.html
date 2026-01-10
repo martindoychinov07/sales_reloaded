@@ -1,0 +1,392 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <style>
+    @font-face {
+      font-family: 'DejaVuSans';
+      src: url('fonts/DejaVuSans.ttf') format('truetype');
+    }
+
+    @media print {
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 2cm 1cm;
+
+      @top-center {
+        content: "";
+        font-family: "DejaVuSans";
+        font-size: 10px;
+      }
+
+      @bottom-center {
+        /*content: "стр. " counter(page) " от " counter(pages);*/
+        content: '[[${@print.t("footer.print", variants[0].lang)}]]';
+        font-family: "DejaVuSans";
+        font-size: 10px;
+      }
+    }
+
+    * {
+      font-family: "DejaVuSans";
+      font-size: 10px;
+      line-height: 1.5em;
+      letter-spacing: 0.5px;
+    }
+
+    table td {
+      padding: 0px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid #999;
+      padding: 4px;
+    }
+
+    .table th {
+      text-align: center;
+    }
+
+    .pre {
+      white-space: pre-line;
+    }
+
+    .left {
+      text-align: left;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .w-1-1 {
+      width: 100%;
+    }
+
+    .w-1-2 {
+      width: 50%;
+    }
+
+    .w-auto {
+      width: auto;
+    }
+
+    .w-fit {
+      width: fit-content;
+    }
+
+    .upper {
+      text-transform: uppercase;
+    }
+
+    .bold {
+      font-weight: 500;
+    }
+
+    b {
+      color: #333333;
+    }
+
+    .black {
+      color: #333333;
+    }
+
+    .grey {
+      color: #777777;
+    }
+
+    .bottom {
+      border-bottom: 1px solid #cccccc;
+    }
+
+    .small {
+      font-size: smaller;
+    }
+
+    .overline {
+      text-decoration: overline;
+    }
+
+    .gap-right {
+      padding-right: 2rem;
+    }
+
+    .gap-left {
+      padding-left: 2rem;
+    }
+
+  </style>
+</head>
+<body>
+
+<div th:each="variant, stat : ${variants}">
+  <table class="w-1-1">
+    <tr>
+      <td colspan="2" class="w-1-2 gap-right"></td>
+      <td colspan="2" class="w-1-2 bold black gap-left">
+        [[${@print.t('orderType.' + orderForm.getOrderType().getTypeId(), variant.lang)}]] No: [[${#numbers.formatInteger(orderForm.orderNum, 10)}]] / [[${#temporals.format(orderForm.orderDate, "dd.MM.yyyy")}]]
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="gap-right"></td>
+      <td colspan="2" class="bold grey gap-left">[[${variant.subtitle}]]</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold grey small gap-right"><div style="width: 2rem; border-bottom: 2px solid; padding-top: 1rem"></div></td>
+      <td colspan="2" class="bold grey small gap-left"><div style="width: 2rem; border-bottom: 2px solid; padding-top: 1rem"></div></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold grey gap-right">[[${@print.t('order.customer.name', variant.lang)}]]:</td>
+      <td colspan="2" class="bold grey gap-left">[[${@print.t('order.supplier.name', variant.lang)}]]:</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="gap-right">
+        <div class="bold upper">[[${orderForm.orderCustomer.contactName}]]</div>
+      </td>
+      <td colspan="2" class="gap-left">
+        <div class="bold upper">[[${orderForm.orderSupplier.contactName}]]</div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold grey gap-right">
+        [[${orderForm.orderCustomer.contactAddress}]]
+      </td>
+      <td colspan="2" class="bold grey gap-left">
+        [[${orderForm.orderSupplier.contactAddress}]]
+      </td>
+    </tr>
+    <tr>
+      <td class="bold grey">[[${@print.t('order.customer.code1', variant.lang)}]]:</td>
+      <td class="bold right gap-right">[[${orderForm.orderCustomer.contactCode1}]]</td>
+      <td class="bold grey gap-left">[[${@print.t('order.customer.code1', variant.lang)}]]:</td>
+      <td class="bold right">[[${orderForm.orderSupplier.contactCode1}]]</td>
+    </tr>
+    <tr>
+      <td class="bold grey">[[${@print.t('order.customer.code2', variant.lang)}]]:</td>
+      <td class="bold right gap-right">[[${orderForm.orderCustomer.contactCode2}]]</td>
+      <td class="bold grey gap-left">[[${@print.t('order.customer.code2', variant.lang)}]]:</td>
+      <td class="bold right">[[${orderForm.orderSupplier.contactCode2}]]</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold grey small gap-right"><div style="width: 2rem; border-bottom: 2px solid; padding-top: 1rem"></div></td>
+      <td colspan="2" class="bold grey small gap-left"><div style="width: 2rem; border-bottom: 2px solid; padding-top: 1rem"></div></td>
+    </tr>
+    <tr>
+      <td class="bold grey">[[${@print.t('order.date.print', variant.lang)}]]:</td>
+      <td class="bold right gap-right">[[${#temporals.format(orderForm.orderDate, "dd.MM.yyyy")}]]</td>
+      <td class="bold grey gap-left">[[${@print.t('order.payment.print', variant.lang)}]]:</td>
+      <td class="bold right">[[${@print.t('payment.' + orderForm.orderPayment, variant.lang)}]]</td>
+    </tr>
+    <tr>
+      <td class="bold grey">
+        [[${@print.t('order.resp.date.print', variant.lang)}]]:
+      </td>
+      <td class="bold right gap-right">
+        [[${#temporals.format(orderForm.orderRespDate, "dd.MM.yyyy")}]]
+      </td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.payment.bank', variant.lang)}]]:
+      </td>
+      <td class="bold right">
+        [[${@print.t('order.payment.bank.' + targetCy, variant.lang)}]]
+      </td>
+    </tr>
+    <tr>
+      <td class="bold grey">
+        [[${@print.t('', variant.lang)}]]Дата на плащане:
+      </td>
+      <td class="bold right gap-right">
+        [[${#temporals.format(orderForm.orderPaymentDate, "dd.MM.yyyy")}]]
+      </td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.payment.bic', variant.lang)}]]:
+      </td>
+      <td class="bold right">
+        [[${@print.t('order.payment.bic.' + targetCy, variant.lang)}]]
+      </td>
+    </tr>
+    <tr>
+      <td class="bold grey">
+        [[${@print.t('order.ccp', variant.lang)}]]<span th:if="${sourceCy != targetCy}"> ([[${@print.t('order.rate', variant.lang)}]])</span>:
+      </td>
+      <td class="bold right gap-right">[[${sourceCy}]]
+        <span th:if="${sourceCy != targetCy}">
+          / [[${targetCy}]] = [[${#numbers.formatDecimal(orderForm.orderRate, 1, 4)}]]
+        </span>
+      </td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.payment.iban', variant.lang)}]]:
+      </td>
+      <td class="bold right">
+        [[${@print.t('order.payment.iban.' + targetCy, variant.lang)}]]
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="padding-bottom: 1rem"></td>
+    </tr>
+  </table>
+
+  <table class="table">
+    <thead>
+    <tr>
+      <th>[[${@print.t('entry.row', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.label', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.measure', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.quantity.print', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.price', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.discountPct', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.sum', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.tax', variant.lang)}]]</th>
+      <th>[[${@print.t('entry.total', variant.lang)}]]</th>
+      <th>[[${@print.t('order.ccp', variant.lang)}]]</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${orderForm.orderEntries}">
+      <td class="left">
+        [[${entry.entryRow}]]
+        <i th:if="${sourceCy != targetCy}"><br/>&#160;</i>
+      </td>
+      <td class="left">
+        [[${entry.entryLabel}]]
+        <i th:if="${sourceCy != targetCy}"><br/>&#160;</i>
+      </td>
+      <td class="left">
+        [[${entry.entryUnits}]] [[${entry.entryMeasure}]]
+        <i th:if="${sourceCy != targetCy}"><br/>&#160;</i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entryQuantity, 1, 0)}]]
+        <i th:if="${sourceCy != targetCy}"><br/>&#160;</i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entryPrice, 1, 2)}]]
+        <i th:if="${sourceCy != targetCy}">
+          <br/>[[${#numbers.formatDecimal(@print.rate(entry.entryPrice, orderForm.orderRate), 1, 2)}]]&#160;
+        </i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entryDiscountPct, 1, 1)}]]
+        <i th:if="${sourceCy != targetCy}"><br/>&#160;</i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entrySum, 1, 2)}]]
+        <i th:if="${sourceCy != targetCy}">
+          <br/>[[${#numbers.formatDecimal(@print.rate(entry.entrySum, orderForm.orderRate), 1, 2)}]]&#160;
+        </i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entryTax, 1, 2)}]]
+        <i th:if="${sourceCy != targetCy}">
+          <br/>[[${#numbers.formatDecimal(@print.rate(entry.entryTax, orderForm.orderRate), 1, 2)}]]&#160;
+        </i>
+      </td>
+      <td class="right">
+        [[${#numbers.formatDecimal(entry.entryTotal, 1, 2)}]]
+        <i th:if="${sourceCy != targetCy}">
+          <br/>[[${#numbers.formatDecimal(@print.rate(entry.entryTotal, orderForm.orderRate), 1, 2)}]]&#160;
+        </i>
+      </td>
+      <td class="center">
+        <b>[[${sourceCy}]]</b>
+        <i th:if="${sourceCy != targetCy}">
+          <br/>[[${targetCy}]]&#160;
+        </i>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <table class="w-1-1">
+    <tr>
+      <td colspan="2" class="w-1-2"></td>
+      <td colspan="2" class="w-1-2"></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.sum', variant.lang)}]]:
+      </td>
+      <td class="right">
+        <b>[[${#numbers.formatDecimal(orderForm.orderSum, 1, 2)}]] [[${sourceCy}]]</b>
+        <i th:if="${sourceCy != targetCy}">
+          / [[${#numbers.formatDecimal(@print.rate(orderForm.orderSum, orderForm.orderRate), 1, 2)}]] [[${targetCy}]]
+        </i>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.tax', variant.lang)}]] ([[${#numbers.formatDecimal(orderForm.orderTaxPct, 1, 2)}]]%):
+      </td>
+      <td class="right">
+        <b>[[${#numbers.formatDecimal(orderForm.orderTax, 1, 2)}]] [[${sourceCy}]]</b>
+        <i th:if="${sourceCy != targetCy}">
+          / [[${#numbers.formatDecimal(@print.rate(orderForm.orderTax, orderForm.orderRate), 1, 2)}]] [[${targetCy}]]
+        </i>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.total', variant.lang)}]]:
+      </td>
+      <td class="right">
+        <b>[[${#numbers.formatDecimal(orderForm.orderTotal, 1, 2)}]] [[${sourceCy}]]</b>
+        <i th:if="${sourceCy != targetCy}">
+          / [[${#numbers.formatDecimal(@print.rate(orderForm.orderTotal, orderForm.orderRate), 1, 2)}]] [[${targetCy}]]
+        </i>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="padding-bottom: 3rem"></td>
+    </tr>
+    <tr>
+      <td class="bold grey">
+        [[${@print.t('order.customer.name', variant.lang)}]]:
+      </td>
+      <td class="bold right gap-right">
+
+      </td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.supplier.name', variant.lang)}]]:
+      </td>
+      <td class="bold right">
+
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="padding-bottom: 1rem"></td>
+    </tr>
+    <tr>
+      <td class="bold grey">
+        [[${@print.t('order.signature', variant.lang)}]]:
+      </td>
+      <td></td>
+      <td class="bold grey gap-left">
+        [[${@print.t('order.signature', variant.lang)}]]:
+      </td>
+      <td></td>
+    </tr>
+  </table>
+  <div th:if="${!stat.last}" class="page-break"></div>
+</div>
+</body>
+</html>
