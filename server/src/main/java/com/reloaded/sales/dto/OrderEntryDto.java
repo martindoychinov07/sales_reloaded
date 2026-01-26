@@ -27,8 +27,8 @@ public class OrderEntryDto {
   private Integer entryUnits;
   @Size(max = 30)
   private String entryMeasure;
-  private Integer entryAvailable;
-  private Integer entryQuantity;
+  private BigDecimal entryAvailable;
+  private BigDecimal entryQuantity;
   private BigDecimal entryPrice;
   private BigDecimal entryDiscountPct;
   private BigDecimal entryDiscount;

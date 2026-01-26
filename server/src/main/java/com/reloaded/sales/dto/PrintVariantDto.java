@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PrintVariant {
+public class PrintVariantDto {
 
   private String lang;
-  private String subtitle;
+  private String sign;
 
 }

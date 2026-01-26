@@ -24,6 +24,7 @@ public class OrderFormDto implements Serializable {
   private OrderState orderState;
   private OffsetDateTime orderDate;
   private Long orderNum;
+  private Integer orderCounter;
   private OrderTypeDto orderType;
   private Integer orderUserId;
   private ContactDto orderSupplier;

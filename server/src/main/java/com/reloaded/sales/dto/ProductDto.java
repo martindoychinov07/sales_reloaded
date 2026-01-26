@@ -26,7 +26,7 @@ public class ProductDto {
   private Integer productUnits;
   @Size(max = 30)
   private String productMeasure;
-  private Integer productAvailable;
+  private BigDecimal productAvailable;
   @Size(max = 50)
   private String productCode;
   @Size(max = 50)

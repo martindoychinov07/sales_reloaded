@@ -19,7 +19,8 @@ import java.math.BigDecimal;
 public class OrderTypeDto implements Serializable {
   private Integer typeId;
   @Size(max = 100)
-  private Integer typeOrder;
+  private Integer typeCounter;
+  private Integer typeIndex;
   private String typeKey;
   private Long typeNum;
   @Size(max = 100)
