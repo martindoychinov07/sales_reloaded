@@ -1,15 +1,19 @@
 package com.reloaded.sales.service;
 
+import com.reloaded.sales.dto.filter.SettingFilter;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Setting;
 import com.reloaded.sales.repository.SettingRepository;
+import com.reloaded.sales.util.ServiceUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.reloaded.sales.util.ServiceUtils.orBlank;
 
 @Service
 @Transactional
@@ -45,27 +49,34 @@ public class SettingService {
     return settingRepository.findById(id).orElseThrow(() -> new NotFound("setting"));
   }
 
+  @Transactional(readOnly = true)
   public Setting getSettingByKey(String key) {
     return settingRepository.findBySettingKey(key).orElseThrow(() -> new NotFound("setting"));
   }
 
+  final List<Sort.Order> defaultSort = List.of(
+    Sort.Order.asc(Setting.Fields.settingId)
+  );
+
   @Transactional(readOnly = true)
-  public Page<Setting> findSettingByKeyGroupNote(String key, String group, String note, Pageable paging) {
+  public Page<Setting> findSetting(SettingFilter filter) {
+    PageRequest paging = ServiceUtils.paging(filter, defaultSort);
+
     Setting probe = Setting.builder()
-      .settingKey(key)
-      .settingGroup(group)
-      .settingNote(note)
+      .settingKey(orBlank(filter.getSettingKey()))
+      .settingGroup(orBlank(filter.getSettingGroup()))
+      .settingNote(orBlank(filter.getSettingNote()))
       .build();
 
-    final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(Setting.Fields.settingKey , match.exact().ignoreCase())
-      .withMatcher(Setting.Fields.settingGroup, match.exact().ignoreCase())
-      .withMatcher(Setting.Fields.settingNote, match.contains().ignoreCase());
+      .withMatcher(Setting.Fields.settingKey , match -> match.exact().ignoreCase())
+      .withMatcher(Setting.Fields.settingGroup, match -> match.exact().ignoreCase())
+      .withMatcher(Setting.Fields.settingNote, match -> match.contains().ignoreCase());
 
     Example<Setting> example = Example.of(probe, matcher);
     return settingRepository.findAll(example, paging);
   }
+
 }

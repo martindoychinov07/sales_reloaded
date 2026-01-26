@@ -1,16 +1,16 @@
 package com.reloaded.sales.service;
 
 import com.reloaded.sales.dto.AppUserDto;
+import com.reloaded.sales.dto.filter.AppUserFilter;
 import com.reloaded.sales.exception.AlreadyReported;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.AppUser;
 import com.reloaded.sales.repository.AppUserRepository;
 import com.reloaded.sales.security.AppUserDetails;
+import com.reloaded.sales.util.ServiceUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
+
+import static com.reloaded.sales.util.ServiceUtils.orBlank;
 
 @Service
 @Transactional
@@ -41,6 +44,7 @@ public class AppUserService implements UserDetailsService {
     return new AppUserDetails(appUser);
   }
 
+  @Transactional(readOnly = true)
   public AppUser getUserById(Integer id) {
     return appUserRepository.findById(id).orElseThrow(() -> new NotFound("user"));
   }
@@ -50,7 +54,7 @@ public class AppUserService implements UserDetailsService {
       throw new AlreadyReported("User already exists");
     }
     if (user.getNewPassword() == null
-      || user.getNewPassword().isBlank()
+      || Strings.isBlank(user.getNewPassword())
     ) {
       throw new NotFound("password");
     }
@@ -71,9 +75,7 @@ public class AppUserService implements UserDetailsService {
       .findById(changes.getUserId())
       .orElseThrow(() -> new NotFound("User not found"));
 
-    if (changes.getNewPassword() != null
-      && !changes.getNewPassword().isBlank()
-    ) {
+    if (Strings.isNotBlank(changes.getNewPassword())) {
       entity.setPassword(passwordEncoder.encode(changes.getNewPassword()));
     }
 
@@ -108,26 +110,26 @@ public class AppUserService implements UserDetailsService {
     return auth.getName();
   }
 
+  final List<Sort.Order> defaultSort = List.of(
+    Sort.Order.asc(AppUser.Fields.userId)
+  );
+
   @Transactional(readOnly = true)
-  public Page<AppUser> findAllAppUserByUsernameUserRoleFullname(
-    String username,
-    String userRole,
-    String fullname,
-    Pageable paging
-  ) {
+  public Page<AppUser> findAllAppUser(AppUserFilter filter) {
+    PageRequest paging = ServiceUtils.paging(filter, defaultSort);
+
     AppUser probe = AppUser.builder()
-      .username(username)
-      .userRole(userRole)
-      .fullname(fullname)
+      .username(orBlank(filter.getUsername()))
+      .userRole(orBlank(filter.getUserRole()))
+      .fullname(orBlank(filter.getFullname()))
       .build();
 
-    final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(AppUser.Fields.username, match.contains().ignoreCase())
-      .withMatcher(AppUser.Fields.userRole, match.contains().ignoreCase())
-      .withMatcher(AppUser.Fields.fullname, match.contains().ignoreCase());
+      .withMatcher(AppUser.Fields.username, match -> match.contains().ignoreCase())
+      .withMatcher(AppUser.Fields.userRole, match -> match.contains().ignoreCase())
+      .withMatcher(AppUser.Fields.fullname, match -> match.contains().ignoreCase());
 
     Example<AppUser> example = Example.of(probe, matcher);
     return appUserRepository.findAll(example, paging);

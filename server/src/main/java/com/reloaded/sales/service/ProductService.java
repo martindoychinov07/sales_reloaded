@@ -1,17 +1,20 @@
 package com.reloaded.sales.service;
 
+import com.reloaded.sales.dto.filter.ProductFilter;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.*;
 import com.reloaded.sales.repository.ProductRepository;
+import com.reloaded.sales.util.ServiceUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.List;
+
+import static com.reloaded.sales.util.ServiceUtils.*;
 
 @Service
 @Transactional
@@ -32,7 +35,13 @@ public class ProductService {
       .findById(changes.getProductId())
       .orElseThrow(() -> new NotFound("Product not found"));
 
-    BeanUtils.copyProperties(changes, entity, Product.Fields.productId, Product.Fields.productState, Product.Fields.productAvailable);
+    BeanUtils.copyProperties(
+      changes,
+      entity,
+      Product.Fields.productId,
+      Product.Fields.productState
+//      Product.Fields.productAvailable
+    );
 
     return productRepository.save(entity);
   }
@@ -40,34 +49,38 @@ public class ProductService {
   public void deleteProduct(Integer id) {
     Product product = productRepository.findById(id)
       .orElseThrow(() -> new NotFound("Product not found"));
+
+    if (gt(product.getProductAvailable(), BigDecimal.ZERO)) {
+      throw new IllegalStateException("Product with availability cannot be deleted");
+    }
+
     product.setProductState(ProductState.deleted);
     productRepository.save(product);
   }
 
-  public Optional<Product> getProductById(Integer id) {
-    return productRepository.findById(id);
+  @Transactional(readOnly = true)
+  public Product getProductById(Integer id) {
+    return productRepository.findById(id).orElseThrow(() -> new NotFound("Product not found"));
   }
 
+  final List<Sort.Order> defaultSort = List.of(
+    Sort.Order.asc(Product.Fields.productName),
+    Sort.Order.asc(Product.Fields.productUnits),
+    Sort.Order.asc(Product.Fields.productId)
+  );
+
   @Transactional(readOnly = true)
-  public Page<Product> findProductByCodeNameNote(String code, String name, String note, Pageable paging) {
-    Product probe = Product.builder()
-      .productCode(code)
-      .productName(name)
-      .productNote(note)
-      .productState(ProductState.active)
-      .build();
+  public Page<Product> findProduct(ProductFilter filter) {
+    PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(Product.Fields.productCode, match.contains().ignoreCase())
-      .withMatcher(Product.Fields.productName, match.contains().ignoreCase())
-      .withMatcher(Product.Fields.productNote, match.contains().ignoreCase());
+    Specification<Product> spec = (root, query, cb) -> cb.conjunction();
 
-    Example<Product> example = Example.of(probe, matcher);
+    spec.and(eq(Product.Fields.productState, ProductState.active));
+    spec.and(anyLike(filter.getProductName(), Product.Fields.productName));
+    spec.and(between(Product.Fields.productAvailable, filter.getFromAvailable(), filter.getToAvailable()));
+    spec.and(anyLike(filter.getProductText(), Product.Fields.productName, Product.Fields.productNote, Product.Fields.productCode, Product.Fields.productBarcode));
 
-    return productRepository.findAll(example, paging);
+    return productRepository.findAll(spec, paging);
   }
 
 }

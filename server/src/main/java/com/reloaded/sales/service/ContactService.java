@@ -1,20 +1,21 @@
 package com.reloaded.sales.service;
 
+import com.reloaded.sales.dto.filter.ContactFilter;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Contact;
 import com.reloaded.sales.model.ContactState;
 import com.reloaded.sales.repository.ContactRepository;
+import com.reloaded.sales.util.ServiceUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
+import static com.reloaded.sales.util.ServiceUtils.*;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
@@ -47,43 +48,29 @@ public class ContactService {
     contactRepository.save(contact);
   }
 
+  @Transactional(readOnly = true)
   public Contact getContactById(Integer id) {
     return contactRepository.findById(id).orElseThrow(() -> new NotFound("contact"));
   }
 
-  @Transactional(readOnly = true)
-  public List<String> findContactLocation(String contactCode1) {
-    return contactRepository.findContactLocationByContactCode1(contactCode1);
-  }
+  final List<Sort.Order> defaultSort = List.of(
+    Sort.Order.asc(Contact.Fields.contactName),
+    Sort.Order.asc(Contact.Fields.contactLocation),
+    Sort.Order.desc(Contact.Fields.contactId)
+  );
 
   @Transactional(readOnly = true)
-  public Page<Contact> findContactByNameLocationCode(
-    String contactName,
-    String contactLocation,
-    String contactCode1,
-    String contactCode2,
-    Pageable paging
-  ) {
-    Contact probe = Contact.builder()
-      .contactName(contactName)
-      .contactLocation(contactLocation)
-      .contactCode1(contactCode1)
-      .contactCode2(contactCode2)
-      .contactState(ContactState.active)
-      .build();
+  public Page<Contact> findContact(ContactFilter filter) {
+    PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    final GenericPropertyMatchers match = new GenericPropertyMatchers();
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(Contact.Fields.contactName, match.contains().ignoreCase())
-      .withMatcher(Contact.Fields.contactLocation, match.contains().ignoreCase())
-      .withMatcher(Contact.Fields.contactCode1, match.contains().ignoreCase())
-      .withMatcher(Contact.Fields.contactCode2, match.contains().ignoreCase())
-      .withMatcher(Contact.Fields.contactState, match.exact());
+    Specification<Contact> spec = (root, query, cb) -> cb.conjunction();
 
-    Example<Contact> example = Example.of(probe, matcher);
-    return contactRepository.findAll(example, paging);
+    spec.and(eq(Contact.Fields.contactState, ContactState.active));
+    spec.and(anyLike(filter.getContactLocation(), Contact.Fields.contactLocation));
+    spec.and(anyLike(filter.getContactCode(), Contact.Fields.contactCode, Contact.Fields.contactCode1, Contact.Fields.contactCode2 ));
+    spec.and(anyLike(filter.getContactText(), Contact.Fields.contactName, Contact.Fields.contactLocation, Contact.Fields.contactCode, Contact.Fields.contactCode1 ));
+
+    return contactRepository.findAll(spec, paging);
   }
 
 }

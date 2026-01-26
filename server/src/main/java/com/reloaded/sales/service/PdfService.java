@@ -2,7 +2,7 @@ package com.reloaded.sales.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.reloaded.sales.model.OrderForm;
-import com.reloaded.sales.dto.PrintVariant;
+import com.reloaded.sales.dto.PrintVariantDto;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
@@ -32,7 +32,7 @@ public class PdfService {
     this.conversionService = conversionService;
   }
 
-  public byte[] generateInvoicePdf(OrderForm orderForm, PrintVariant printVariant) throws IOException {
+  public byte[] generatePdf(OrderForm orderForm, PrintVariantDto printVariant) throws IOException {
     Context context = new Context(LocaleContextHolder.getLocale());
     context.setVariable("orderForm", orderForm);
     context.setVariable(
@@ -43,7 +43,7 @@ public class PdfService {
     context.setVariable("sourceCy", orderForm.getOrderCcp().substring(0, 3));
     context.setVariable("targetCy", orderForm.getOrderCcp().substring(4));
 
-    List<PrintVariant> variants = List.of(printVariant);
+    List<PrintVariantDto> variants = List.of(printVariant);
     context.setVariable("variants", variants);
 
     String html = templateEngine.process(orderForm.getOrderType().getTypePrint(), context);

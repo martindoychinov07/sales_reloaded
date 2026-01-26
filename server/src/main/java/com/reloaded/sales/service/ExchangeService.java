@@ -1,15 +1,18 @@
 package com.reloaded.sales.service;
 
+import com.reloaded.sales.dto.filter.ExchangeFilter;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Exchange;
 import com.reloaded.sales.repository.ExchangeRepository;
+import com.reloaded.sales.util.ServiceUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.reloaded.sales.util.ServiceUtils.orBlank;
 
 @Service
 @Transactional
@@ -41,18 +44,28 @@ public class ExchangeService {
   }
 
   @Transactional(readOnly = true)
-  public Page<Exchange> findExchangeByBaseTarget(String base, String target, Pageable paging) {
+  public Exchange getExchangeById(Integer id) {
+    return exchangeRepository.findById(id).orElseThrow(() -> new NotFound("exchange"));
+  }
+
+  final List<Sort.Order> defaultSort = List.of(
+    Sort.Order.asc(Exchange.Fields.exchangeId)
+  );
+
+  @Transactional(readOnly = true)
+  public Page<Exchange> findExchange(ExchangeFilter filter) {
+    PageRequest paging = ServiceUtils.paging(filter, defaultSort);
+
     Exchange probe = Exchange.builder()
-      .exchangeBase(base)
-      .exchangeTarget(target)
+      .exchangeBase(orBlank(filter.getExchangeBase()))
+      .exchangeTarget(orBlank(filter.getExchangeTarget()))
       .build();
 
-    final ExampleMatcher.GenericPropertyMatchers match = new ExampleMatcher.GenericPropertyMatchers();
     ExampleMatcher matcher = ExampleMatcher
       .matchingAll()
       .withIgnoreNullValues()
-      .withMatcher(Exchange.Fields.exchangeBase, match.contains().ignoreCase())
-      .withMatcher(Exchange.Fields.exchangeTarget, match.contains().ignoreCase());
+      .withMatcher(Exchange.Fields.exchangeBase, match -> match.contains().ignoreCase())
+      .withMatcher(Exchange.Fields.exchangeTarget, match -> match.contains().ignoreCase());
 
     Example<Exchange> example = Example.of(probe, matcher);
     return exchangeRepository.findAll(example, paging);
