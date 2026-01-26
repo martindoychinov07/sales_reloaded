@@ -48,7 +48,7 @@ public class PrintUtil {
 
   public BigDecimal rate(BigDecimal value, BigDecimal rate) {
     if (value != null && rate != null) {
-      return value.divide(rate, RoundingMode.HALF_UP);
+      return value.multiply(rate);
     }
     else {
       return null;
