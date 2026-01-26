@@ -3,20 +3,18 @@ package com.reloaded.sales.controller;
 import com.reloaded.sales.security.AppUserDetails;
 import com.reloaded.sales.security.AuthUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.core.Authentication;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "auth", description = "auth service")
-@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/auth")
+@NoArgsConstructor
 public class AuthController {
-
-  public AuthController() {
-
-  }
 
   @GetMapping(
     value = "/csrf",

@@ -1,106 +1,63 @@
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.SettingDto;
+import com.reloaded.sales.dto.filter.SettingFilter;
 import com.reloaded.sales.model.Setting;
 import com.reloaded.sales.service.SettingService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @Tag(name = "setting", description = "setting service")
-@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/setting")
-public class SettingController {
+@RequiredArgsConstructor
+public class SettingController implements CrudController<SettingDto, SettingFilter, Setting> {
+
   private final SettingService settingService;
   private final ModelMapper modelMapper;
 
-  public SettingController(SettingService settingService) {
-    this.settingService = settingService;
-    this.modelMapper = new ModelMapper();
-  }
-
-  @PostMapping(
-    value = "/createSetting",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.CREATED)
-  public SettingDto createSetting(
-    @RequestBody SettingDto settingDto
-  ) {
+  @Operation(operationId = "createSetting")
+  @Override
+  public SettingDto create(@RequestBody SettingDto settingDto) {
     return toDto(settingService.createSetting(toEntity(settingDto)));
   }
 
-  @PutMapping(
-    value = "/updateSetting",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public SettingDto updateSetting(
-    @RequestBody SettingDto settingDto
-  ) {
-    return toDto(settingService.updateSetting(toEntity(settingDto)));
+  @Operation(operationId = "updateSetting")
+  @Override
+  public SettingDto update(@PathVariable int id, @RequestBody SettingDto settingDto) {
+    Setting setting = toEntity(settingDto);
+    setting.setSettingId(id);
+    return toDto(settingService.updateSetting(setting));
   }
 
-  @DeleteMapping(
-    value = "/deleteSetting",
-    consumes = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public void deleteSetting(
-    @RequestBody Integer id
-  ) {
+  @Operation(operationId = "deleteSetting")
+  @Override
+  public void delete(@PathVariable int id) {
     settingService.deleteSetting(id);
   }
 
-  @GetMapping(
-    value = "/findSetting",
-    produces = "application/json"
-  )
-  public Page<SettingDto> findSetting(
-    @RequestParam Optional<String> settingKey,
-    @RequestParam Optional<String> settingGroup,
-    @RequestParam Optional<String> settingNote,
-    @RequestParam Optional<Integer> page,
-    @RequestParam Optional<Integer> size,
-    @RequestParam Optional<String> sort,
-    @RequestParam Optional<Sort.Direction> direction
-  ) {
-    PageRequest paging = PageRequest.ofSize(size.orElse(20));
-    if (page.isPresent()) {
-      paging = paging.withPage(page.get());
-    }
-    if (sort.isPresent()) {
-      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-    }
-
-    return settingService.findSettingByKeyGroupNote(
-      settingKey.orElse(null),
-      settingGroup.orElse(null),
-      settingNote.orElse(null),
-      paging
-    ).map(this::toDto);
+  @Operation(operationId = "findSetting")
+  @Override
+  public Page<SettingDto> find(@ParameterObject @ModelAttribute SettingFilter filter) {
+    return settingService.findSetting(filter).map(this::toDto);
   }
 
-  private Setting toEntity(SettingDto dto) {
-    return modelMapper.map(
-      dto,
-      Setting.class
-    );
+  @Operation(operationId = "getSettingById")
+  @Override
+  public SettingDto getById(@PathVariable int id) {
+    return toDto(settingService.getSettingById(id));
   }
 
-  private SettingDto toDto(Setting entity) {
-    return modelMapper.map(
-      entity,
-      SettingDto.class
-    );
+  public Setting toEntity(SettingDto dto) {
+    return modelMapper.map(dto, Setting.class);
+  }
+
+  public SettingDto toDto(Setting entity) {
+    return modelMapper.map(entity, SettingDto.class);
   }
 }

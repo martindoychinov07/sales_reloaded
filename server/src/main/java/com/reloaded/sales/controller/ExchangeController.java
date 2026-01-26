@@ -1,104 +1,63 @@
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.ExchangeDto;
+import com.reloaded.sales.dto.filter.ExchangeFilter;
 import com.reloaded.sales.model.Exchange;
 import com.reloaded.sales.service.ExchangeService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @Tag(name = "exchange", description = "exchange service")
-@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/exchange")
-public class ExchangeController {
+@RequiredArgsConstructor
+public class ExchangeController implements CrudController<ExchangeDto, ExchangeFilter, Exchange> {
+
   private final ExchangeService exchangeService;
   private final ModelMapper modelMapper;
 
-  public ExchangeController(ExchangeService exchangeService) {
-    this.exchangeService = exchangeService;
-    this.modelMapper = new ModelMapper();
-  }
-
-  @PostMapping(
-    value = "/createExchange",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.CREATED)
-  public ExchangeDto createExchange(
-    @RequestBody ExchangeDto exchangeDto
-  ) {
+  @Operation(operationId = "createExchange")
+  @Override
+  public ExchangeDto create(@RequestBody ExchangeDto exchangeDto) {
     return toDto(exchangeService.createExchange(toEntity(exchangeDto)));
   }
 
-  @PutMapping(
-    value = "/updateExchange",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public ExchangeDto updateExchange(
-    @RequestBody ExchangeDto exchangeDto
-  ) {
-    return toDto(exchangeService.updateExchange(toEntity(exchangeDto)));
+  @Operation(operationId = "updateExchange")
+  @Override
+  public ExchangeDto update(@PathVariable int id, @RequestBody ExchangeDto exchangeDto) {
+    Exchange exchange = toEntity(exchangeDto);
+    exchange.setExchangeId(id);
+    return toDto(exchangeService.updateExchange(exchange));
   }
 
-  @DeleteMapping(
-    value = "/deleteExchange",
-    consumes = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public void deleteExchange(
-    @RequestBody Integer id
-  ) {
+  @Operation(operationId = "deleteExchange")
+  @Override
+  public void delete(@PathVariable int id) {
     exchangeService.deleteExchange(id);
   }
 
-  @GetMapping(
-    value = "/findExchange",
-    produces = "application/json"
-  )
-  public Page<ExchangeDto> findExchange(
-    @RequestParam Optional<String> exchangeBase,
-    @RequestParam Optional<String> exchangeTarget,
-    @RequestParam Optional<Integer> page,
-    @RequestParam Optional<Integer> size,
-    @RequestParam Optional<String> sort,
-    @RequestParam Optional<Sort.Direction> direction
-  ) {
-    PageRequest paging = PageRequest.ofSize(size.orElse(20));
-    if (page.isPresent()) {
-      paging = paging.withPage(page.get());
-    }
-    if (sort.isPresent()) {
-      paging = paging.withSort(direction.orElse(Sort.Direction.ASC), sort.get());
-    }
-    return exchangeService
-      .findExchangeByBaseTarget(
-        exchangeBase.orElse(null),
-        exchangeTarget.orElse(null),
-        paging
-      ).map(this::toDto);
+  @Operation(operationId = "findExchange")
+  @Override
+  public Page<ExchangeDto> find(@ParameterObject @ModelAttribute ExchangeFilter filter) {
+    return exchangeService.findExchange(filter).map(this::toDto);
   }
 
-  private Exchange toEntity(ExchangeDto dto) {
-    return modelMapper.map(
-      dto,
-      Exchange.class
-    );
+  @Operation(operationId = "getExchangeById")
+  @Override
+  public ExchangeDto getById(int id) {
+    return toDto(exchangeService.getExchangeById(id));
   }
 
-  private ExchangeDto toDto(Exchange entity) {
-    return modelMapper.map(
-      entity,
-      ExchangeDto.class
-    );
+  public Exchange toEntity(ExchangeDto dto) {
+    return modelMapper.map(dto, Exchange.class);
+  }
+
+  public ExchangeDto toDto(Exchange entity) {
+    return modelMapper.map(entity, ExchangeDto.class);
   }
 }

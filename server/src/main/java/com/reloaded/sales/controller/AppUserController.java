@@ -1,122 +1,70 @@
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.AppUserDto;
+import com.reloaded.sales.dto.filter.AppUserFilter;
 import com.reloaded.sales.model.AppUser;
 import com.reloaded.sales.service.AppUserService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @Tag(name = "appUser", description = "user service")
-@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/user")
-public class AppUserController {
+@RequiredArgsConstructor
+public class AppUserController implements CrudController<AppUserDto, AppUserFilter, AppUser> {
 
   private final AppUserService appUserService;
   private final ModelMapper modelMapper;
 
-  public AppUserController(AppUserService appUserService) {
-    this.appUserService = appUserService;
-    this.modelMapper = new ModelMapper();
-  }
-
-  @PostMapping(
-    value = "/createAppUser",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.CREATED)
-  public AppUserDto createAppUser(@RequestBody AppUserDto user) {
+  @Operation(operationId = "createAppUser")
+  @Override
+  public AppUserDto create(@RequestBody AppUserDto user) {
     return toDto(appUserService.createAppUser(user));
   }
 
-  @PutMapping(
-    value = "/updateAppUser",
-    consumes = "application/json",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public AppUserDto updateAppUser(
-    @RequestBody AppUserDto appUserDto
-  ) {
-    return toDto(appUserService.updateAppUser(appUserDto));
+  @Operation(operationId = "updateAppUser")
+  @Override
+  public AppUserDto update(@PathVariable int id, @RequestBody AppUserDto appUserDto) {
+    AppUser appUser = appUserService.updateAppUser(appUserDto);
+    appUser.setUserId(id);
+    return toDto(appUser);
   }
 
-  @DeleteMapping("/deleteAppUser")
-  public void deleteAppUser(@RequestBody int id) {
+  @Operation(operationId = "deleteAppUser")
+  @Override
+  public void delete(@PathVariable int id) {
     appUserService.deleteAppUser(id);
   }
 
-  @PatchMapping("/changePassword")
-  public void changePassword(@RequestBody String password) {
-    appUserService.changePassword(password);
+  @Operation(operationId = "findAppUser")
+  @Override
+  public Page<AppUserDto> find(@ParameterObject @ModelAttribute AppUserFilter filter) {
+    return appUserService.findAllAppUser(filter).map(this::toDto);
   }
 
-  @GetMapping(
-    value="/findAppUser",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public Page<AppUserDto> findAppUser(
-    @RequestParam Optional<String> username,
-    @RequestParam Optional<String> userRole,
-    @RequestParam Optional<String> fullname,
-    @RequestParam Optional<Integer> page,
-    @RequestParam Optional<Integer> size,
-    @RequestParam Optional<String> sort,
-    @RequestParam Optional<Sort.Direction> direction
-  ) {
-    PageRequest paging = PageRequest.of(
-      page.orElse(0),
-      size.orElse(20),
-      sort.isPresent()
-        ? Sort.by(
-        Sort.by(direction.orElse(Sort.Direction.ASC), sort.get()).getOrderFor(sort.get()),
-        Sort.Order.asc(AppUser.Fields.userId)
-      )
-        : Sort.by(Sort.Order.asc(AppUser.Fields.userId)
-      )
-    );
-
-    return appUserService
-      .findAllAppUserByUsernameUserRoleFullname(
-        username.orElse(null),
-        userRole.orElse(null),
-        fullname.orElse(null),
-        paging
-      ).map(this::toDto);
-  }
-
-  @GetMapping(
-    value = "/{id}",
-    produces = "application/json"
-  )
-  @ResponseStatus(HttpStatus.OK)
-  public AppUserDto getUserById(
-    @RequestParam Integer id
-  ) {
+  @Operation(operationId = "getAppUserById")
+  @Override
+  public AppUserDto getById(@PathVariable int id) {
     return toDto(appUserService.getUserById(id));
   }
 
-  private AppUser toEntity(AppUserDto dto) {
-    return modelMapper.map(
-      dto,
-      AppUser.class
-    );
+  public AppUser toEntity(AppUserDto dto) {
+    return modelMapper.map(dto, AppUser.class);
   }
 
-  private AppUserDto toDto(AppUser entity) {
-    return modelMapper.map(
-      entity,
-      AppUserDto.class
-    );
+  public AppUserDto toDto(AppUser entity) {
+    return modelMapper.map(entity, AppUserDto.class);
+  }
+
+  @Operation(operationId = "changePassword")
+  @PatchMapping("/pwd")
+  public void changePassword(@RequestBody String password) {
+    appUserService.changePassword(password);
   }
 }
 

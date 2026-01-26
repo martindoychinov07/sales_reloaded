@@ -6,74 +6,64 @@ import com.reloaded.sales.model.OrderForm;
 import com.reloaded.sales.model.OrderType;
 import com.reloaded.sales.service.OrderFormService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 
 @Tag(name = "orderForm", description = "orderForm service")
-@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/order")
+@RequiredArgsConstructor
 public class OrderFormController {
+
   private final OrderFormService orderFormService;
   private final ModelMapper modelMapper;
 
-  public OrderFormController(OrderFormService orderFormService) {
-    this.orderFormService = orderFormService;
-    this.modelMapper = new ModelMapper();
-    this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-  }
-
   @PostMapping(
-    value = "/createOrderForm",
+    value = "/",
     consumes = "application/json",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  public OrderFormDto createOrder(
-    @RequestBody OrderFormDto orderFormDto
-  ) {
+  public OrderFormDto createOrder(@RequestBody OrderFormDto orderFormDto) {
     return toDto(orderFormService.createOrder(toEntity(orderFormDto)));
   }
 
   @PutMapping(
-    value = "/updateOrderForm",
+    value = "/{id:\\d+}",
     consumes = "application/json",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public OrderFormDto updateOrder(
-    @RequestBody OrderFormDto orderFormDto
-  ) {
-    return toDto(orderFormService.updateOrder(toEntity(orderFormDto)));
+  public OrderFormDto updateOrder(@PathVariable int id, @RequestBody OrderFormDto orderFormDto) {
+    OrderForm orderForm = toEntity(orderFormDto);
+    orderForm.setOrderId(id);
+    return toDto(orderFormService.updateOrder(orderForm));
   }
 
   @DeleteMapping(
-    value = "/deleteOrderForm",
+    value = "/{id:\\d+}",
     consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public void deleteOrder(
-    @RequestBody Integer id
-  ) {
+  public void deleteOrder(@PathVariable int id) {
     orderFormService.deleteOrder(id);
   }
 
   @GetMapping(
-    value = "/{id}",
+    value = "/{id:\\d+}",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public OrderFormDto getOrderById(
-    @PathVariable int id
-  ) {
+  public OrderFormDto getOrderById(@PathVariable int id) {
     return toDto(orderFormService.getOrderById(id));
   }
 
   @GetMapping(
-    value = "/copy/{id}",
+    value = "/copy/{id:\\d+}",
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
@@ -89,10 +79,9 @@ public class OrderFormController {
     produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  public OrderFormDto getLastOrderByOrderType(
-    @PathVariable Integer orderTypeId
-  ) {
-    return toDto(orderFormService.getLastOrderByOrderType(orderTypeId));
+  public Optional<OrderFormDto> getLastOrderByOrderType(@PathVariable Integer orderTypeId) {
+    Optional<OrderForm> found = orderFormService.getLastOrderByOrderType(orderTypeId);
+    return found.map(orderForm -> Optional.of(toDto(orderForm))).orElse(null);
   }
 
   private OrderForm toEntity(OrderFormDto dto) {
@@ -118,9 +107,6 @@ public class OrderFormController {
   }
 
   private OrderFormDto toDto(OrderForm entity) {
-    return modelMapper.map(
-      entity,
-      OrderFormDto.class
-    );
+    return modelMapper.map(entity, OrderFormDto.class);
   }
 }
