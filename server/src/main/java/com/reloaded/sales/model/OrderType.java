@@ -25,8 +25,11 @@ public class OrderType {
   @Column(name = "a_state")
   private OrderTypeState typeState;
 
-  @Column(name = "a_order")
-  private Integer typeOrder;
+  @Column(name = "a_counter")
+  private Integer typeCounter;
+
+  @Column(name = "a_index")
+  private Integer typeIndex;
 
   @Size(max = 100)
   @Column(name = "a_key", length = 100)

@@ -24,11 +24,11 @@ public class OrderEntry {
   @Column(name = "e_id", nullable = false)
   private Integer entryId;
 
-  @Column(name = "e_version")
-  private Integer entryVersion;
+//  @Column(name = "e_version")
+//  private Integer entryVersion;
 
   @ManyToOne()
-  @JoinColumn(name = "e_order_id")
+  @JoinColumn(name = "e_order_id", nullable = false)
   private OrderForm entryOrder;
 
   @Column(name = "e_row")
@@ -58,10 +58,10 @@ public class OrderEntry {
   private String entryMeasure;
 
   @Column(name = "e_available")
-  private Integer entryAvailable;
+  private BigDecimal entryAvailable;
 
   @Column(name = "e_quantity")
-  private Integer entryQuantity;
+  private BigDecimal entryQuantity;
 
   @Column(name = "e_price", precision = 16, scale = 4)
   private BigDecimal entryPrice;

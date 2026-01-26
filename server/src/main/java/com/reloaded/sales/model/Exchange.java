@@ -41,4 +41,7 @@ public class Exchange {
   @Column(name = "x_rate", nullable = false, precision = 16, scale = 4)
   private BigDecimal exchangeRate;
 
+  public static String getFxKey(String base, String target) {
+    return base + "/" + target;
+  }
 }

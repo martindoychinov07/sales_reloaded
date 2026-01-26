@@ -22,9 +22,9 @@ public class Product {
   @Column(name = "p_id", nullable = false)
   private Integer productId;
 
-  @Version
-  @Column(name = "p_version")
-  private Integer productVersion;
+//  @Version
+//  @Column(name = "p_version")
+//  private Integer productVersion;
 
   @Column(name = "p_ref_id")
   private Integer productRefId;
@@ -52,7 +52,7 @@ public class Product {
   private String productMeasure;
 
   @Column(name = "p_available")
-  private Integer productAvailable;
+  private BigDecimal productAvailable;
 
   @Size(max = 50)
   @Column(name = "p_code", length = 50)

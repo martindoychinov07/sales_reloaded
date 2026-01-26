@@ -7,13 +7,13 @@ import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
 @FieldNameConstants
 @Entity
 @Table(name = "order_form")
@@ -24,8 +24,8 @@ public class OrderForm {
   @Column(name = "o_id", nullable = false)
   private Integer orderId;
 
-  @Column(name = "o_version")
-  private Integer orderVersion;
+//  @Column(name = "o_version")
+//  private Integer orderVersion;
 
   @Column(name = "o_ref_id")
   private Integer orderRefId;
@@ -38,6 +38,9 @@ public class OrderForm {
 
   @Column(name = "o_num")
   private Long orderNum;
+
+  @Column(name = "o_counter")
+  private Integer orderCounter;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "o_type_id")
@@ -132,8 +135,12 @@ public class OrderForm {
   @Column(name = "o_discount", precision = 16, scale = 4)
   private BigDecimal orderDiscount;
 
-  @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "e_order_id")
+  @OneToMany(
+    mappedBy = "entryOrder",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true,
+    fetch = FetchType.EAGER
+  )
   @OrderBy("entryRow")
-  private List<OrderEntry> orderEntries;
+  private List<OrderEntry> orderEntries = new ArrayList<>();
 }

@@ -20,9 +20,9 @@ public class Contact {
   @Column(name = "c_id", nullable = false)
   private Integer contactId;
 
-  @Version
-  @Column(name = "c_version")
-  private Integer contactVersion;
+//  @Version
+//  @Column(name = "c_version")
+//  private Integer contactVersion;
 
   @Column(name = "c_ref_id")
   private Integer contactRefId;
