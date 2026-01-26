@@ -1,4 +1,4 @@
-package com.reloaded.sales;
+package com.reloaded.sales.config;
 
 import com.reloaded.sales.service.AppUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -51,12 +50,13 @@ public class SecurityConfig {
           "/login",
           "/logout",
           "/index.html",
+          "/static/**",
           "/*.svg",
           "/assets/**",
           "/app/**",
           "/swagger-ui/**",
           "/v3/api-docs/**",
-          "/api/translation/findTranslation"
+          "/api/translation/find"
         ).permitAll()
         .anyRequest().authenticated()
       )

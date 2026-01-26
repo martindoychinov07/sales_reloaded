@@ -1,4 +1,4 @@
-package com.reloaded.sales;
+package com.reloaded.sales.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
