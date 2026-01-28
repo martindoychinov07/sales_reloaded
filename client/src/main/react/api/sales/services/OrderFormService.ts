@@ -11,16 +11,61 @@ export class OrderFormService {
    * @returns OrderFormDto OK
    * @throws ApiError
    */
+  public static getOrderById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<OrderFormDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/order/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns OrderFormDto OK
+   * @throws ApiError
+   */
   public static updateOrder({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: OrderFormDto,
   }): CancelablePromise<OrderFormDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/order/updateOrderForm',
+      url: '/api/order/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteOrder({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/order/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -37,29 +82,9 @@ export class OrderFormService {
   }): CancelablePromise<OrderFormDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/order/createOrderForm',
+      url: '/api/order/',
       body: requestBody,
       mediaType: 'application/json',
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns OrderFormDto OK
-   * @throws ApiError
-   */
-  public static getOrderById({
-    id,
-  }: {
-    id: number,
-  }): CancelablePromise<OrderFormDto> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/order/{id}',
-      path: {
-        'id': id,
-      },
       errors: {
         409: `Conflict`,
       },
@@ -105,25 +130,6 @@ export class OrderFormService {
       query: {
         'content': content,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteOrder({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/order/deleteOrderForm',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },

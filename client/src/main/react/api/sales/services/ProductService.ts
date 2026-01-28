@@ -3,7 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { PagedModelProductDto } from '../models/PagedModelProductDto';
-import type { Product } from '../models/Product';
 import type { ProductDto } from '../models/ProductDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -13,16 +12,61 @@ export class ProductService {
    * @returns ProductDto OK
    * @throws ApiError
    */
+  public static getProductById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<ProductDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/product/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns ProductDto OK
+   * @throws ApiError
+   */
   public static updateProduct({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: ProductDto,
   }): CancelablePromise<ProductDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/product/updateProduct',
+      url: '/api/product/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteProduct({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/product/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -39,29 +83,9 @@ export class ProductService {
   }): CancelablePromise<ProductDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/product/createProduct',
+      url: '/api/product/',
       body: requestBody,
       mediaType: 'application/json',
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns Product OK
-   * @throws ApiError
-   */
-  public static getProductById({
-    id,
-  }: {
-    id: number,
-  }): CancelablePromise<Product> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/product/{id}',
-      path: {
-        'id': id,
-      },
       errors: {
         409: `Conflict`,
       },
@@ -72,17 +96,21 @@ export class ProductService {
    * @throws ApiError
    */
   public static findProduct({
-    productCode,
+    productText,
     productName,
     productNote,
+    fromAvailable,
+    toAvailable,
     page,
     size,
     sort,
     direction,
   }: {
-    productCode?: string,
+    productText?: string,
     productName?: string,
     productNote?: string,
+    fromAvailable?: number,
+    toAvailable?: number,
     page?: number,
     size?: number,
     sort?: string,
@@ -90,35 +118,18 @@ export class ProductService {
   }): CancelablePromise<PagedModelProductDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/product/findProduct',
+      url: '/api/product/find',
       query: {
-        'productCode': productCode,
+        'productText': productText,
         'productName': productName,
         'productNote': productNote,
+        'fromAvailable': fromAvailable,
+        'toAvailable': toAvailable,
         'page': page,
         'size': size,
         'sort': sort,
         'direction': direction,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteProduct({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/product/deleteProduct',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },

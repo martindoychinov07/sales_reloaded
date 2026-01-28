@@ -12,16 +12,61 @@ export class ExchangeService {
    * @returns ExchangeDto OK
    * @throws ApiError
    */
+  public static getExchangeById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<ExchangeDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/exchange/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns ExchangeDto OK
+   * @throws ApiError
+   */
   public static updateExchange({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: ExchangeDto,
   }): CancelablePromise<ExchangeDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/exchange/updateExchange',
+      url: '/api/exchange/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteExchange({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/exchange/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -38,7 +83,7 @@ export class ExchangeService {
   }): CancelablePromise<ExchangeDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/exchange/createExchange',
+      url: '/api/exchange/',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -67,7 +112,7 @@ export class ExchangeService {
   }): CancelablePromise<PagedModelExchangeDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/exchange/findExchange',
+      url: '/api/exchange/find',
       query: {
         'exchangeBase': exchangeBase,
         'exchangeTarget': exchangeTarget,
@@ -76,25 +121,6 @@ export class ExchangeService {
         'sort': sort,
         'direction': direction,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteExchange({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/exchange/deleteExchange',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },

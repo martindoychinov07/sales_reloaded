@@ -12,44 +12,6 @@ export class ContactService {
    * @returns ContactDto OK
    * @throws ApiError
    */
-  public static updateContact({
-    requestBody,
-  }: {
-    requestBody: ContactDto,
-  }): CancelablePromise<ContactDto> {
-    return __request(OpenAPI, {
-      method: 'PUT',
-      url: '/api/contact/updateContact',
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns ContactDto Created
-   * @throws ApiError
-   */
-  public static createContact({
-    requestBody,
-  }: {
-    requestBody: ContactDto,
-  }): CancelablePromise<ContactDto> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/contact/createContact',
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns ContactDto OK
-   * @throws ApiError
-   */
   public static getContactById({
     id,
   }: {
@@ -67,61 +29,24 @@ export class ContactService {
     });
   }
   /**
-   * @returns string OK
+   * @returns ContactDto OK
    * @throws ApiError
    */
-  public static findLocation({
-    contactCode1,
+  public static updateContact({
+    id,
+    requestBody,
   }: {
-    contactCode1: string,
-  }): CancelablePromise<Array<string>> {
+    id: number,
+    requestBody: ContactDto,
+  }): CancelablePromise<ContactDto> {
     return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/contact/findLocation',
-      query: {
-        'contactCode1': contactCode1,
+      method: 'PUT',
+      url: '/api/contact/{id}',
+      path: {
+        'id': id,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns PagedModelContactDto OK
-   * @throws ApiError
-   */
-  public static findContact({
-    contactName,
-    contactLocation,
-    contactCode1,
-    contactCode2,
-    page,
-    size,
-    sort,
-    direction,
-  }: {
-    contactName?: string,
-    contactLocation?: string,
-    contactCode1?: string,
-    contactCode2?: string,
-    page?: number,
-    size?: number,
-    sort?: string,
-    direction?: 'ASC' | 'DESC',
-  }): CancelablePromise<PagedModelContactDto> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/contact/findContact',
-      query: {
-        'contactName': contactName,
-        'contactLocation': contactLocation,
-        'contactCode1': contactCode1,
-        'contactCode2': contactCode2,
-        'page': page,
-        'size': size,
-        'sort': sort,
-        'direction': direction,
-      },
+      body: requestBody,
+      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },
@@ -132,15 +57,73 @@ export class ContactService {
    * @throws ApiError
    */
   public static deleteContact({
-    requestBody,
+    id,
   }: {
-    requestBody: number,
+    id: number,
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/contact/deleteContact',
+      url: '/api/contact/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns ContactDto Created
+   * @throws ApiError
+   */
+  public static createContact({
+    requestBody,
+  }: {
+    requestBody: ContactDto,
+  }): CancelablePromise<ContactDto> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/contact/',
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns PagedModelContactDto OK
+   * @throws ApiError
+   */
+  public static findContact({
+    contactCode,
+    contactLocation,
+    contactText,
+    page,
+    size,
+    sort,
+    direction,
+  }: {
+    contactCode?: string,
+    contactLocation?: string,
+    contactText?: string,
+    page?: number,
+    size?: number,
+    sort?: string,
+    direction?: 'ASC' | 'DESC',
+  }): CancelablePromise<PagedModelContactDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/contact/find',
+      query: {
+        'contactCode': contactCode,
+        'contactLocation': contactLocation,
+        'contactText': contactText,
+        'page': page,
+        'size': size,
+        'sort': sort,
+        'direction': direction,
+      },
       errors: {
         409: `Conflict`,
       },

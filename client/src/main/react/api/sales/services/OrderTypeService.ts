@@ -12,16 +12,61 @@ export class OrderTypeService {
    * @returns OrderTypeDto OK
    * @throws ApiError
    */
+  public static getOrderTypeById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<OrderTypeDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/orderType/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns OrderTypeDto OK
+   * @throws ApiError
+   */
   public static updateOrderType({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: OrderTypeDto,
   }): CancelablePromise<OrderTypeDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/orderType/updateOrderType',
+      url: '/api/orderType/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteOrderType({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/orderType/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -38,7 +83,7 @@ export class OrderTypeService {
   }): CancelablePromise<OrderTypeDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/orderType/createOrderType',
+      url: '/api/orderType/',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -51,11 +96,17 @@ export class OrderTypeService {
    * @throws ApiError
    */
   public static findOrderType({
+    typeCounter,
+    typeEval,
+    typeNote,
     page,
     size,
     sort,
     direction,
   }: {
+    typeCounter?: number,
+    typeEval?: 'none' | 'init' | 'push' | 'pull',
+    typeNote?: string,
     page?: number,
     size?: number,
     sort?: string,
@@ -63,32 +114,16 @@ export class OrderTypeService {
   }): CancelablePromise<PagedModelOrderTypeDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/orderType/findOrderType',
+      url: '/api/orderType/find',
       query: {
+        'typeCounter': typeCounter,
+        'typeEval': typeEval,
+        'typeNote': typeNote,
         'page': page,
         'size': size,
         'sort': sort,
         'direction': direction,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteOrderType({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/orderType/deleteOrderType',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },

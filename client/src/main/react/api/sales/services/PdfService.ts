@@ -13,21 +13,22 @@ export class PdfService {
   public static getOrderPdf({
     orderId,
     lang,
-    subtitle,
+    sign,
+    name,
   }: {
     orderId: number,
     lang: string,
-    subtitle: string,
+    sign: string,
+    name: string,
   }): CancelablePromise<string> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/pdf/{orderId}',
+      url: '/api/pdf/{orderId}/{lang}/{sign}/{name}',
       path: {
         'orderId': orderId,
-      },
-      query: {
         'lang': lang,
-        'subtitle': subtitle,
+        'sign': sign,
+        'name': name,
       },
       errors: {
         409: `Conflict`,

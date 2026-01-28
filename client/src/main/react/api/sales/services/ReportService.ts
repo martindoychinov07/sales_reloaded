@@ -2,39 +2,57 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { PagedModelOrderFormView } from '../models/PagedModelOrderFormView';
+import type { PagedModelReportDto } from '../models/PagedModelReportDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ReportService {
   /**
-   * @returns PagedModelOrderFormView OK
+   * @returns PagedModelReportDto OK
    * @throws ApiError
    */
   public static findReport({
-    startOrderDate,
-    endOrderDate,
+    fromDate,
+    toDate,
+    orderNum,
     customerName,
+    customerLocation,
+    productName,
+    orderTypeId,
+    orderPayment,
+    orderState,
     page,
     size,
     sort,
     direction,
   }: {
-    startOrderDate?: string,
-    endOrderDate?: string,
+    fromDate?: string,
+    toDate?: string,
+    orderNum?: number,
     customerName?: string,
+    customerLocation?: string,
+    productName?: string,
+    orderTypeId?: number,
+    orderPayment?: string,
+    orderState?: 'canceled' | 'archived' | 'draft' | 'scheduled' | 'in_progress' | 'for_review' | 'reviewed' | 'for_approve' | 'approved' | 'finished',
     page?: number,
     size?: number,
     sort?: string,
     direction?: 'ASC' | 'DESC',
-  }): CancelablePromise<PagedModelOrderFormView> {
+  }): CancelablePromise<PagedModelReportDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/report/findReport',
+      url: '/api/report/',
       query: {
-        'startOrderDate': startOrderDate,
-        'endOrderDate': endOrderDate,
+        'fromDate': fromDate,
+        'toDate': toDate,
+        'orderNum': orderNum,
         'customerName': customerName,
+        'customerLocation': customerLocation,
+        'productName': productName,
+        'orderTypeId': orderTypeId,
+        'orderPayment': orderPayment,
+        'orderState': orderState,
         'page': page,
         'size': size,
         'sort': sort,

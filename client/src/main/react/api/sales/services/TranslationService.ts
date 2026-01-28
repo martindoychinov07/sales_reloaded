@@ -12,16 +12,61 @@ export class TranslationService {
    * @returns TranslationDto OK
    * @throws ApiError
    */
+  public static getTranslationById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<TranslationDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/translation/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns TranslationDto OK
+   * @throws ApiError
+   */
   public static updateTranslation({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: TranslationDto,
   }): CancelablePromise<TranslationDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/translation/updateTranslation',
+      url: '/api/translation/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteTranslation({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/translation/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -38,7 +83,7 @@ export class TranslationService {
   }): CancelablePromise<TranslationDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/translation/createTranslation',
+      url: '/api/translation/',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -69,7 +114,7 @@ export class TranslationService {
   }): CancelablePromise<PagedModelTranslationDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/translation/findTranslation',
+      url: '/api/translation/find',
       query: {
         'translationKey': translationKey,
         'en': en,
@@ -79,25 +124,6 @@ export class TranslationService {
         'sort': sort,
         'direction': direction,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteTranslation({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/translation/deleteTranslation',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },

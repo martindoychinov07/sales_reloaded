@@ -12,16 +12,61 @@ export class AppUserService {
    * @returns AppUserDto OK
    * @throws ApiError
    */
+  public static getAppUserById({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<AppUserDto> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/user/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns AppUserDto OK
+   * @throws ApiError
+   */
   public static updateAppUser({
+    id,
     requestBody,
   }: {
+    id: number,
     requestBody: AppUserDto,
   }): CancelablePromise<AppUserDto> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/user/updateAppUser',
+      url: '/api/user/{id}',
+      path: {
+        'id': id,
+      },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        409: `Conflict`,
+      },
+    });
+  }
+  /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static deleteAppUser({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/user/{id}',
+      path: {
+        'id': id,
+      },
       errors: {
         409: `Conflict`,
       },
@@ -38,7 +83,7 @@ export class AppUserService {
   }): CancelablePromise<AppUserDto> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/user/createAppUser',
+      url: '/api/user/',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -57,29 +102,9 @@ export class AppUserService {
   }): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'PATCH',
-      url: '/api/user/changePassword',
+      url: '/api/user/pwd',
       body: requestBody,
       mediaType: 'application/json',
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns AppUserDto OK
-   * @throws ApiError
-   */
-  public static getUserById({
-    id,
-  }: {
-    id: number,
-  }): CancelablePromise<AppUserDto> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/user/{id}',
-      query: {
-        'id': id,
-      },
       errors: {
         409: `Conflict`,
       },
@@ -108,7 +133,7 @@ export class AppUserService {
   }): CancelablePromise<PagedModelAppUserDto> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/user/findAppUser',
+      url: '/api/user/find',
       query: {
         'username': username,
         'userRole': userRole,
@@ -118,25 +143,6 @@ export class AppUserService {
         'sort': sort,
         'direction': direction,
       },
-      errors: {
-        409: `Conflict`,
-      },
-    });
-  }
-  /**
-   * @returns any OK
-   * @throws ApiError
-   */
-  public static deleteAppUser({
-    requestBody,
-  }: {
-    requestBody: number,
-  }): CancelablePromise<any> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/user/deleteAppUser',
-      body: requestBody,
-      mediaType: 'application/json',
       errors: {
         409: `Conflict`,
       },
