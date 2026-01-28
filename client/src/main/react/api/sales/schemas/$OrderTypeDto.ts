@@ -8,10 +8,14 @@ export const $OrderTypeDto = {
       type: 'number',
       format: 'int32',
     },
-    typeOrder: {
+    typeCounter: {
       type: 'number',
       format: 'int32',
       maximum: 100,
+    },
+    typeIndex: {
+      type: 'number',
+      format: 'int32',
     },
     typeKey: {
       type: 'string',

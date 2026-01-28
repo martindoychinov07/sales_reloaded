@@ -38,7 +38,6 @@ export const $ProductDto = {
     },
     productAvailable: {
       type: 'number',
-      format: 'int32',
     },
     productCode: {
       type: 'string',

@@ -27,6 +27,10 @@ export const $OrderFormDto = {
       type: 'number',
       format: 'int64',
     },
+    orderCounter: {
+      type: 'number',
+      format: 'int32',
+    },
     orderType: {
       type: 'OrderTypeDto',
     },

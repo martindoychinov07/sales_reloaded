@@ -2,12 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export const $PagedModelOrderFormView = {
+export const $PagedModelReportDto = {
   properties: {
     content: {
       type: 'array',
       contains: {
-        type: 'OrderFormView',
+        type: 'ReportDto',
       },
     },
     page: {
