@@ -1,49 +1,70 @@
-import {type ReactNode, useRef} from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 export type ModalReject = "code" | "esc" | "out" | "x";
-export interface ModalResolve<R> {
+export interface ModalResolve<R, P> {
+  args?: P;
   action?: string;
   result?: R;
 }
-export type ModalCloseEvent<R> = (modal: { resolve: ModalResolve<R>, reject?: ModalReject }) => void;
-export type ModalComponentProps<R, P> = {close: ModalCloseEvent<R>, args?: P};
+export type ModalCloseEvent<R, P> = (modal: { resolve: ModalResolve<R, P>, reject?: ModalReject }) => void;
+export type ModalComponentProps<R, P> = {open?: boolean, close?: ModalCloseEvent<R, P>, args?: P};
 export type ModalComponent<R, P> = (props: ModalComponentProps<R, P>) => ReactNode;
 type ModalElement<R, P> = ReactNode | ModalComponent<R, P>;
 
 export interface ModalProps<R, P> {
-  open?: true | undefined;
+  open?: boolean | undefined;
   args?: P,
   header?: ModalElement<R, P>,
   children: ModalElement<R, P>,
   footer?: ModalElement<R, P>,
-  onClose?: ModalCloseEvent<R>,
+  onClose?: ModalCloseEvent<R, P>,
   noWrapper?: boolean,
   variant?: "full",
 }
 
 export function Modal<R, P>(props: ModalProps<R, P>) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-
   const cancel = useRef<ModalReject>(undefined);
+  const args = useRef<P>(undefined);
   const result = useRef<R>(undefined);
 
   cancel.current = undefined;
   result.current = undefined;
 
-  const handleClose: ModalCloseEvent<R> = ({ resolve, reject }) => {
-    cancel.current = reject;
+  const handleClose: ModalCloseEvent<R, P> = ({ resolve, reject }) => {
+    args.current = resolve?.args;
     result.current = resolve?.result;
+    cancel.current = reject;
     dialogRef.current?.close(reject ?? resolve?.action ?? dialogRef.current?.returnValue);
   }
 
-  const body = typeof props.children === "function" ? props.children({ close: handleClose, args: props.args }) : props.children;
+  useEffect(() => {
+    if (props.open) {
+      dialogRef.current?.showModal();
+    }
+  }, [props.open]);
+
+  const body = typeof props.children === "function"
+    ? props.children({ open: props.open, close: handleClose, args: props.args })
+    : props.children;
+
   return <dialog
     key={"dialog"}
     ref={dialogRef}
-    open={props.open}
     className="modal"
-    onKeyDown={(e) => { if (e.key === 'Escape') handleClose({ resolve: {}, reject: "esc" }) } }
-    onClose={() => props.onClose?.({ resolve: { action: cancel.current ?? dialogRef.current?.returnValue, result: result.current }, reject: cancel.current })}
+    onCancel={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleClose({ resolve: {}, reject: "esc" });
+    }}
+    onClose={() => {
+      if (cancel.current || result.current) {
+        props.onClose?.({
+          resolve: { args: args.current, action: cancel.current ?? dialogRef.current?.returnValue, result: result.current },
+          reject: cancel.current
+        });
+      }
+    }}
   >
     <div key={"dialog_container"}
          className={`modal-box w-fit resize max-h-[calc(100%-1em)] max-w-[calc(100%-1em)] flex-1 flex flex-col overflow-hidden ${props.variant === "full" ? "min-h-[calc(100%-1em)] min-w-[calc(100%-1em)]" : ""}`}

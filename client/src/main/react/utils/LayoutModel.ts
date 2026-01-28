@@ -32,9 +32,9 @@ export interface LayoutModelItem<T> {
   span?: number;
   size?: string;
   type?: MetaLayoutItemType;
-  pattern?: string;
-  mode?: "input" | "disabled" | "hidden";
-  variant?: "bordered" | "ghost" | "label" | "compact";
+  format?: string;
+  mode?: "disabled" | "hidden" | undefined;
+  variant?: "bordered" | "ghost" | "label" | "compact" | "title";
   source?: Path<T> | string;
   enable?: string[];
   disable?: string[];
@@ -47,3 +47,39 @@ export interface MetaLayoutGroupItem<T> {
 }
 
 export function layoutDivider<T>(span: number): LayoutModelItem<T> { return ({span: span, label: ""}) }
+
+export function findEnabled<T>(
+  items: LayoutModelItem<T>[] | undefined,
+  currentName: string,
+  step: number
+): LayoutModelItem<T> | undefined {
+  if (!items) return undefined;
+
+  const index = items.findIndex(
+    i => i.name === currentName
+  );
+
+  if (index === -1) return undefined;
+
+  for (
+    let i = index + step;
+    i >= 0 && i < items.length;
+    i += step
+  ) {
+    if (items[i].mode === undefined && items[i].type !== "hidden") {
+      return items[i];
+    }
+  }
+
+  return undefined;
+}
+
+export function splitPath(path: string, n: number): string[] {
+  const parts = path.split(".");
+  const firstSegments = parts.slice(0, n);
+  if (parts.length > n) {
+    const remaining =  parts.slice(n).join(".");
+    return [...firstSegments, remaining];
+  }
+  return firstSegments;
+}

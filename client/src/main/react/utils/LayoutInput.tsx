@@ -1,11 +1,10 @@
 import {Input, type InputFormatter, type InputOptions, type InputProps} from "./Input.tsx";
 import type {LayoutModelItem} from "./LayoutModel.ts";
-import type {Control, Path, SubmitHandler} from "react-hook-form";
+import type { Path, UseFormReturn } from "react-hook-form";
 import {useI18n} from "../context/i18n/useI18n.tsx";
 
 interface LayoutInputProps<T extends object> {
-  control: Control<T>;
-  onSubmit: SubmitHandler<T>;
+  form: UseFormReturn<any, any>,
   variant?: InputProps<T>["variant"];
   item: LayoutModelItem<T>;
   name?: Path<T> | string;
@@ -35,16 +34,16 @@ export function LayoutInput<T extends object>(props: LayoutInputProps<T>) {
       {
         props.item.name
           ? <Input<T>
-            control={props.control}
-            onSubmit={props.onSubmit}
+            form={props.form}
             key={name}
             name={name as Path<T>}
             type={props.item.mode === "hidden" ? "hidden" : props.item.type}
             prefix={t(props.item.label)}
             disabled={props.disabled ?? props.item.mode === "disabled"}
             autoComplete="off"
+            rules={props.item.rules}
             formatter={props.formatter}
-            pattern={props.item.type === "text" ? undefined : t(props.item.pattern)}
+            format={props.item.format}
             options={props.options}
             action={props.item.source}
             variant={props.variant}

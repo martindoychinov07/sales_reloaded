@@ -1,16 +1,16 @@
-import {defaultPatternDatetime, formatDate, parseDate} from "./DateUtils.ts";
-import {formatNumber} from "./NumberUtils.ts";
+import {defaultFormatDatetime, formatDate, parseDate} from "./DateUtils.ts";
+import { formatNumber, normalizeDecimalInput } from "./NumberUtils.ts";
 import type {ClassNameRule, InputFormatter} from "./Input.tsx";
 import {useI18n} from "../context/i18n/useI18n.tsx";
 
 export function useFormat() {
   const { t } = useI18n();
-  const patternDatetime = t("~pattern.datetime") ?? defaultPatternDatetime;
-  const datetimeFormatter: InputFormatter = (value, pattern) => {
-    const parsed = parseDate(value, !pattern || patternDatetime.includes(pattern) ? patternDatetime : pattern)
+  const patternDatetime = t("~format.datetime") ?? defaultFormatDatetime;
+  const datetimeFormatter: InputFormatter = (value, format) => {
+    const parsed = parseDate(value, !format || patternDatetime.includes(format) ? patternDatetime : format)
       ?? parseDate(value);
     if (parsed) {
-      const formatted = formatDate(parsed, pattern);
+      const formatted = formatDate(parsed, format);
       if (value !== formatted) return formatted;
     }
     return undefined;
@@ -18,17 +18,20 @@ export function useFormat() {
 
   const inputFormatters: { [key: string]: InputFormatter } =
   {
-    "text": (value, pattern) => pattern !== undefined ? t( `${pattern}${value}`) : value,
+    "text": (value, format) => format !== undefined ? t( `${format}${value}`) : value,
 
     "datetime": datetimeFormatter,
 
-    "number": (value, pattern) => {
-      if (!pattern) {
-        pattern = "0.####";
+    "number": (value, format, normalize) => {
+      if (!format) {
+        format = "0.####";
+      }
+      if (normalize) {
+        value = normalizeDecimalInput(value);
       }
       const parsed = Number(value);
       if (isFinite(parsed)) {
-        const formatted = formatNumber(parsed, pattern);
+        const formatted = formatNumber(parsed, format);
         if (value !== formatted) return formatted;
       }
       return undefined;

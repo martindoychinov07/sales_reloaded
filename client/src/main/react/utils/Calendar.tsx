@@ -10,7 +10,15 @@ interface CalendarProps {
 export function Calendar(props: CalendarProps) {
   const { t } = useI18n();
   const [date, setDate] = useState(props.date ?? new Date());
-  const dates = generateCalendarDates(date.getFullYear(), date.getMonth() + 1, 1);
+  const dates = generateCalendarDates(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    1,
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds(),
+    date.getMilliseconds()
+  );
   const monthDiffChange = (monthDiff: number) => setDate(new Date(date.setMonth(date.getMonth() + monthDiff)));
   const monthChange = (month: number) => setDate(new Date(date.setMonth(month)));
   const yearChange = (year: number) => setDate(new Date(date.setFullYear(year)));

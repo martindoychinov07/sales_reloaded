@@ -22,11 +22,11 @@ export function useCalendar() {
         const action = submitter?.value;
         const date = new Date(action);
         if (date) {
-          date.setMinutes( + new Date().getTimezoneOffset());
-          props.close({resolve: {action: "select", result: {date: date}}})
+          // date.setMinutes( + new Date().getTimezoneOffset());
+          props.close?.({ resolve: { action: "select", result: { date: date } } } );
         }
         else {
-          props.close({resolve: {action: "select", result: {date: undefined}}, reject: "code"})
+          props.close?.({ resolve: {action: "select", result: { date: undefined } }, reject: "code" })
         }
       }}>
       <div className={"grid grid-cols-2 gap-1 p-1 min-w-[20em]"}>
@@ -40,10 +40,10 @@ export function useCalendar() {
   const modalProps: ModalProps<CalendarResult, CalendarArgs> = //useMemo( () => (
     {
       header: (props) => {
-        return props.args?.title ?? t("~calendar.title")
+        return <>{props.args?.title ?? t("~calendar.title")}</>
       },
       children: (props) => {
-        return <Content close={props.close} args={props.args} />
+        return <Content close={props.close} {...props} />
       },
     }
   //), []);

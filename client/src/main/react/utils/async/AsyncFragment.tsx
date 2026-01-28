@@ -34,8 +34,6 @@ export function AsyncFragment<T, P>(props: {
   if (props.onFallback) {
     return props.onFallback(props.asyncState.args, props.children);
   }
-  return <>
-    {props.children}
-    <Loading />
-  </>
+
+  return <>{props.children}<Loading /></>;
 }

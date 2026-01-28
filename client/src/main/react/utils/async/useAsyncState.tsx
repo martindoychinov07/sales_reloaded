@@ -1,4 +1,4 @@
-import {type Dispatch, type SetStateAction, useEffect, useState} from "react";
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from "react";
 
 export interface AsyncState<T, P> {
   reload: Dispatch<SetStateAction<P | undefined>>;
@@ -10,7 +10,7 @@ export interface AsyncState<T, P> {
   error: Error | undefined
 }
 
-export function useAsyncState<T, P>(fn: (args: P) => Promise<T>, initArgs?: P): AsyncState<T, P> {
+export function useAsyncState<T, P>(fn: (args: P) => Promise<T>, initArgs?: P | (() => P)): AsyncState<T, P> {
   const [args, reload] = useState<P | undefined>(initArgs);
   const [started, setStarted] = useState<number | undefined>();
   const [finished, setFinished] = useState<number | undefined>( initArgs ? undefined : new Date().getTime());
@@ -21,7 +21,7 @@ export function useAsyncState<T, P>(fn: (args: P) => Promise<T>, initArgs?: P): 
     if (args) {
       setStarted(new Date().getTime());
       setFinished(undefined);
-      setError(undefined)
+      setError(undefined);
       fn(args).then(
         res => {
           if (cancel) return;
@@ -41,5 +41,11 @@ export function useAsyncState<T, P>(fn: (args: P) => Promise<T>, initArgs?: P): 
       cancel = true;
     }
   }, [fn, args])
-  return { reload, update, args, started, finished, result, error };
+  // console.log({reload, update, args, started, finished, result, error})
+  return useMemo(
+    () => {
+      return { reload, update, args, started, finished, result, error };
+    },
+    [finished, args, result]
+  );
 }

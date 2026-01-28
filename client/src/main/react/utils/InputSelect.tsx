@@ -1,66 +1,78 @@
-import {Controller, type UseControllerProps} from "react-hook-form";
-import type {ClassNameRule, InputProps} from "./Input.tsx";
-import {toClassName} from "./useFormat.tsx";
-import {useI18n} from "../context/i18n/useI18n.tsx";
-import type { HTMLAttributes } from "react";
+import { useEffect, useState, type HTMLAttributes } from "react";
+import { get } from "react-hook-form";
+import type { ClassNameRule, InputOption, InputProps } from "./Input.tsx";
+import { useI18n } from "../context/i18n/useI18n.tsx";
+import { toClassName } from "./useFormat.tsx";
 
-export function InputSelect<T extends object>(props: UseControllerProps<T> & InputProps<T>) {
+export function InputSelect<T extends object>(props: InputProps<T>) {
   const { t } = useI18n();
+  const [options, setOptions] = useState<InputOption[]>();
+
+  const { register } = props.form;
+
   let prefix = props.prefix;
-  if (props.variant !== "label") {
+  if (props.variant === "ghost") {
     prefix = undefined;
   }
 
+  useEffect(() => {
+    async function load() {
+      try {
+        setOptions(await props.options?.(props.entry));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    load();
+  }, [props.options, props.entry]);
+
+  const error = get(props.form.formState.errors, props.name);
+  const isInvalid = !!error;
+
+  const cn: ClassNameRule[] = [
+    { addIf: true, add: "w-full" },
+    { addIf: true, add: "select select-sm" },
+    { addIf: props.variant === "label", add: "" },
+    { addIf: props.variant === "title", add: "select-title" },
+    { addIf: props.variant === "ghost", add: "select-ghost" },
+    { addIf: isInvalid, add: "field-state-invalid" },
+  ];
+
+  let dataTooltip: HTMLAttributes<unknown> = {};
+  if (isInvalid) {
+    const message =
+      error?.type === "required"
+        ? "~validation.required"
+        : String(error?.message);
+
+    dataTooltip = {
+      "title": t(message)
+      // "data-tooltip-id": "tooltip",
+      // "data-tooltip-content": t(message),
+      // "data-tooltip-place": "bottom-start",
+    };
+  }
+
   return (
-    <Controller
-      control={props.control}
-      name={props.name}
-      rules={props.rules}
-      render={({field, fieldState}) => {
-        const cn: ClassNameRule[] = [
-          { addIf: true, add: "w-full" },
-          { addIf: true, add: "select select-sm" },
-          { addIf: props.variant === "ghost", add: "select-ghost" },
-          { addIf: fieldState.isTouched, add: "field-state-touched" },
-          { addIf: fieldState.isDirty, add: "field-state-dirty" },
-          { addIf: fieldState.invalid, add: "field-state-invalid" },
-        ];
-
-        let dataTooltip: HTMLAttributes<unknown> = {};
-        if (fieldState.invalid) {
-          let message: string;
-          switch (fieldState.error?.type) {
-            case "required":
-              message = "~validation.required"
-              break;
-            default:
-              message = fieldState.error?.message ?? "~validation.unknown";
-          }
-          dataTooltip = {
-            "data-tooltip-id": "tooltip",
-            "data-tooltip-content": t(message),
-            "data-tooltip-place": "bottom-start"
-          }
-        }
-
-        return (
-          <label key="label" className={toClassName(cn)}>
-            {prefix && <span key="prefix" className="label" {...dataTooltip}>{prefix}</span>}
-            <select
-              key="input"
-              {...field}
-              value={field.value ?? ""}
-              disabled={props.disabled}
-              className={"field-input"}
-              autoComplete={props.autoComplete}>
-              {
-                props.options?.(props.entry)?.map((opt, index) =>
-                  <option key={opt.value ?? index} value={opt.value} disabled={opt.disabled}>{t(opt.label)}</option>)
-              }
-            </select>
-          </label>
-        )
-      }}
-    />
+    <label className={toClassName(cn)} {...dataTooltip}>
+      {prefix && <span className="label">{prefix}</span>}
+      <select
+        key={`${props.name}_${options?.length}`}
+        {...register(props.name, props.rules)}
+        disabled={props.disabled}
+        className="field-input"
+        autoComplete={props.autoComplete}
+      >
+        {options?.map((opt, index) => (
+          <option
+            key={opt.value ?? index}
+            value={opt.value}
+            disabled={opt.disabled}
+          >
+            {t(opt.label)}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

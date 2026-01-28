@@ -1,10 +1,11 @@
 import {useI18n} from "../../context/i18n/useI18n.tsx";
 import type {ModalComponent, ModalProps} from "./Modal.tsx";
 import useModal from "./useModal.tsx";
+import type { ReactNode } from "react";
 
 interface ConfirmArgs {
-  title?: string | null;
-  content?: string | null;
+  title?: ReactNode;
+  content?: ReactNode;
   buttons?: "no_yes" | "ok";
 }
 
@@ -33,7 +34,7 @@ export function useConfirm() {
       onSubmit={(e) => {
         const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
         const action = submitter?.value;
-        props.close({ resolve: {action: action, result: { confirmed: action === "yes" }} })
+        props.close?.({ resolve: {action: action, result: { confirmed: action === "yes" }} })
       }}>
       <div className={"grid grid-cols-2 gap-1 p-1 min-w-[20em]"}>
         <p key={"content"} className={"col-span-2"}>{props.args?.content}</p>
@@ -45,10 +46,10 @@ export function useConfirm() {
   const modalProps: ModalProps<ConfirmResult, ConfirmArgs> = //useMemo( () => (
     {
       header: (props) => {
-        return props.args?.title ?? t("~confirm.title")
+        return <>{props.args?.title ?? t("~confirm.title")}</>
       },
       children: (props) => {
-        return <Content close={props.close} args={props.args} />
+        return <Content close={props.close} {...props} />
       },
     }
   //), []);

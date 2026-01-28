@@ -60,18 +60,19 @@ export function isDate(value: unknown): value is Date {
   return value instanceof Date && !isNaN(value.getTime());
 }
 
-export const defaultPatternDatetime = "YYYY-MM-DDTHH:mm:ss.SSSZ";
+export const defaultFormatDatetime = "YYYY-MM-DDTHH:mm:ss.SSSZ";
 
-export function parseDate(value: unknown, pattern?: string | null): Date | null {
-
+export function parseDate(value: unknown, format?: string | null): Date | null {
   if (isDate(value)) return value;
 
   if (typeof value === "string") {
-    if (value.endsWith("Z")) return new Date(value);
+    if (value.endsWith("Z")) {
+      return new Date(value);
+    }
 
-    const regex = getCachedRegex(pattern ?? defaultPatternDatetime);
+    const regex = getCachedRegex(format ?? defaultFormatDatetime);
     const match = regex.exec(value)
-      ?? (pattern ? null : getCachedRegex(defaultPatternDatetime).exec(value));
+      ?? (format ? null : getCachedRegex(defaultFormatDatetime).exec(value));
 
     if (!match || !match.groups) return null;
 
@@ -85,11 +86,12 @@ export function parseDate(value: unknown, pattern?: string | null): Date | null 
     if (g.minute) parts.minute = parseInt(g.minute, 10);
     if (g.second) parts.second = parseInt(g.second, 10);
     if (g.ms) parts.ms = parseInt(g.ms, 10);
-    if (g.ampm) parts.isPM = /pm/i.test(g.ampm);
-
-    // Adjust for AM/PM
-    if (parts.isPM && parts.hour !== undefined && parts.hour < 12) parts.hour += 12;
-    if (!parts.isPM && parts.hour === 12) parts.hour = 0;
+    if (g.ampm) {
+      parts.isPM = /pm/i.test(g.ampm);
+      // Adjust for AM/PM
+      if (parts.isPM && parts.hour !== undefined && parts.hour < 12) parts.hour += 12;
+      if (!parts.isPM && parts.hour === 12) parts.hour = 0;
+    }
 
     // Time zone offset
     if (g.tz && g.tz !== "Z") {
@@ -121,11 +123,12 @@ export function parseDate(value: unknown, pattern?: string | null): Date | null 
   return null;
 }
 
-export function formatDate(date: Date | null | undefined, pattern?: string | null) {
+export function formatDate(date: Date | null | undefined, format?: string | null) {
   let formatted: string | undefined;
+
   if (date) {
     const _padStart = (value: number): string => value.toString().padStart(2, '0');
-    formatted = (pattern ?? defaultPatternDatetime)
+    formatted = (format ?? defaultFormatDatetime)
       .replace(/YYYY/g, _padStart(date.getFullYear()))
       .replace(/DD/g, _padStart(date.getDate()))
       .replace(/MM/g, _padStart(date.getMonth() + 1))
@@ -160,7 +163,11 @@ export function prepareDateProps<T extends Record<string, any>>(
 export function generateCalendarDates(
   year: number,
   month: number,
-  firstDayOfWeek: number = 0
+  firstDayOfWeek: number = 0,
+  hours?: number,
+  minutes?: number,
+  seconds?: number,
+  ms?: number
 ): Date[] {
   const dates: Date[] = [];
 
@@ -169,7 +176,7 @@ export function generateCalendarDates(
   const startWeekDay = (firstDate.getDay() - firstDayOfWeek + 7) % 7;
 
   // First date to display (may belong to previous month)
-  const startDate = new Date(year, month - 1, 1 - startWeekDay);
+  const startDate = new Date(year, month - 1, 1 - startWeekDay, hours, minutes, seconds, ms);
 
   // Total days to display: 6 weeks (42 days) ensures full calendar grid
   const totalDays = 42;
@@ -188,5 +195,17 @@ export function getDateOffsetMonth(month: number) {
   const res = new Date(currentDate);
   res.setMonth(currentDate.getMonth() + month);
   res.setHours(0, 0, 0, 0);
+  return res;
+}
+export function getDateOffset(date: number, time?: "from" | "to") {
+  const currentDate = new Date();
+  const res = new Date(currentDate);
+  res.setDate(currentDate.getDate() + date);
+  if (time === "to") {
+    res.setHours(23, 59, 59, 999);
+  }
+  else {
+    res.setHours(0, 0, 0, 0);
+  }
   return res;
 }

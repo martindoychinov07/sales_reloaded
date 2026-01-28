@@ -1,30 +1,35 @@
-import {type Path, type SubmitHandler, type UseControllerProps} from "react-hook-form";
-import {type HTMLInputAutoCompleteAttribute, type HTMLInputTypeAttribute, type ReactNode} from "react";
-import {InputSelect} from "./InputSelect.tsx";
-import {InputButton} from "./InputButton.tsx";
-import {InputCommon} from "./InputCommon.tsx";
-import {InputToggle} from "./InputToggle.tsx";
-import {ModalIcon} from "./modal/ModalIcon.tsx";
+import {
+  type Path,
+  type UseFormReturn
+} from "react-hook-form";
+import { type HTMLInputAutoCompleteAttribute, type HTMLInputTypeAttribute, type ReactNode } from "react";
+import { InputSelect } from "./InputSelect.tsx";
+import { InputButton } from "./InputButton.tsx";
+import InputCommon from "./InputCommon.tsx";
+import { InputToggle } from "./InputToggle.tsx";
+import { ModalIcon } from "./modal/ModalIcon.tsx";
 import type { ItemRules } from "./LayoutModel.ts";
 
-export type InputFormatter = (value: string, pattern?: string | null| undefined) => string | null | undefined;
+export type InputFormatter = (value: string, format?: string | null | undefined, normalize?: boolean) => string | null | undefined;
 export type InputOption = { label: string, value?: string | number, disabled?: boolean };
-export type InputOptions<T> = (entry?: T | unknown) => InputOption[];
+export type InputOptions<T> = (entry?: T | unknown) => InputOption[] | Promise<InputOption[]>;
 
 export interface InputProps<T extends object> {
-  type: HTMLInputTypeAttribute | "select" | undefined;
-  prefix?: ReactNode;
-  suffix?: ReactNode;
-  placeholder?: string;
-  variant?: "bordered" | "ghost" | "label" | "compact" | "float";
-  autoComplete?: HTMLInputAutoCompleteAttribute;
-  formatter?: InputFormatter;
-  pattern?: string | null;
-  entry?: T;
-  options?: InputOptions<T>;
-  action?: string;
-  onSubmit?: SubmitHandler<T>;
-  rules?: ItemRules;
+  form: UseFormReturn,
+  type: HTMLInputTypeAttribute | "select" | undefined,
+  name: string,
+  prefix?: ReactNode,
+  suffix?: ReactNode,
+  placeholder?: string,
+  variant?: "bordered" | "ghost" | "label" | "compact" | "title",
+  autoComplete?: HTMLInputAutoCompleteAttribute,
+  formatter?: InputFormatter,
+  format?: string | null,
+  entry?: T,
+  options?: InputOptions<T>,
+  action?: string,
+  rules?: ItemRules,
+  disabled?: boolean
 }
 
 export interface ClassNameRule {
@@ -33,7 +38,7 @@ export interface ClassNameRule {
   orElse?: string;
 }
 
-export function Input<T extends object>(props: UseControllerProps<T> & InputProps<T>) {
+export function Input<T extends object>(props: InputProps<T>) {
   switch (props.type) {
     case "select":
       return InputSelect(props);
@@ -51,14 +56,18 @@ export function Input<T extends object>(props: UseControllerProps<T> & InputProp
     case "datetime":
     case "datetime-local":
     case "dialog":
-      return InputCommon({...props, type: "text", suffix: InputButton({
+      return InputCommon({
         ...props,
-        prefix: <ModalIcon />,
-        type: "button",
-        name: "action" as Path<T>,
-        action: [props.action, props.name].filter(s => s).join(":"),
-        variant: "ghost",
-      })})
+        type: "text",
+        suffix: InputButton({
+          ...props,
+          prefix: <ModalIcon/>,
+          type: "button",
+          name: "action" as Path<T>,
+          action: [props.action, props.name].filter(s => s).join(":"),
+          variant: "ghost",
+        })
+      })
   }
 
   return InputCommon(props);

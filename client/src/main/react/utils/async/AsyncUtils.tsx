@@ -28,7 +28,7 @@ export function statsOnFinish<T, P>(state: AsyncState<T, P>, children: any) {
 }
 
 export async function delay(ms: number){
-  let timeout: any;
+  let timeout: number | undefined;
   return new Promise(
       (r) => { timeout = setTimeout(r, ms); }
   ).finally(
