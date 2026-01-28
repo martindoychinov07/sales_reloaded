@@ -1,20 +1,12 @@
 import { Input, type InputOptions } from "../utils/Input.tsx";
 import {
-  type ContactDto,
-  ContactService,
-  type ExchangeDto,
-  ExchangeService, OpenAPI,
+  ExchangeService,
   type OrderEntryDto,
   OrderFormDto,
-  OrderFormService,
-  type OrderTypeDto,
-  OrderTypeService,
-  PdfService,
-  type ProductDto,
-  ProductService, RequestService
+  OrderFormService, type ProductDto,
+  RequestService
 } from "../api/sales";
 import {
-  Controller,
   type Path,
   type SubmitErrorHandler,
   type SubmitHandler,
@@ -24,14 +16,9 @@ import {
 import { useLocation } from "react-router";
 import { useAsyncState } from "../utils/async/useAsyncState.tsx";
 import { AsyncFragment } from "../utils/async/AsyncFragment.tsx";
-import { type Key, useCallback, useEffect, useMemo, useState } from "react";
+import { type Key, useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react";
 import { Table } from "../utils/Table.tsx";
 import { useFormat } from "../utils/useFormat.tsx";
-import useModal from "../utils/modal/useModal.tsx";
-import { ContactListModel } from "./model/ContactListModel.ts";
-import { ListForm } from "../utils/ListForm.tsx";
-import type { ModalProps } from "../utils/modal/Modal.tsx";
-import { ProductListModel } from "./model/ProductListModel.ts";
 import { useI18n } from "../context/i18n/useI18n.tsx";
 import { formatDate, parseDate, prepareDateProps } from "../utils/DateUtils.ts";
 import { useCalendar } from "../utils/modal/useCalendar.tsx";
@@ -39,12 +26,33 @@ import { Loading } from "../utils/Loading.tsx";
 import { OrderFormModel } from "./model/OrderFormModel.ts";
 import { useConfirm } from "../utils/modal/useConfirm.tsx";
 import { useAuth } from "../context/auth/useAuth.tsx";
-import { formatNumber } from "../utils/NumberUtils.ts";
+import { formatNumber, range, toFixedNumber } from "../utils/NumberUtils.ts";
 import { useNavigate } from "react-router-dom";
-import { delay } from "../utils/async/AsyncUtils.tsx";
+import { useProduct } from "./modal/useProduct.tsx";
+import { useContact } from "./modal/useContact.tsx";
+import {
+  getExchangeList,
+  getOptionExchange,
+  getOptionOrderState,
+  getOptionOrderType,
+  getOptionPayment,
+  getOrderTypeList
+} from "./model/OptionModel.ts";
+import { useKeyboardNavigation } from "../utils/useKeyboard.tsx";
+import { findEnabled, splitPath } from "../utils/LayoutModel.ts";
+import { getSelection } from "../utils/TableUtils.tsx";
+import { mapToReportDto, usePrintOrder } from "./usePrint.tsx";
 
+const programmatic = {
+  shouldDirty: false,
+  shouldTouch: false,
+  shouldValidate: false,
+}
 
-export function OrderForm() {
+const priceList = ["productPrice", ...range(1, 9).map(i => `productPrice${i}`)];
+const codeList = ["productCode", ...range(1, 9).map(i => `productCode${i}`)];
+
+function OrderForm() {
   const { state } = useLocation();
   const { t } = useI18n();
   const { fullname } = useAuth();
@@ -52,66 +60,22 @@ export function OrderForm() {
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState<string[]>([]);
   const [orderFormOptions, setOrderFormOptions] = useState<{ [key: string]: InputOptions<OrderFormDto> }>({});
-  const [orderTypeList, setOrderTypeList] = useState<OrderTypeDto[]>();
-  const [exchangeList, setExchangeList] = useState<ExchangeDto[]>();
+  const printOrder = usePrintOrder();
   const modalConfirm = useConfirm();
   const modalCalendar = useCalendar();
-
-  const modalContactProps: ModalProps<ContactDto, Parameters<typeof ContactService.findContact>[number]> = useMemo(() => (
-    {
-      header: t("~contact.title"),
-      variant: "full",
-      noWrapper: true,
-      children: (props) => {
-        return <ListForm model={ContactListModel} close={props.close} args={props.args}/>
-      },
-    }
-  ), []);
-  const modalContact = useModal(modalContactProps);
-
-  const modalProductProps: ModalProps<ProductDto, Parameters<typeof ProductService.findProduct>[number]> = useMemo(() => (
-    {
-      header: t("~product.title"),
-      variant: "full",
-      noWrapper: true,
-      children: (props) => {
-        return <ListForm model={ProductListModel} close={props.close} args={props.args}/>
-      },
-    }
-  ), []);
-  const modalProduct = useModal(modalProductProps);
-
+  const modalContact = useContact();
+  const modalProduct = useProduct();
   const model = OrderFormModel;
 
-  const loadOrder = async (args: { orderId?: number, target?: "edit" | "create" | "copy" | "delete" }) => {
-    const _type = await OrderTypeService.findOrderType({ sort: "typeOrder" });
-    const orderType = [{ label: "" }, ..._type.content?.map(item => (
-      { value: `${item.typeId}`, label: t(`~${item.typeKey}`) ?? "?", disabled: (args === undefined || args.target === "edit") }
-    )) ?? []];
-    setOrderTypeList(_type.content);
+  // console.log("order render")
 
-    const _exchange = await ExchangeService.findExchange({});
-    const orderCcp = _exchange.content?.map(item => (
-      { value: `${item.exchangeTarget}/${item.exchangeBase}`, label: `${item.exchangeTarget} (${item.exchangeBase})` }
-    )) ?? [];
-    setExchangeList(_exchange.content);
-
-    const orderState = Object.values(OrderFormDto.orderState)
-      .reverse()
-      .map(value => (
-        { value: value, label: `~orderState.${value}`, disabled: (args === undefined || args.target === "edit") }
-      ));
-
+  const loadOrder = useCallback(async (args: { orderId?: number, target?: "edit" | "create" | "copy" | "delete" }) => {
     setOrderFormOptions({
       ...orderFormOptions,
-      orderState: () => orderState,
-      orderType: () => orderType,
-      orderCcp: () => orderCcp,
-      payment: () => [
-        { label: "" },
-        { value: "bank", label: "~payment.bank" },
-        { value: "cash", label: "~payment.cash" },
-      ],
+      orderState: () => getOptionOrderState(),
+      orderType: async () => { return getOptionOrderType(await getOrderTypeList()); },
+      orderCcp: async () => { return getOptionExchange(await getExchangeList()); },
+      payment: () => getOptionPayment(),
     });
 
     let res: FormType;
@@ -119,24 +83,17 @@ export function OrderForm() {
     if (args.orderId) {
       if (args.target === undefined || args.target === "edit") {
         res = {
-          selected: "*",
+          selected: [],
           ...await OrderFormService.getOrderById({ id: args.orderId })
         };
       }
       else {
-        if (args.target === "delete") {
-          res = {
-            selected: "*",
-            ...await OrderFormService.getOrderById({ id: args.orderId }),
-          };
-        }
-        else {
-          res = {
-            selected: "*",
-            ...await OrderFormService.getOrderCopyById({ id: args.orderId, content: args.target === "copy" })
-          };
-        }
-        res.orderRef = `${t(`~orderType.${res.orderType?.typeId}`)} ${formatNumber(res.orderNum ?? 0, "0000000000")}/${formatDate(parseDate(res.orderDate), t("~pattern.datetime"))}`
+        res = {
+          selected: [],
+          ...await OrderFormService.getOrderCopyById({ id: args.orderId, content: args.target === "copy" }),
+        };
+        res.orderId = undefined;
+        res.orderRef = `${t(`~orderType.${res.orderType?.typeId}`)} ${formatNumber(res.orderNum ?? 0, "0000000000")} / ${formatDate(parseDate(res.orderDate), t("~format.date"))}`
         res.orderState = OrderFormDto.orderState.DRAFT;
         res.orderType = undefined;
         res.orderNum = undefined;
@@ -145,9 +102,9 @@ export function OrderForm() {
     }
     else {
       res = {
-        selected: "*",
+        selected: [],
         orderState: OrderFormDto.orderState.DRAFT,
-        orderDate: formatDate(new Date(), t("~pattern.datetime")),
+        orderDate: formatDate(new Date(), t("~format.datetime")),
         orderTaxPct: 0,
         orderTax: 0,
         orderDiscount: 0,
@@ -157,105 +114,188 @@ export function OrderForm() {
       };
     }
 
-    // await formUse.trigger();
-    // formUse.setFocus("orderType.typeId");
-
     return res;
-  }
+  }, [orderFormOptions, t]);
 
   const orderData = useAsyncState(
     useCallback(loadOrder, [state?.orderId, state?.target]),
     { orderId: state?.orderId, target: state?.target }
   );
 
-  type FormType = OrderFormDto & { action?: Path<OrderFormDto> } & { selected?: string };
+  type FormType = OrderFormDto & { action?: Path<OrderFormDto> } & { selected?: string[] };
   const formUse = useForm<FormType>({
     defaultValues: {
+      orderState: OrderFormDto.orderState.DRAFT,
       orderResp: fullname ?? "",
       orderEntries: []
     },
-    values: orderData.result,
-    mode: "onChange",
-    reValidateMode: "onChange",
+    shouldUnregister: false,
+    mode: "onBlur",
+    reValidateMode: "onBlur"
   });
   useEffect(() => {
-    formUse.reset(orderData.result);
-    formUse.trigger();
-  }, [orderData.result]);
+    if (orderData.finished) {
+      // console.log("init", orderData.result);
+      formUse.reset(orderData.result);
+      formUse.trigger();
+    }
+  }, [formUse, orderData.result, orderData.finished]);
 
   const orderEntries = useFieldArray<FormType>({
     control: formUse.control,
     name: "orderEntries",
   });
 
-  async function print(orderId: number, subtitle: string) {
-    const url = `${OpenAPI.BASE}/api/pdf/${orderId}?lang=bg&subtitle=${subtitle}`;
-    window.open(url);
+  const updateTime = useEffectEvent(() => {
+    const values = formUse.getValues();
+    if (!values.orderId && values.orderState === OrderFormDto.orderState.DRAFT) {
+      formUse.setValue("orderDate", formatDate(new Date(), t("~format.datetime")), programmatic);
+    }
+  });
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      updateTime(); // always latest setValue
+    }, 1000);
+    return () => clearInterval(id);
+  }, [updateTime]);
+
+  useKeyboardNavigation((ctx) => {
+    const name = ctx.current.name;
+    let next: string | undefined;
+    if (name.startsWith("orderEntries.")) {
+      const p = splitPath(name, 2);
+      let step: number;
+      switch (ctx.key) {
+        case "ArrowLeft":
+          step = -1;
+          break;
+        case "ArrowRight":
+          step = +1;
+          break;
+        case "ArrowUp":
+          p[1] = `${Math.max(0, +p[1] - 1)}`;
+          step = 0;
+          break;
+        case "ArrowDown":
+        case "Enter":
+          p[1] = `${Math.min(+p[1] + 1, orderEntries.fields.length ?? 0 - 1)}`;
+          step = 0;
+          break;
+        default:
+          step = 0;
+          break
+      }
+      const found = findEnabled(
+        model.table.items,
+        p[2],
+        step
+      );
+      if (found) {
+        next = `${p[0]}.${p[1]}.${found.name}`;
+      }
+    }
+    else {
+      const found = findEnabled(
+        model.fields.items,
+        name,
+        ((ctx.key === "ArrowLeft" || ctx.key === "ArrowUp") ? -1 : 1)
+      );
+      next = found?.name;
+    }
+
+    if (next) {
+      formUse.setFocus(next as Path<FormType>, { shouldSelect : true });
+      ctx.event.preventDefault();
+      ctx.event.stopPropagation();
+    }
+
+    return null;
+  }, [formUse, orderEntries, model.fields.items]);
+
+  async function getExchangeRate(ccp?: string) {
+    const cur = ccp?.split("/") ?? [undefined, undefined];
+    const exchange = (await ExchangeService.findExchange({ exchangeBase: cur[0], exchangeTarget: cur[1]}))?.content;
+    return exchange?.length ? exchange[0].exchangeRate : undefined;
   }
+
+  const activeName = useRef<string | null>(null);
+
+  useLayoutEffect(() => {
+    const el = document.activeElement as HTMLElement | null;
+    activeName.current = el?.getAttribute("name") ?? null;
+  });
 
   useEffect(() => {
     // Subscribe to all field changes
     const subscription = formUse.watch(async (values, { name, type }) => {
-      if (type === "change" && name) {
-        const mt = name.lastIndexOf(".");
-        const path = mt < 0 ? undefined : name.slice(0, mt);
-        const target = mt < 0 ? name : name.slice(mt + 1);
-        if (target === "entryPrice"
-          || target === "entryDiscountPct"
-          || target === "entryQuantity"
-        ) {
-          const orderEntry = formUse.getValues(path as Path<OrderFormDto>) as OrderEntryDto;
-          const discount = (orderEntry.entryQuantity ?? 0) * (orderEntry.entryPrice ?? 0) * ((orderEntry.entryDiscountPct ?? 0) / 100.0);
-          const sum = (orderEntry.entryQuantity ?? 0) * (orderEntry.entryPrice ?? 0) * ((100.0 - (orderEntry.entryDiscountPct ?? 0)) / 100.0);
-          const tax = sum * (values.orderTaxPct ?? 0) / 100;
-          if (!isFinite(orderEntry.entrySum ?? NaN) || (Math.abs((orderEntry.entrySum ?? 0) - sum) > 0.000001)) {
-            formUse.setValue(path as Path<OrderFormDto>, {
-              ...orderEntry,
-              entryDiscount: discount,
-              entrySum: sum,
-              entryTax: tax,
-              entryTotal: (sum + tax)
-            });
-
-            const summary = values.orderEntries?.reduce((res, entry) => {
-              res.orderDiscount = res.orderDiscount + (entry?.entryDiscount ?? 0);
-              res.orderSum = res.orderSum + (entry?.entrySum ?? 0);
-              res.orderTax = res.orderTax + (entry?.entryTax ?? 0);
-              res.orderTotal = res.orderTotal + (entry?.entryTotal ?? 0);
-              return res;
-            }, { orderDiscount: 0, orderSum: 0, orderTax: 0, orderTotal: 0 });
-
-            formUse.setValue("orderDiscount", summary?.orderDiscount);
-            formUse.setValue("orderSum", summary?.orderSum);
-            formUse.setValue("orderTax", summary?.orderTax);
-            formUse.setValue("orderTotal", summary?.orderTotal);
+      if ((type === "change" && name !== "selected") || (type === undefined && (name === "selected" || values.action as string === "save"))) {
+        const p = splitPath(name as Path<FormType>, 2);
+        let target = p.at(-1);
+        let orderTaxPct = values.orderTaxPct;
+        if (target === "typeId") {
+          setLoading(true);
+          try {
+            const typeId = Number(values.orderType?.typeId);
+            const last = await OrderFormService.getLastOrderByOrderType({ orderTypeId: typeId });
+            if (last) {
+              formUse.setValue("orderSupplier", last.orderSupplier);
+              if (last) {
+                formUse.setValue("orderType", last.orderType);
+                formUse.setValue("orderTaxPct", last.orderType?.typeTaxPct);
+                formUse.setValue("orderCcp", last.orderType?.typeCcp);
+                formUse.setValue("orderRate", await getExchangeRate(last.orderType?.typeCcp));
+                formUse.setValue("orderSupplier", last.orderSupplier);
+                formUse.setValue("orderCounter", last.orderCounter);
+                formUse.setValue("orderNum", last.orderNum);
+                formUse.setValue("orderDate", last.orderDate);
+                formUse.setValue("orderState", last.orderState);
+                orderTaxPct = last.orderType?.typeTaxPct;
+                target = "orderTaxPct";
+                await formUse.trigger();
+              }
+            }
+          }
+          finally {
+            setLoading(false);
           }
         }
-        else if (target === "selected") {
 
+        if (target === "entryQuantity"
+          || target === "entryPrice"
+          || target === "selected"
+          || target === "entryDiscountPct"
+          || target === "orderTaxPct"
+        ) {
+          const current = p[1] !== undefined ? Number(p[1]) : undefined;
+          const summary = { orderDiscount: 0, orderSum: 0, orderTax: 0, orderTotal: 0 };
+          values.orderEntries?.forEach((entry, index) => {
+            if (entry) {
+              const normal = (entry.entryQuantity ?? 0) * (entry.entryPrice ?? 0);
+              const discount = normal * ((entry.entryDiscountPct ?? 0) / 100.0);
+              const sum = normal - discount;
+              const tax = sum * (orderTaxPct ?? 0) / 100;
+
+              summary.orderDiscount = summary.orderDiscount + discount;
+              summary.orderSum = summary.orderSum + sum;
+              summary.orderTax = summary.orderTax + tax;
+              summary.orderTotal = summary.orderTotal + sum + tax;
+
+              if (current === undefined || current === index) {
+                formUse.setValue(`orderEntries.${index}.entryDiscount`, toFixedNumber(discount, 2), programmatic);
+                formUse.setValue(`orderEntries.${index}.entrySum`, toFixedNumber(sum, 2), programmatic);
+                formUse.setValue(`orderEntries.${index}.entryTax`, toFixedNumber(tax, 2), programmatic);
+                formUse.setValue(`orderEntries.${index}.entryTotal`, toFixedNumber(sum + tax, 2), programmatic);
+              }
+            }
+          });
+          formUse.setValue("orderDiscount", toFixedNumber(summary?.orderDiscount, 2), programmatic);
+          formUse.setValue("orderSum", toFixedNumber(summary?.orderSum, 2), programmatic);
+          formUse.setValue("orderTax", toFixedNumber(summary?.orderTax, 2), programmatic);
+          formUse.setValue("orderTotal", toFixedNumber(summary?.orderTotal, 2), programmatic);
         }
         else if (target === "orderCcp") {
-          const found = exchangeList?.find(item => `${item.exchangeTarget}/${item.exchangeBase}` === values.orderCcp);
-          formUse.setValue("orderRate", found?.exchangeRate);
-        }
-        else if (target === "typeId") {
-          const typeId = Number(values.orderType?.typeId);
-          const orderType = orderTypeList?.find(orderType => orderType.typeId === typeId);
-          formUse.setValue("orderType", orderType);
-          formUse.setValue("orderNum", orderType?.typeNum);
-          formUse.setValue("orderTaxPct", orderType?.typeTaxPct);
-          formUse.setValue("orderCcp", orderType?.typeCcp);
-
-          if (orderType) {
-            const exchange = exchangeList?.find(item => `${item.exchangeTarget}/${item.exchangeBase}` === orderType.typeCcp);
-            formUse.setValue("orderRate", exchange?.exchangeRate);
-          }
-
-          const last = await OrderFormService.getLastOrderByOrderType({ orderTypeId: typeId});
-          if (last) {
-            formUse.setValue("orderSupplier", last.orderSupplier);
-          }
-          await formUse.trigger();
+          formUse.setValue("orderRate", await getExchangeRate(values.orderCcp), programmatic);
         }
         // console.log({type, name, path, target, values});
       }
@@ -263,7 +303,7 @@ export function OrderForm() {
 
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe();
-  }, [formUse, orderTypeList, exchangeList]);
+  }, [formUse]);
 
   const onSubmit: SubmitHandler<FormType> = useCallback(async (values, event) => {
     const nativeEvent = event?.nativeEvent as SubmitEvent;
@@ -271,7 +311,7 @@ export function OrderForm() {
 
     const actionName = submitter?.name ?? "action";
     const actionValue = submitter?.value as string ?? "true";
-    formUse.setValue(actionName as Path<OrderFormDto>, actionValue);
+    formUse.setValue(actionName as Path<OrderFormDto>, actionValue, programmatic);
 
     if (actionValue === "add") {
       orderEntries.append({
@@ -287,60 +327,97 @@ export function OrderForm() {
       await formUse.trigger();
     }
     else if (actionValue === "save") {
-      if (formUse.formState.isValid) {
-        setLoading(true);
-        try {
-          const requestBody = prepareDateProps(values,
-            (value) => parseDate(value, t("~pattern.datetime"))?.toISOString());
-
-          let response: OrderFormDto;
-          if (requestBody.orderId) {
-            response = await OrderFormService.updateOrder({ requestBody });
+      const isValid = await formUse.trigger();
+      if (isValid) {
+        const zeroPrice: number[] = [];
+        const zeroQuantity: number[] = [];
+        values.orderEntries?.forEach((entry, index) => {
+          if (entry.entryPrice == 0) {
+            zeroPrice.push(index + 1);
           }
-          else {
-            response = await OrderFormService.createOrder({ requestBody });
+          if (entry.entryQuantity == 0) {
+            zeroQuantity.push(index + 1);
           }
-          formUse.reset(response);
-
-          if (response.orderId !== undefined) {
-            const confirmation = await modalConfirm.value({title: t("~confirm.print.title"), content: t("~confirm.question")});
-            if (confirmation.result?.confirmed) {
-              print(response.orderId, t("~print.original") ?? "");
-              print(response.orderId, "");
+        });
+        let confirmed = true;
+        if (zeroPrice.length || zeroQuantity.length) {
+          const confirmation = await modalConfirm.value(
+            {
+              title: t("~confirm.question"),
+              content: <>{!!zeroPrice.length && `${t("~confirm.zeroPrice")}: ${zeroPrice}`}
+                {!!zeroPrice.length && <br/>}
+                {!!zeroQuantity.length && `${t("~confirm.zeroQuantity")}: ${zeroQuantity}`}
+              </>
             }
-            navigate("/app/order", { replace: true });
-            navigate(0);
-          }
+          );
+          confirmed = confirmation.result?.confirmed ?? false;
         }
-        finally {
-          setLoading(false);
+
+        if (confirmed) {
+          setLoading(true);
+          try {
+            const requestBody = prepareDateProps(
+              values,
+              (value) => parseDate(value, t("~format.datetime"))?.toISOString()
+            );
+            let response: OrderFormDto;
+            if (requestBody.orderId) {
+              requestBody.orderResp = fullname ?? requestBody.orderResp;
+              response = await OrderFormService.updateOrder({ id: requestBody.orderId, requestBody });
+            }
+            else {
+              response = await OrderFormService.createOrder({ requestBody });
+            }
+            formUse.reset(response);
+
+            if (response.orderId !== undefined) {
+              const confirmation = await modalConfirm.value(
+                { title: t("~confirm.print.title"), content: t("~confirm.question") }
+              );
+              if (confirmation.result?.confirmed) {
+                printOrder(mapToReportDto(response));
+              }
+              navigate("/app/order", { replace: true });
+              navigate(0);
+            }
+          }
+          finally {
+            setLoading(false);
+          }
         }
       }
     }
     else if (actionValue === "cancel") {
-      const confirmation = await modalConfirm.value({title: t("~confirm.undo.title"), content: t("~confirm.question")});
+      const confirmation = await modalConfirm.value(
+        { title: t("~confirm.undo.title"), content: t("~confirm.question") }
+      );
       if (confirmation.result?.confirmed) {
         formUse.reset();
       }
     }
     else if (actionValue === "delete") {
-      if ((values.selected ?? "*") !== "*") {
-        const confirmation = await modalConfirm.value({title: t("~confirm.delete.title"), content: t("~confirm.question")});
+      if (values.selected?.length) {
+        const confirmation = await modalConfirm.value(
+          { title: t("~confirm.delete.title"), content: t("~confirm.question") }
+        );
         if (confirmation.result?.confirmed) {
-          const index = Number(values.selected);
-          for (let i = index + 1; i < orderEntries.fields.length; i++) {
-            formUse.setValue(`orderEntries.${i}.entryRow`, i);
+          const ids = values.selected.map(id => Number(id));
+          orderEntries.remove(ids);
+          const len = orderEntries.fields.length - ids.length;
+          for (let i = 0; i < len; i++) {
+            formUse.setValue(`orderEntries.${i}.entryRow`, i + 1, programmatic);
           }
-          orderEntries.remove(index);
+          formUse.setValue("selected", len === 0 ? [] : ids[0] < len ? [String(ids[0])] : [String(len - 1)], programmatic);
+          await formUse.trigger();
         }
       }
     }
     else if (actionValue === "print") {
-      if (formUse.formState.isValid && values.orderId) {
+      const isValid = await formUse.trigger();
+      if (isValid && values.orderId) {
         setLoading(true);
         try {
-          print(values.orderId, t("~print.original") ?? "");
-          print(values.orderId, "");
+          printOrder(mapToReportDto(values));
         }
         finally {
           setLoading(false);
@@ -360,28 +437,32 @@ export function OrderForm() {
 
         if (fn === "calendar") {
           const res = await modalCalendar.value(
-            { date: parseDate(formUse.getValues(value as Path<FormType>) as string, t("~pattern.datetime")) }
+            { date: parseDate(formUse.getValues(value as Path<FormType>) as string, t("~format.datetime")) }
           );
           if (res.result) {
-            formUse.setValue(value as Path<FormType>, formatDate(res.result.date, t("~pattern.datetime")));
+            formUse.setValue(value as Path<FormType>, formatDate(res.result.date, t("~format.datetime")), programmatic);
             await formUse.trigger();
           }
         }
         else if (fn === "contact") {
-          const res = await modalContact.value({ [target]: formUse.getValues(value as Path<FormType>) as string });
-          if (res.result) {
-            formUse.setValue((path || value) as Path<FormType>, res.result);
+          const res = (await modalContact.value(
+            { [target]: formUse.getValues(value as Path<FormType>) as string }
+          )).result?.at(-1);
+          if (res) {
+            formUse.setValue((path || value) as Path<FormType>, res);
             if (path === "orderCustomer") {
-              formUse.setValue("orderRcvd", res.result.contactResp);
+              formUse.setValue("orderRcvd", res.contactResp, programmatic);
             }
             await formUse.trigger();
           }
         }
         else if (fn === "location") {
-          const res = await modalContact.value({ contactCode1: values.orderCustomer?.contactCode1 });
-          if (res.result) {
+          const res = (await modalContact.value(
+            { contactCode1: values.orderCustomer?.contactCode1 }
+          )).result?.at(-1);
+          if (res) {
             if (path === "orderCustomer") {
-              formUse.setValue("orderCustomer.contactLocation", res.result.contactLocation);
+              formUse.setValue("orderCustomer.contactLocation", res.contactLocation, programmatic);
             }
             await formUse.trigger();
           }
@@ -390,36 +471,86 @@ export function OrderForm() {
           if (values.orderCustomer?.contactCode1) {
             const found = await RequestService.requestJson({api: "uic", params: values.orderCustomer?.contactCode1});
             if (found) {
-              formUse.setValue("orderCustomer.contactName", found["contactName"]);
-              formUse.setValue("orderCustomer.contactAddress", found["contactAddress"]);
-              formUse.setValue("orderCustomer.contactCode2", found["contactCode2"]);
+              formUse.setValue("orderCustomer.contactName", found["contactName"], programmatic);
+              formUse.setValue("orderCustomer.contactAddress", found["contactAddress"], programmatic);
+              formUse.setValue("orderCustomer.contactCode2", found["contactCode2"], programmatic);
               await formUse.trigger();
             }
           }
         }
         else if (fn === "product") {
-          const res = await modalProduct.value({ productName: formUse.getValues(value as Path<FormType>) as string });
-          if (res.result) {
-            formUse.setValue(`${(path || value)}.entryProduct.productId` as Path<FormType>, res.result.productId);
-            formUse.setValue(`${(path || value)}.entryLabel` as Path<FormType>, res.result.productName);
-            formUse.setValue(`${(path || value)}.entryUnits` as Path<FormType>, res.result.productUnits);
-            formUse.setValue(`${(path || value)}.entryMeasure` as Path<FormType>, res.result.productMeasure);
-            if (values.orderCcp?.endsWith(res.result.productCy ?? "")) {
-              formUse.setValue(`${(path || value)}.entryPrice` as Path<FormType>, (res.result.productPrice ?? 0.0) * (values.orderRate ?? 1.0));
+          const p = splitPath(`${(path || value)}`, 1);
+          const i = parseInt(p[1]);
+          const res = await modalProduct.value(
+            { selection: "many" } // productName: formUse.getValues(value as Path<FormType>) as string
+          );
+          const list = res.result;
+          if (list) {
+            const pattern = res.args?.view?.slice(3);
+            const regex = pattern ? new RegExp(pattern) : undefined;
+            const priceField = (priceList.find(item => !regex?.test(item)) ?? "productPrice") as keyof ProductDto;
+            const codeField = (codeList.find(item => !regex?.test(item)) ?? "productCode") as keyof ProductDto;
+            const rate = values.orderRate ? values.orderRate : 1.0;
+            for (let j = 0; j < list.length; j++) {
+              const k = i + j;
+              if (j > 0 || k >= orderEntries.fields.length) {
+                orderEntries.insert(k,{
+                  entryRow: k + 1,
+                  entryQuantity: 0,
+                  entryPrice: 0,
+                  entryDiscountPct: 0,
+                  entryDiscount: 0,
+                  entrySum: 0,
+                  entryTax: 0,
+                  entryTotal: 0,
+                });
+              }
+              const product = list[j];
+              formUse.setValue(`orderEntries.${k}.entryProduct`, product, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryLabel`, product.productName, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryUnits`, product.productUnits, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryMeasure`, product.productMeasure, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryCode`, product[codeField] as string, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryBarcode`, product.productBarcode, programmatic);
+              const price = (product?.[priceField] as number) ?? 0.0;
+              if (values.orderCcp?.endsWith(product.productCy ?? "")) {
+                formUse.setValue(`orderEntries.${k}.entryPrice`, toFixedNumber(price / rate, 2), programmatic);
+              }
+              else {
+                formUse.setValue(`orderEntries.${k}.entryPrice`, price, programmatic);
+              }
+              formUse.setValue(`orderEntries.${k}.entryAvailable`, product.productAvailable, programmatic);
             }
-            formUse.setValue(`${(path || value)}.entryAvailable` as Path<FormType>, res.result.productAvailable);
+
+            const len = orderEntries.fields.length - 1;
+            for (let j = len; j < len + list.length; j ++) {
+              formUse.setValue(`orderEntries.${j}.entryRow`, j + 1, programmatic);
+            }
+
             await formUse.trigger();
+            setTimeout(() => formUse.setFocus(`orderEntries.${i}.entryQuantity`, { shouldSelect: true }), 300);
           }
         }
       }
     }
 
     // console.log({ actionName, actionValue, values: values });
-  }, [formUse, orderEntries, modalConfirm, modalCalendar,  modalContact, modalProduct]);
+  }, [formUse, orderEntries, modalConfirm, t, fullname, navigate, modalCalendar, modalContact, modalProduct]);
 
-  const onError: SubmitErrorHandler<FormType> = useCallback(async (errors, event) => {
-    await onSubmit(formUse.getValues(), event);
+  const onError: SubmitErrorHandler<FormType> = useCallback(
+    async (errors, event) => {
+      await onSubmit(formUse.getValues(), event);
   }, [formUse, onSubmit]);
+
+  const handleSelect = (data?: OrderEntryDto[], index?: number, ctrlKey?: boolean, shiftKey?: boolean) => {
+    const selected = formUse.getValues("selected") || [];
+    const res: string[] = getSelection("many", selected, undefined, data, index, ctrlKey, shiftKey);
+    formUse.setValue("selected", res, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
+  };
 
   const formatters = useFormat();
   const cols = model.fields.columns ?? 1;
@@ -447,7 +578,7 @@ export function OrderForm() {
                         item.name
                           ? <Input<OrderFormDto>
                             key={item.name}
-                            control={formUse.control}
+                            form={formUse}
                             rules={item.rules}
                             variant={item.variant ?? "label"}
                             name={item.name as Path<OrderFormDto>}
@@ -457,7 +588,7 @@ export function OrderForm() {
                             disabled={item.mode === "disabled" || (!!item.name && disabled.includes(item.name))}
                             autoComplete="off"
                             formatter={formatters[item.type ?? "none"]}
-                            pattern={item.type === "text" ? item.pattern : t(item.pattern)}
+                            format={item.format}
                             options={orderFormOptions[item.source ?? "none"]}
                             action={item.source}
                           />
@@ -473,32 +604,36 @@ export function OrderForm() {
             return (
               <div key={group} className={`flex-1 overflow-y-auto`}>
                 <Table
+                  context={"order"}
                   data={orderEntries.fields}
                   dataKey={"entryId"}
                   formatters={formatters}
                   layout={model.table}
-                  selector={(entry, index) => <Controller
-                    control={formUse.control}
-                    name={"selected"}
-                    render={({field}) => {
-                      return (
-                        <input
-                          key={(index !== undefined ? index : "*") as Key}
-                          name={field.name}
-                          type={"radio"}
-                          value={(index !== undefined ? index : "*").toString()}
-                          defaultChecked={index === undefined}
-                          className={index !== undefined ? "peer checkbox checkbox-lg" : "checkbox checkbox-lg"}/>
-                      )
-                    }}/>
-                  }
+                  selector={(entry, index) => {
+                    return (
+                      <input
+                        key={(index !== undefined ? index : "*") as Key}
+                        {...formUse.register("selected", {
+                          onChange: (e) => {
+                            if (e.target.value === "*") {
+                              handleSelect(orderEntries.fields, undefined);
+                            }
+                          }
+                        })}
+                        type={"checkbox"}
+                        value={(index !== undefined ? index : "*").toString()}
+                        className={index !== undefined ? "peer checkbox checkbox-lg" : "checkbox checkbox-lg"}
+                      />
+                    )
+                  }}
+                  onClick={handleSelect}
                 /*Table*/>
                   {(props) => {
                     return (
                       props.item.name
                         ? <Input<OrderFormDto>
                           key={props.item.name}
-                          control={formUse.control}
+                          form={formUse}
                           rules={props.item.rules}
                           name={`orderEntries.${props.index}.${props.item.name}` as Path<OrderFormDto>}
                           type={props.item.mode === "hidden" ? "hidden" : props.item.type}
@@ -506,7 +641,7 @@ export function OrderForm() {
                           variant={"ghost"}
                           autoComplete="off"
                           formatter={formatters[props.item.type ?? "none"]}
-                          pattern={props.item.type === "text" ? props.item.pattern : t(props.item.pattern)}
+                          format={props.item.format}
                           options={orderFormOptions[props.item.source ?? "none"]}
                           action={props.item.source}
                         />
@@ -514,7 +649,7 @@ export function OrderForm() {
                     )
                   }}
                 </Table>
-                <button type={"submit"} className={"btn w-full"} name={"action"} value={"add"}>{t("~action.add")}</button>
+                <button type={"submit"} className={"btn w-full"} name={"action"} value={`product:orderEntries.${orderEntries.fields.length}.entryLabel`}>{t("~action.add")}</button>
               </div>
             )
           }
@@ -528,3 +663,5 @@ export function OrderForm() {
     {loading && <Loading/>}
   </>
 }
+
+export default OrderForm;

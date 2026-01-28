@@ -1,10 +1,9 @@
 import {type SettingDto, SettingService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize, getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const SettingListModel: ListFormModel<Parameters<typeof SettingService.findSetting>[number], SettingDto> = {
   action: {
@@ -18,15 +17,14 @@ export const SettingListModel: ListFormModel<Parameters<typeof SettingService.fi
       settingKey: undefined,
       settingGroup: undefined,
       settingNote: undefined,
-    },
-    paging: {
+
       page: 0,
-      size: 100,
+      size: import.meta.env.VITE_PAGE_SIZE,
       sort: "settingKey",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "settingId",
@@ -68,10 +66,6 @@ export const SettingListModel: ListFormModel<Parameters<typeof SettingService.fi
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
-
       "sort": () => {
         return getOptionSort(SettingListModel.table.layout.items);
       },

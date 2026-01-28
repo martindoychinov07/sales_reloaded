@@ -1,11 +1,9 @@
 import {type AppUserDto, AppUserService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const AppUserListModel: ListFormModel<Parameters<typeof AppUserService.findAppUser>[number], AppUserDto> = {
   action: {
@@ -17,15 +15,14 @@ export const AppUserListModel: ListFormModel<Parameters<typeof AppUserService.fi
   form: {
     args: {
       username: "",
-    },
-    paging: {
+
       page: 0,
-      size: 100,
+      size: import.meta.env.VITE_PAGE_SIZE,
       sort: "fullname",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "userId",
@@ -67,9 +64,6 @@ export const AppUserListModel: ListFormModel<Parameters<typeof AppUserService.fi
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
 
       "sort": () => {
         return getOptionSort(AppUserListModel.table.layout.items);
@@ -113,7 +107,7 @@ export const AppUserListModel: ListFormModel<Parameters<typeof AppUserService.fi
           name: "userExpireDate",
           label: "~user.expireDate",
           type: "datetime",
-          pattern: "~pattern.datetime",
+          format: "~format.datetime",
           source: "calendar",
         },
         {
@@ -121,7 +115,7 @@ export const AppUserListModel: ListFormModel<Parameters<typeof AppUserService.fi
           name: "userLockDate",
           label: "~user.lockDate",
           type: "datetime",
-          pattern: "~pattern.datetime",
+          format: "~format.datetime",
           source: "calendar",
         },
         {

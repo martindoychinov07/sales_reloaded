@@ -1,13 +1,17 @@
-import {type OrderFormView, ReportService} from "../../api/sales";
+import { type ReportDto, ReportService } from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
-import { getDateOffsetMonth } from "../../utils/DateUtils.ts";
+import { getDateOffset } from "../../utils/DateUtils.ts";
+import {
+  getOptionDirection, getOptionOrderState,
+  getOptionOrderType,
+  getOptionPayment,
+  getOptionSort,
+  getOrderTypeList
+} from "./OptionModel.ts";
 
-export const ReportListModel: ListFormModel<Parameters<typeof ReportService.findReport>[number], OrderFormView> = {
+export const ReportListModel: ListFormModel<Parameters<typeof ReportService.findReport>[number], ReportDto> = {
   action: {
     search: ReportService.findReport,
     create: undefined,
@@ -16,20 +20,19 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
   },
   form: {
     args: {
-      startOrderDate: getDateOffsetMonth(-1).toISOString(),
-      endOrderDate: undefined,
-    },
-    paging: {
+      fromDate: getDateOffset(0, "from").toISOString(),
+      toDate: getDateOffset(0, "to").toISOString(),
+
       page: 0,
-      size: 100,
+      size: 1000,
       sort: "orderDate",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: [],
     input: undefined,
-    inputId: "orderId",
+    inputId: "reportId",
   },
   fields: {
     layout: {
@@ -39,27 +42,29 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         {
           span: 2,
           group: "args",
-          name: "startOrderDate",
-          label: "~report.startOrderDate",
+          name: "fromDate",
+          label: "~report.fromDate",
           type: "datetime",
-          pattern: "~pattern.datetime",
+          format: "~format.datetime",
+          source: "calendar",
+          variant: "title",
+        },
+        {
+          span: 2,
+          group: "args",
+          name: "toDate",
+          label: "~report.toDate",
+          type: "datetime",
+          format: "~format.datetime",
           source: "calendar",
         },
         {
           span: 2,
           group: "args",
-          name: "endOrderDate",
-          label: "~report.endOrderDate",
-          type: "datetime",
-          pattern: "~pattern.datetime",
-          source: "calendar",
-        },
-        {
-          span: 2,
-          group: "args",
-          name: "customerName",
-          label: "~customer.name",
-          type: "search",
+          name: "orderTypeId",
+          label: "~order.type",
+          type: "select",
+          source: "orderType",
         },
         {
           span: 2,
@@ -70,21 +75,59 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         },
         {
           span: 2,
+          group: "args",
+          name: "customerName",
+          label: "~order.customer.name",
+          type: "dialog",
+          source: "contact",
+        },
+        {
+          span: 2,
+          group: "args",
+          name: "customerLocation",
+          label: "~order.customer.location",
+          type: "text",
+        },
+        {
+          span: 2,
+          group: "args",
+          name: "productName",
+          label: "~product.name",
+          type: "dialog",
+          source: "product",
+        },
+        {
+          span: 1,
+          group: "args",
+          name: "orderPayment",
+          label: "~order.payment",
+          type: "select",
+          source: "payment",
+        },
+        {
+          span: 1,
+          group: "args",
+          name: "orderState",
+          label: "~order.state",
+          type: "select",
+          source: "orderState",
+        },
+        {
+          span: 1,
           group: "paging",
           name: "page",
           label: "~filter.page",
           type: "number",
         },
         {
-          span: 2,
+          span: 1,
           group: "paging",
           name: "size",
           label: "~filter.size",
-          type: "select",
-          source: "size",
+          type: "number",
         },
         {
-          span: 2,
+          span: 1,
           group: "paging",
           name: "sort",
           label: "~filter.sort",
@@ -92,12 +135,20 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           source: "sort",
         },
         {
-          span: 2,
+          span: 1,
           group: "paging",
           name: "direction",
           label: "~filter.direction",
           type: "select",
           source: "direction",
+        },
+        {
+          span: 4,
+          group: "paging",
+          name: "view",
+          label: "~filter.view",
+          type: "select",
+          source: "view",
         },
         {
           span: 1,
@@ -106,7 +157,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~action.create",
           type: "button",
           enable: ["save", "cancel"],
-          disable: ["create", "copy", "edit", "delete", "search", "close", "ok"],
+          disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
           span: 1,
@@ -115,7 +166,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~action.copy",
           type: "button",
           enable: ["save", "cancel"],
-          disable: ["create", "copy", "edit", "delete", "search", "close", "ok"],
+          disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
           span: 1,
@@ -124,13 +175,20 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~action.edit",
           type: "button",
           enable: ["save", "cancel"],
-          disable: ["create", "copy", "edit", "delete", "search", "close", "ok"],
+          disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
           span: 1,
           group: "action",
           name: "delete",
           label: "~action.delete",
+          type: "button",
+        },
+        {
+          span: 1,
+          group: "action",
+          name: "export",
+          label: "~action.export",
           type: "button",
         },
         {
@@ -143,17 +201,11 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
+      "orderState": () => getOptionOrderState("~orderState.all"),
 
-      "sort": () => {
-        return getOptionSort(ReportListModel.table.layout.items);
-      },
+      "payment": () => { return getOptionPayment("~payment.all"); },
 
-      "direction": () => {
-        return getOptionDirection();
-      },
+      "orderType": async () => { return getOptionOrderType(await getOrderTypeList(), "~orderType.all"); }
     },
   },
   table: {
@@ -168,37 +220,95 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         },
         {
           group: "input",
-          name: "orderDate",
-          label: "~order.date",
-          type: "datetime",
-          pattern: "~pattern.datetime",
+          name: "entryId",
+          label: "",
+          type: "hidden"
         },
         {
           group: "input",
-          name: "orderTypeTypeKey",
+          name: "orderDate",
+          label: "~order.date",
+          type: "datetime",
+          format: "~format.datetime",
+        },
+        {
+          group: "input",
+          name: "orderType",
           label: "~order.type",
           type: "text",
-          pattern: "~",
+          format: "~",
         },
         {
           group: "input",
           name: "orderNum",
           label: "~order.num",
           type: "number",
-          pattern: "~pattern.counter",
+          format: "~format.counter",
         },
         {
           group: "input",
-          name: "orderCustomerContactName",
+          name: "customerName",
           label: "~order.customer.name",
           type: "text"
         },
         {
           group: "input",
-          name: "orderState",
-          label: "~order.state",
-          type: "text",
-          pattern: "~orderState.",
+          name: "customerLocation",
+          label: "~order.customer.location",
+          type: "text"
+        },
+        {
+          group: "input",
+          name: "entryRow",
+          label: "~order.row",
+          type: "number"
+        },
+        {
+          group: "input",
+          name: "productName",
+          label: "~order.product",
+          type: "text"
+        },
+        {
+          group: "input",
+          name: "entryAvailable",
+          label: "~entry.available",
+          type: "number",
+          format: "~format.quantity",
+        },
+        {
+          group: "input",
+          name: "entryQuantity",
+          label: "~entry.quantity",
+          type: "number",
+          format: "~format.quantity",
+        },
+        {
+          group: "input",
+          name: "entrySum",
+          label: "~order.sum",
+          type: "number",
+          format: "~format.total",
+        },
+        {
+          group: "input",
+          name: "entryTax",
+          label: "~order.tax",
+          type: "number",
+          format: "~format.total",
+        },
+        {
+          group: "input",
+          name: "entryTotal",
+          label: "~order.total",
+          type: "number",
+          format: "~format.total",
+        },
+        {
+          group: "input",
+          name: "orderCy",
+          label: "~order.ccp",
+          type: "text"
         },
         {
           group: "input",
@@ -211,28 +321,34 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           name: "orderRate",
           label: "~order.rate",
           type: "number",
-          pattern: "~pattern.rate",
+          format: "~format.rate",
         },
         {
           group: "input",
-          name: "orderSum",
-          label: "~order.sum",
-          type: "number",
-          pattern: "~pattern.total",
+          name: "orderPaymentDate",
+          label: "~order.payment.date",
+          type: "datetime",
+          format: "~format.datetime",
         },
         {
           group: "input",
-          name: "orderTax",
-          label: "~order.tax",
-          type: "number",
-          pattern: "~pattern.total",
+          name: "orderPayment",
+          label: "~order.payment",
+          type: "text",
+          format: "~payment.",
         },
         {
           group: "input",
-          name: "orderTotal",
-          label: "~order.total",
-          type: "number",
-          pattern: "~pattern.total",
+          name: "orderResp",
+          label: "~order.resp",
+          type: "text",
+        },
+        {
+          group: "input",
+          name: "orderState",
+          label: "~order.state",
+          type: "text",
+          format: "~orderState.",
         },
       ]
     },

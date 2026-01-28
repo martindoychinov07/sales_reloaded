@@ -1,11 +1,9 @@
 import {type ContactDto, ContactService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const ContactListModel: ListFormModel<Parameters<typeof ContactService.findContact>[number], ContactDto> = {
   action: {
@@ -20,15 +18,14 @@ export const ContactListModel: ListFormModel<Parameters<typeof ContactService.fi
       contactLocation: undefined,
       contactCode1: undefined,
       contactCode2: undefined,
-    },
-    paging: {
+
       page: 0,
-      size: 100,
+      size: import.meta.env.VITE_PAGE_SIZE,
       sort: "contactName",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "contactId",
@@ -41,26 +38,40 @@ export const ContactListModel: ListFormModel<Parameters<typeof ContactService.fi
         {
           span: 2,
           group: "args",
-          name: "contactCode1",
-          label: "~contact.code1",
-          type: "search",
-        },
-        {
-          span: 2,
-          group: "args",
-          name: "contactCode2",
-          label: "~contact.code2",
-          type: "search",
-        },
-        {
-          span: 2,
-          group: "args",
           name: "contactName",
           label: "~contact.name",
           type: "search",
         },
         {
           span: 2,
+          group: "args",
+          name: "contactLocation",
+          label: "~contact.location",
+          type: "search",
+        },
+        {
+          span: 1,
+          group: "args",
+          name: "contactCode1",
+          label: "~contact.code1",
+          type: "search",
+        },
+        {
+          span: 1,
+          group: "args",
+          name: "contactCode2",
+          label: "~contact.code2",
+          type: "search",
+        },
+        {
+          span: 1,
+          group: "args",
+          name: "contactCode",
+          label: "~contact.code",
+          type: "search",
+        },
+        {
+          span: 1,
           group: "args",
           name: "search",
           label: "~action.search",
@@ -70,10 +81,6 @@ export const ContactListModel: ListFormModel<Parameters<typeof ContactService.fi
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
-
       "sort": () => {
         return getOptionSort(ContactListModel.table.layout.items);
       },
@@ -126,7 +133,7 @@ export const ContactListModel: ListFormModel<Parameters<typeof ContactService.fi
         {
           group: "input",
           name: "contactAddress",
-          label: "~contacta.address",
+          label: "~contact.address",
           type: "text"
         },
         {

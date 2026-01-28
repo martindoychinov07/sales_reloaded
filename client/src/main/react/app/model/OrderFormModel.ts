@@ -31,13 +31,12 @@ export const OrderFormModel: OrderFormModelType = {
           required: true,
         }
       },
-
       {
         span: 2,
         name: "orderNum",
         label: "~order.num",
         type: "number",
-        pattern: "~pattern.counter",
+        format: "~format.counter",
         rules: {
           required: true,
         }
@@ -47,7 +46,7 @@ export const OrderFormModel: OrderFormModelType = {
         name: "orderDate",
         label: "~order.date",
         type: "datetime",
-        pattern: "~pattern.datetime",
+        format: "~format.datetime",
         source: "calendar",
         rules: {
           required: true,
@@ -96,7 +95,7 @@ export const OrderFormModel: OrderFormModelType = {
         name: "orderRate",
         label: "~order.rate",
         type: "number",
-        pattern: "~pattern.rate",
+        format: "~format.rate",
         rules: {
           required: true,
         }
@@ -123,7 +122,7 @@ export const OrderFormModel: OrderFormModelType = {
         name: "orderPaymentDate",
         label: "~order.payment.date",
         type: "datetime",
-        pattern: "~pattern.date",
+        format: "~format.date",
         source: "calendar",
       },
 
@@ -153,23 +152,16 @@ export const OrderFormModel: OrderFormModelType = {
         name: "orderRespDate",
         label: "~order.resp.date",
         type: "datetime",
-        pattern: "~pattern.date",
+        format: "~format.date",
         source: "calendar",
       },
 
       {
         span: 2,
-        name: "orderRcvd",
-        label: "~order.rcvd",
-        type: "text",
-        mode: "hidden",
-      },
-      {
-        span: 2,
         name: "orderRcvdDate",
         label: "~order.rcvd.date",
         type: "datetime",
-        pattern: "~pattern.datetime.short",
+        format: "~format.datetime.short",
         source: "calendar",
         mode: "hidden",
       },
@@ -186,7 +178,7 @@ export const OrderFormModel: OrderFormModelType = {
         name: "orderDlvdDate",
         label: "~order.dlvd.date",
         type: "datetime",
-        pattern: "~pattern.datetime.short",
+        format: "~format.datetime.short",
         source: "calendar",
         mode: "hidden",
       },
@@ -195,57 +187,63 @@ export const OrderFormModel: OrderFormModelType = {
         span: 4,
         name: "orderNote",
         label: "~order.note",
-        type: "text"
+        type: "search"
       },
       {
         span: 4,
         name: "orderRef",
         label: "~order.ref",
-        type: "text"
+        type: "search"
+      },
+
+      {
+        span: 2,
+        name: "orderRcvd",
+        label: "~order.rcvd",
+        type: "text",
       },
       {
         span: 2,
         name: "orderTaxPct",
         label: "~order.tax_pct",
         type: "number",
-        pattern: "~pattern.percent",
-        mode: "hidden",
+        format: "~format.percent",
       },
       {
-        span: 2,
+        span: 1,
         name: "orderDiscount",
         label: "~order.discount",
         type: "number",
         mode: "disabled",
         variant: "compact",
-        pattern: "~pattern.total",
+        format: "~format.total",
       },
       {
-        span: 2,
+        span: 1,
         name: "orderSum",
         label: "~order.sum",
         type: "number",
         mode: "disabled",
         variant: "compact",
-        pattern: "~pattern.total",
+        format: "~format.total",
       },
       {
-        span: 2,
+        span: 1,
         name: "orderTax",
         label: "~order.tax",
         type: "number",
         mode: "disabled",
         variant: "compact",
-        pattern: "~pattern.total",
+        format: "~format.total",
       },
       {
-        span: 2,
+        span: 1,
         name: "orderTotal",
         label: "~order.total",
         type: "number",
         mode: "disabled",
         variant: "compact",
-        pattern: "~pattern.total",
+        format: "~format.total",
       },
       {
         span: 1,
@@ -302,6 +300,18 @@ export const OrderFormModel: OrderFormModelType = {
         type: "hidden",
       },
       {
+        name: "entryCode",
+        label: "~entry.code",
+        type: "text",
+        size: "1ch",
+      },
+      {
+        name: "entryBarcode",
+        label: "~entry.barcode",
+        type: "text",
+        size: "1ch",
+      },
+      {
         name: "entryLabel",
         label: "~entry.label",
         type: "dialog",
@@ -314,7 +324,7 @@ export const OrderFormModel: OrderFormModelType = {
         name: "entryUnits",
         label: "~entry.units",
         type: "number",
-        pattern: "~pattern.quantity",
+        format: "~format.quantity",
         mode: "disabled",
         size: "10ch",
       },
@@ -329,14 +339,14 @@ export const OrderFormModel: OrderFormModelType = {
         name: "entryPrice",
         label: "~entry.price",
         type: "number",
-        pattern: "~pattern.price",
+        format: "~format.price",
         size: "12ch",
       },
       {
         name: "entryAvailable",
         label: "~entry.available",
         type: "number",
-        pattern: "~pattern.quantity",
+        format: "~format.quantity",
         mode: "disabled",
         rules: {
           required: true,
@@ -347,14 +357,14 @@ export const OrderFormModel: OrderFormModelType = {
         name: "entryQuantity",
         label: "~entry.quantity",
         type: "number",
-        pattern: "~pattern.quantity",
+        format: "~format.quantity",
         size: "12ch",
       },
       {
         name: "entryDiscountPct",
         label: "~entry.discountPct",
         type: "number",
-        pattern: "~pattern.percent",
+        format: "~format.percent",
         size: "8ch",
       },
       {
@@ -362,7 +372,7 @@ export const OrderFormModel: OrderFormModelType = {
         label: "~entry.sum",
         type: "number",
         mode: "disabled",
-        pattern: "~pattern.total",
+        format: "~format.total",
         size: "15ch",
       },
       {
@@ -370,7 +380,7 @@ export const OrderFormModel: OrderFormModelType = {
         label: "~entry.discount",
         type: "hidden",
         mode: "disabled",
-        pattern: "~pattern.total",
+        format: "~format.total",
         size: "15ch",
       },
       {
@@ -378,7 +388,7 @@ export const OrderFormModel: OrderFormModelType = {
         label: "~entry.tax",
         type: "number",
         mode: "disabled",
-        pattern: "~pattern.total",
+        format: "~format.total",
         size: "15ch",
       },
       {
@@ -386,7 +396,7 @@ export const OrderFormModel: OrderFormModelType = {
         label: "~entry.total",
         type: "number",
         mode: "disabled",
-        pattern: "~pattern.total",
+        format: "~format.total",
         size: "15ch",
       },
     ]

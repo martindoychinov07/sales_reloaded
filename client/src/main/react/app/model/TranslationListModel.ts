@@ -1,11 +1,9 @@
 import {type TranslationDto, TranslationService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const TranslationListModel: ListFormModel<Parameters<typeof TranslationService.findTranslation>[number], TranslationDto> = {
   action: {
@@ -19,15 +17,14 @@ export const TranslationListModel: ListFormModel<Parameters<typeof TranslationSe
       translationKey: undefined,
       en: undefined,
       bg: undefined,
-    },
-    paging: {
+
       page: 0,
-      size: 100,
+      size: import.meta.env.VITE_PAGE_SIZE,
       sort: "translationKey",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "translationId",
@@ -69,10 +66,6 @@ export const TranslationListModel: ListFormModel<Parameters<typeof TranslationSe
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
-
       "sort": () => {
         return getOptionSort(TranslationListModel.table.layout.items);
       },

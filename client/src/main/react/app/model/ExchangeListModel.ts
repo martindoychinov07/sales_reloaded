@@ -1,11 +1,9 @@
 import {type ExchangeDto, ExchangeService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const ExchangeListModel: ListFormModel<Parameters<typeof ExchangeService.findExchange>[number], ExchangeDto> = {
   action: {
@@ -18,15 +16,14 @@ export const ExchangeListModel: ListFormModel<Parameters<typeof ExchangeService.
     args: {
       exchangeBase: undefined,
       exchangeTarget: undefined,
-    },
-    paging: {
+
       page: 0,
-      size: 100,
+      size: import.meta.env.VITE_PAGE_SIZE,
       sort: "exchangeDate",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "exchangeId",
@@ -66,10 +63,6 @@ export const ExchangeListModel: ListFormModel<Parameters<typeof ExchangeService.
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
-
       "sort": () => {
         return getOptionSort(ExchangeListModel.table.layout.items);
       },
@@ -106,14 +99,17 @@ export const ExchangeListModel: ListFormModel<Parameters<typeof ExchangeService.
           name: "exchangeRate",
           label: "~exchange.rate",
           type: "number",
-          pattern: "~pattern.rate"
+          format: "~format.rate",
+          rules: {
+            required: true,
+          }
         },
         {
           group: "input",
           name: "exchangeDate",
           label: "~exchange.date",
           type: "datetime",
-          pattern: "~pattern.datetime"
+          format: "~format.datetime"
         },
       ]
     },

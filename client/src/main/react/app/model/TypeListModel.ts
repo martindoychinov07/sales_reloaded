@@ -1,11 +1,9 @@
 import {type OrderTypeDto, OrderTypeService} from "../../api/sales";
 import {
-  getOptionDirection,
-  getOptionSize,
-  getOptionSort,
   type ListFormModel,
 } from "../../utils/ListFormModel.ts";
 import {getCommonActions} from "./CommonListModel.ts";
+import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
 export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.findOrderType>[number], OrderTypeDto> = {
   action: {
@@ -16,15 +14,13 @@ export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.fin
   },
   form: {
     args: {
-    },
-    paging: {
       page: 0,
-      size: 100,
-      sort: "typeOrder",
+      size: import.meta.env.VITE_PAGE_SIZE,
+      sort: "typeIndex",
       direction: "ASC"
     },
     action: undefined,
-    selected: undefined,
+    selected: [],
     disabled: ["save", "cancel"],
     input: undefined,
     inputId: "typeId",
@@ -45,10 +41,6 @@ export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.fin
       ]
     },
     options: {
-      "size": () => {
-        return getOptionSize();
-      },
-
       "sort": () => {
         return getOptionSort(TypeListModel.table.layout.items);
       },
@@ -65,27 +57,40 @@ export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.fin
         {
           group: "input",
           name: "typeId",
-          label: "",
-          type: "hidden"
+          label: "~type.id",
+          type: "number",
+          mode: "disabled"
         },
         {
           group: "input",
-          name: "typeOrder",
-          label: "~type.order",
-          type: "number"
+          name: "typeIndex",
+          label: "~type.index",
+          type: "number",
+          rules: {
+            required: true,
+          }
         },
         {
           group: "input",
           name: "typeKey",
           label: "~type.key",
           type: "text",
-          pattern: "~"
+          format: "~"
+        },
+        {
+          group: "input",
+          name: "typeCounter",
+          label: "~type.counter",
+          type: "number",
+          rules: {
+            required: true,
+          }
         },
         {
           group: "input",
           name: "typeNum",
           label: "~type.num",
-          type: "number"
+          type: "number",
         },
         {
           group: "input",
@@ -98,7 +103,7 @@ export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.fin
           name: "typeEval",
           label: "~type.eval",
           type: "text",
-          pattern: "~orderEval."
+          format: "~orderEval."
         },
         {
           group: "input",
@@ -111,7 +116,7 @@ export const TypeListModel: ListFormModel<Parameters<typeof OrderTypeService.fin
           name: "typeTaxPct",
           label: "~type.taxPct",
           type: "number",
-          pattern: "~pattern.percent",
+          format: "~format.percent",
         },
         {
           group: "input",
