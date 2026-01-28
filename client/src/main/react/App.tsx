@@ -2,7 +2,7 @@ import {Route, Routes,} from "react-router-dom";
 import './App.css'
 import {AuthProvider} from "./context/auth/AuthProvider.tsx";
 import {AuthLayout} from "./context/auth/AuthLayout.tsx";
-import {OrderForm} from "./app/OrderForm.tsx";
+import OrderForm from "./app/OrderForm.tsx";
 import {PublicLayout} from "./app/PublicLayout.tsx";
 import {AppLayout} from "./app/AppLayout.tsx";
 import {PublicHome} from "./app/PublicHome.tsx";
@@ -16,7 +16,7 @@ import {TranslationAdmin} from "./app/admin/TranslationAdmin.tsx";
 import {SettingAdmin} from "./app/admin/SettingAdmin.tsx";
 import {TypeAdmin} from "./app/admin/TypeAdmin.tsx";
 import {I18nProvider} from "./context/i18n/I18nProvider.tsx";
-import {OrderFormReport} from "./app/OrderFormReport.tsx";
+import {ReportForm} from "./app/ReportForm.tsx";
 import { Tooltip } from "react-tooltip";
 import { AppUserAdmin } from "./app/admin/AppUserAdmin.tsx";
 
@@ -32,7 +32,7 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index element={<AppHome />} />
               <Route path="/app/order" element={<OrderForm />} />
-              <Route path="/app/report" element={<OrderFormReport />} />
+              <Route path="/app/report" element={<ReportForm />} />
             </Route>
           </Route>
           <Route path="/app/admin" element={<AuthLayout />}>
@@ -50,7 +50,7 @@ export default function App() {
         </Routes>
       </AuthProvider>
     </I18nProvider>
-    <Tooltip id="tooltip" />
+    <Tooltip id="tooltip" globalCloseEvents={{scroll: true, escape: true}} className={"z-50"} clickable={true} />
   </>);
 }
 

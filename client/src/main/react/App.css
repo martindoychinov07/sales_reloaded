@@ -21,6 +21,7 @@
   @apply border-r border-gray-300 rounded-none;
   min-width: max-content;
   width: fit-content;
+  /*contain: layout paint;*/
 
   & td, & th {
     @apply border-l border-b border-gray-300 px-[6px] py-[2px] max-w-[3em] align-middle whitespace-nowrap overflow-hidden;
@@ -48,11 +49,15 @@
   }
 }
 
+td > label > .label {
+  margin: -2px;
+}
+
 .table thead {
   @apply z-10 relative;
 
   & th {
-    @apply overflow-hidden sticky top-0 border-t border-gray-300 text-center bg-gray-200 text-black;
+    @apply overflow-hidden sticky -top-1 border-t border-gray-300 text-center bg-gray-200 text-black;
     font-weight: bold;
     /*font-variant: petite-caps;*/
 
@@ -65,18 +70,27 @@
       cursor: ew-resize;
     }
   }
-
 }
 
-.table tr:hover {
-  @apply bg-gray-200;
+.table tbody tr:hover {
+  @apply bg-base-content/5;
 }
 
-.table tr:has(> td:first-child input[type="checkbox"]:checked),
-.table tr:has(> td:first-child input[type="radio"]:checked) {
-  @apply bg-base-100;
-  outline: 2px solid;
-  outline-offset: -2px;
+.table tbody tr:has(> td:first-child input[type="checkbox"]:checked),
+.table tbody tr:has(> td:first-child input[type="radio"]:checked) {
+  @apply bg-primary-content text-base-content shadow-md;
+}
+
+.table tbody tr.t.odd,
+.table tbody tr.t.even
+{
+  @apply sticky top-8 z-9 bg-gray-200 text-black shadow-md font-bold;
+}
+
+.table tbody tr.m.odd,
+.table tbody tr.m.even
+{
+  @apply sticky top-16 z-8 bg-primary text-primary-content shadow-md;
 }
 
 .app-list .table {
@@ -87,18 +101,19 @@
 
 .input, .select {
   &:focus, &:focus-within {
-    @apply -outline-offset-2 shadow-xl;
+    @apply -outline-offset-2 shadow-md;
   }
 }
 
 .label {
   &:is(.input > *, .select > *) {
     &:first-child {
-      @apply min-w-[10rem];
+      @apply min-w-[10rem] lg:min-w-[8rem] xl:min-w-[10rem];
       @apply max-w-[10rem];
       font-weight: bold;
-      /*font-variant: petite-caps;*/
       overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline;
     }
   }
 }
@@ -111,11 +126,11 @@
   }
 }
 
-.field-input[type="number"] {
+.input.number .field-input {
   @apply text-right;
 }
 
-.input-compact .field-input[type="number"] {
+.input-compact.number .field-input {
   @apply text-left;
 }
 
@@ -161,4 +176,43 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield; /* Firefox */
+}
+
+/* shared wrapper */
+.input-title,
+.select-title,
+.btn-title {
+  position: relative;
+  overflow: visible;
+  margin-top: 0.35rem;
+}
+
+/* label on border */
+.input-title .label:first-of-type,
+.select-title .label:first-of-type {
+  width: auto !important;
+  min-width: auto !important;
+  max-width: unset !important;
+  border-style: none;
+  position: absolute;
+  top: -0.45rem;
+  left: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0 0.35rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-title .label:first-of-type::before,
+.select-title .label:first-of-type::before {
+  content: "";
+  position: absolute;
+  top: 0.35rem; /* moves the mask slightly above the border */
+  left: 0.25rem; /* extend a bit left/right to fully cover border */
+  right: 0.25rem;
+  height: 0.2rem; /* height enough to cover border line */
+  background: white; /* same as input background */
+  z-index: -1;
+  border-radius: 2px;
 }
