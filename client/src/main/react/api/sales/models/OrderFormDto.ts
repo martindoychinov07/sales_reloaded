@@ -12,6 +12,7 @@ export type OrderFormDto = {
   orderState?: OrderFormDto.orderState;
   orderDate?: string;
   orderNum?: number;
+  orderCounter?: number;
   orderType?: OrderTypeDto;
   orderUserId?: number;
   orderSupplier?: ContactDto;

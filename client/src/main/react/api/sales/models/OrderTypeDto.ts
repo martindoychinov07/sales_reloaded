@@ -4,7 +4,8 @@
 /* eslint-disable */
 export type OrderTypeDto = {
   typeId?: number;
-  typeOrder?: number;
+  typeCounter?: number;
+  typeIndex?: number;
   typeKey?: string;
   typeNum?: number;
   typePrint?: string;

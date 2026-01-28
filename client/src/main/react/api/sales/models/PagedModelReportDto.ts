@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { OrderFormView } from './OrderFormView';
 import type { PageMetadata } from './PageMetadata';
-export type PagedModelOrderFormView = {
-  content?: Array<OrderFormView>;
+import type { ReportDto } from './ReportDto';
+export type PagedModelReportDto = {
+  content?: Array<ReportDto>;
   page?: PageMetadata;
 };
 
