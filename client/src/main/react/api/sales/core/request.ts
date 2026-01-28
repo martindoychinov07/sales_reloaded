@@ -232,16 +232,14 @@ export const getResponseHeader = (response: Response, responseHeader?: string): 
 export const getResponseBody = async (response: Response): Promise<any> => {
   if (response.status !== 204) {
     try {
-      const contentType = response.headers.get('Content-Type')?.toLowerCase();
+      const contentType = response.headers.get('Content-Type');
       if (contentType) {
-        if (contentType.includes("json")) {
+        const jsonTypes = ['application/json', 'application/problem+json']
+        const isJSON = jsonTypes.some(type => contentType.toLowerCase().startsWith(type));
+        if (isJSON) {
           return await response.json();
-        }
-        else if (/(text|html|xml|csv)/.test(contentType)) {
+        } else {
           return await response.text();
-        }
-        else {
-          return await response.blob();
         }
       }
     } catch (error) {
@@ -249,7 +247,6 @@ export const getResponseBody = async (response: Response): Promise<any> => {
     }
   }
   return undefined;
-
 };
 
 export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
