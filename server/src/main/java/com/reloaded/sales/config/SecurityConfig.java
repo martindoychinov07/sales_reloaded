@@ -1,9 +1,3 @@
-/*
- * /*
- *  * Copyright 2026 Martin Doychinov
- *  * Licensed under the Apache License, Version 2.0
- *  */
- */
 package com.reloaded.sales.config;
 
 import com.reloaded.sales.service.AppUserService;
@@ -25,7 +19,7 @@ import java.util.List;
 
 @Slf4j
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity // Enables Spring Security for the app
 public class SecurityConfig {
 
   private final AppUserService appUserService;
@@ -34,76 +28,76 @@ public class SecurityConfig {
     this.appUserService = appUserService;
   }
 
+  /**
+   * Defines the security filter chain: CORS, CSRF, authentication, login/logout
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-      // CORS (only if SPA is separated)
-      .cors(Customizer.withDefaults())
+            // Enable CORS (important if frontend SPA is served from a different origin)
+            .cors(Customizer.withDefaults())
 
-      // CSRF (enabled)
-      .csrf(csrf -> csrf
-        .csrfTokenRepository(
-          CookieCsrfTokenRepository.withHttpOnlyFalse()
-        )
-      )
+            // Enable CSRF protection using cookies
+            .csrf(csrf -> csrf
+                    .csrfTokenRepository(
+                            CookieCsrfTokenRepository.withHttpOnlyFalse() // allows frontend JS to read CSRF token
+                    )
+            )
 
-      // Authorization
-      .authorizeHttpRequests(auth -> auth
-        .requestMatchers(
-          "/",
-          "/error",
-          "/auth/csrf",
-          "/login",
-          "/logout",
-          "/index.html",
-          "/static/**",
-          "/*.svg",
-          "/assets/**",
-          "/app/**",
-          "/swagger-ui/**",
-          "/v3/api-docs/**",
-          "/api/translation/find"
-        ).permitAll()
-        .anyRequest().authenticated()
-      )
+            // Configure URL-based authorization
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/", "/error", "/auth/csrf", "/login", "/logout",
+                            "/index.html", "/static/**", "/*.svg", "/assets/**",
+                            "/app/**", "/swagger-ui/**", "/v3/api-docs/**",
+                            "/api/translation/find"
+                    ).permitAll() // public endpoints
+                    .anyRequest().authenticated() // all other requests require authentication
+            )
 
-      // UserDetails service
-      .userDetailsService(appUserService)
+            // Set custom user service for authentication
+            .userDetailsService(appUserService)
 
-      // Form login (session-based)
-      .formLogin(form -> form
-        .loginProcessingUrl("/login")
-        .successHandler((req, res, auth) -> res.setStatus(200))
-        .failureHandler((req, res, ex) -> res.setStatus(401))
-      )
+            // Configure form login (session-based)
+            .formLogin(form -> form
+                    .loginProcessingUrl("/login") // URL to submit username/password
+                    .successHandler((req, res, auth) -> res.setStatus(200)) // return 200 on success
+                    .failureHandler((req, res, ex) -> res.setStatus(401)) // return 401 on failure
+            )
 
-      // Logout
-      .logout(logout -> logout
-        .logoutUrl("/logout")
-        .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
-      );
+            // Configure logout
+            .logout(logout -> logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessHandler((req, res, auth) -> res.setStatus(200)) // return 200 after logout
+            );
 
     return http.build();
   }
 
+  /**
+   * Password encoder bean using BCrypt
+   * Important for hashing passwords securely
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
+  /**
+   * Configures CORS for frontend SPA
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowedOrigins(List.of(
-      "http://localhost:5173"   // dev SPA
+            "http://localhost:5173"   // frontend dev server
     ));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN"));
-    config.setAllowCredentials(true);
+    config.setAllowCredentials(true); // allow cookies (for sessions / CSRF)
 
-    UrlBasedCorsConfigurationSource source =
-      new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config); // apply to all endpoints
 
     return source;
   }
