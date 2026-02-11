@@ -1,9 +1,3 @@
-/*
- * /*
- *  * Copyright 2026 Martin Doychinov
- *  * Licensed under the Apache License, Version 2.0
- *  */
- */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.security.AppUserDetails;
@@ -16,28 +10,40 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "auth", description = "auth service")
-@RestController
-@RequestMapping("/auth")
+@Tag(name = "auth", description = "auth service") // Swagger documentation
+@RestController // Marks this as a REST controller
+@RequestMapping("/auth") // Base path for authentication-related endpoints
 @NoArgsConstructor
 public class AuthController {
 
+  /**
+   * Returns the CSRF token to the frontend.
+   *
+   * Used by SPA to read the token and send it in future requests.
+   */
   @GetMapping(
-    value = "/csrf",
-    produces = "application/json"
+          value = "/csrf",
+          produces = "application/json"
   )
   public CsrfToken csrf(CsrfToken token) {
-    return token;
+    return token; // Spring automatically injects the current CSRF token
   }
 
+  /**
+   * Returns information about the currently authenticated user.
+   */
   @GetMapping(
-    value = "/info",
-    produces = "application/json"
+          value = "/info",
+          produces = "application/json"
   )
   public AuthUser info(
-    @AuthenticationPrincipal AppUserDetails userDetails
+          @AuthenticationPrincipal AppUserDetails userDetails
   ) {
-    return new AuthUser(userDetails.getUsername(), userDetails.getFullname());
+    // Extracts user data from Spring Security context
+    return new AuthUser(
+            userDetails.getUsername(),
+            userDetails.getFullname()
+    );
   }
 
 }
