@@ -1,48 +1,47 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import { Input, type InputOptions } from "../utils/Input.tsx";
+import {
+  AsyncFragment,
+  downloadTable,
+  findEnabled,
+  formatDate,
+  formatNumber,
+  getSelection,
+  Input,
+  type InputOptions,
+  Loading,
+  parseDate,
+  prepareDateProps,
+  range,
+  splitPath,
+  Table,
+  toFixedNumber,
+  useAsyncState,
+  useCalendar,
+  useConfirm,
+  useExport,
+  useFormat,
+  useI18n,
+  useKeyboardNavigation
+} from "@crud-daisyui/utils";
 import {
   ExchangeService,
   type OrderEntryDto,
   OrderFormDto,
-  OrderFormService, type ProductDto,
-  RequestService
+  OrderFormService,
+  type ProductDto,
+  UtilityService,
 } from "../api/sales";
 import {
   type Path,
   type SubmitErrorHandler,
   type SubmitHandler,
   useFieldArray,
-  useForm
+  useForm,
+  type WatchObserver
 } from "react-hook-form";
 import { useLocation } from "react-router";
-import { useAsyncState } from "../utils/async/useAsyncState.tsx";
-import { AsyncFragment } from "../utils/async/AsyncFragment.tsx";
 import { type Key, useCallback, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react";
-import { Table } from "../utils/Table.tsx";
-import { useFormat } from "../utils/useFormat.tsx";
-import { useI18n } from "../context/i18n/useI18n.tsx";
-import { formatDate, parseDate, prepareDateProps } from "../utils/DateUtils.ts";
-import { useCalendar } from "../utils/modal/useCalendar.tsx";
-import { Loading } from "../utils/Loading.tsx";
 import { OrderFormModel } from "./model/OrderFormModel.ts";
-import { useConfirm } from "../utils/modal/useConfirm.tsx";
 import { useAuth } from "../context/auth/useAuth.tsx";
-import { formatNumber, range, toFixedNumber } from "../utils/NumberUtils.ts";
 import { useNavigate } from "react-router-dom";
 import { useProduct } from "./modal/useProduct.tsx";
 import { useContact } from "./modal/useContact.tsx";
@@ -54,9 +53,6 @@ import {
   getOptionPayment,
   getOrderTypeList
 } from "./model/OptionModel.ts";
-import { useKeyboardNavigation } from "../utils/useKeyboard.tsx";
-import { findEnabled, splitPath } from "../utils/LayoutModel.ts";
-import { getSelection } from "../utils/TableUtils.tsx";
 import { mapToReportDto, usePrintOrder } from "./usePrint.tsx";
 
 const programmatic = {
@@ -79,13 +75,19 @@ function OrderForm() {
   const printOrder = usePrintOrder();
   const modalConfirm = useConfirm();
   const modalCalendar = useCalendar();
+  const modalExport = useExport();
   const modalContact = useContact();
   const modalProduct = useProduct();
   const model = OrderFormModel;
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   // console.log("order render")
 
-  const loadOrder = useCallback(async (args: { orderId?: number, target?: "edit" | "create" | "copy" | "delete" }) => {
+  async function infoSelectRequired() {
+    await modalConfirm.value({ title: t("~confirm.info.title"), content: t("~action.select.required"), buttons: "ok" });
+  }
+
+  const loadOrder = useCallback(async (args: { orderIds?: number[], target?: "edit" | "create" | "copy" | "delete" }) => {
     setOrderFormOptions({
       ...orderFormOptions,
       orderState: () => getOptionOrderState(),
@@ -96,20 +98,22 @@ function OrderForm() {
 
     let res: FormType;
 
-    if (args.orderId) {
+    if (args.orderIds?.length) {
       if (args.target === undefined || args.target === "edit") {
         res = {
           selected: [],
-          ...await OrderFormService.getOrderById({ id: args.orderId })
+          ...await OrderFormService.getOrderById({ id: args.orderIds[0] })
         };
       }
       else {
         res = {
           selected: [],
-          ...await OrderFormService.getOrderCopyById({ id: args.orderId, content: args.target === "copy" }),
+          ...await OrderFormService.getOrderCopyByIds({ ids: args.orderIds, content: args.target === "copy" }),
         };
         res.orderId = undefined;
-        res.orderRef = `${t(`~orderType.${res.orderType?.typeId}`)} ${formatNumber(res.orderNum ?? 0, "0000000000")} / ${formatDate(parseDate(res.orderDate), t("~format.date"))}`
+        if (args.orderIds.length === 1) {
+          res.orderRef = `${t(`~orderType.${res.orderType?.typeId}`)} ${formatNumber(res.orderNum ?? 0, "0000000000")} / ${formatDate(parseDate(res.orderDate), t("~format.date"))}`
+        }
         res.orderState = OrderFormDto.orderState.DRAFT;
         res.orderType = undefined;
         res.orderNum = undefined;
@@ -134,8 +138,8 @@ function OrderForm() {
   }, [orderFormOptions, t]);
 
   const orderData = useAsyncState(
-    useCallback(loadOrder, [state?.orderId, state?.target]),
-    { orderId: state?.orderId, target: state?.target }
+    useCallback(loadOrder, [state?.orderIds, state?.target]),
+    { orderIds: state?.orderIds, target: state?.target }
   );
 
   type FormType = OrderFormDto & { action?: Path<OrderFormDto> } & { selected?: string[] };
@@ -207,8 +211,13 @@ function OrderForm() {
         p[2],
         step
       );
+
       if (found) {
         next = `${p[0]}.${p[1]}.${found.name}`;
+
+        if (orderEntries.fields.length === Number(p[1]) && ctx.key === "Enter") {
+          document.getElementById("add_row")?.click();
+        }
       }
     }
     else {
@@ -231,7 +240,7 @@ function OrderForm() {
 
   async function getExchangeRate(ccp?: string) {
     const cur = ccp?.split("/") ?? [undefined, undefined];
-    const exchange = (await ExchangeService.findExchange({ exchangeBase: cur[0], exchangeTarget: cur[1]}))?.content;
+    const exchange = (await ExchangeService.findExchange({ exchangeTarget: cur[0], exchangeSource: cur[1]}))?.content;
     return exchange?.length ? exchange[0].exchangeRate : undefined;
   }
 
@@ -242,80 +251,82 @@ function OrderForm() {
     activeName.current = el?.getAttribute("name") ?? null;
   });
 
+  const recalc =  useCallback<WatchObserver<FormType>>(async (values, { name, type }) => {
+    if ((type === "change" && name !== "selected") || (type === undefined && (name === "selected" || values.action as string === "save"))) {
+      const p = splitPath(name as Path<FormType>, 2);
+      let target = p.at(-1);
+      let orderTaxPct = values.orderTaxPct;
+      if (target === "typeId") {
+        setLoading(true);
+        try {
+          const typeId = Number(values.orderType?.typeId);
+          const last = await OrderFormService.getLastOrderByOrderType({
+            orderTypeId: typeId,
+            orderId: values.orderId
+          });
+          if (last) {
+            formUse.setValue("orderSupplier", last.orderSupplier);
+            formUse.setValue("orderType", last.orderType);
+            formUse.setValue("orderTaxPct", last.orderType?.typeTaxPct);
+            formUse.setValue("orderCcp", last.orderType?.typeCcp);
+            formUse.setValue("orderRate", await getExchangeRate(last.orderType?.typeCcp));
+            formUse.setValue("orderSupplier", last.orderSupplier);
+            formUse.setValue("orderCounter", last.orderCounter);
+            formUse.setValue("orderNum", last.orderNum);
+            formUse.setValue("orderDate", last.orderDate);
+            orderTaxPct = last.orderType?.typeTaxPct;
+            target = "orderTaxPct";
+            await formUse.trigger();
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      if (target === "entryQuantity"
+        || target === "entryPrice"
+        || target === "selected"
+        || target === "entryDiscountPct"
+        || target === "orderTaxPct"
+      ) {
+        const current = p[1] !== undefined ? Number(p[1]) : undefined;
+        const summary = { orderDiscount: 0, orderSum: 0, orderTax: 0, orderTotal: 0 };
+
+        values.orderEntries?.forEach((entry, index) => {
+          if (entry) {
+            const normal = (entry.entryQuantity ?? 0) * (entry.entryPrice ?? 0);
+            const discount = normal * ((entry.entryDiscountPct ?? 0) / 100.0);
+            const sum = normal - discount;
+            const tax = sum * (orderTaxPct ?? 0) / 100;
+
+            summary.orderDiscount = summary.orderDiscount + discount;
+            summary.orderSum = summary.orderSum + sum;
+            summary.orderTax = summary.orderTax + tax;
+            summary.orderTotal = summary.orderTotal + sum + tax;
+
+            if (current === undefined || current === index) {
+              formUse.setValue(`orderEntries.${index}.entryDiscount`, toFixedNumber(discount, 2), programmatic);
+              formUse.setValue(`orderEntries.${index}.entrySum`, toFixedNumber(sum, 2), programmatic);
+              formUse.setValue(`orderEntries.${index}.entryTax`, toFixedNumber(tax, 2), programmatic);
+              formUse.setValue(`orderEntries.${index}.entryTotal`, toFixedNumber(sum + tax, 2), programmatic);
+            }
+          }
+        });
+        formUse.setValue("orderDiscount", toFixedNumber(summary?.orderDiscount, 2), programmatic);
+        formUse.setValue("orderSum", toFixedNumber(summary?.orderSum, 2), programmatic);
+        formUse.setValue("orderTax", toFixedNumber(summary?.orderTax, 2), programmatic);
+        formUse.setValue("orderTotal", toFixedNumber(summary?.orderTotal, 2), programmatic);
+      }
+      else if (target === "orderCcp") {
+        formUse.setValue("orderRate", await getExchangeRate(values.orderCcp), programmatic);
+      }
+      // console.log({type, name, path, target, values});
+    }
+  }, []);
+
   useEffect(() => {
     // Subscribe to all field changes
-    const subscription = formUse.watch(async (values, { name, type }) => {
-      if ((type === "change" && name !== "selected") || (type === undefined && (name === "selected" || values.action as string === "save"))) {
-        const p = splitPath(name as Path<FormType>, 2);
-        let target = p.at(-1);
-        let orderTaxPct = values.orderTaxPct;
-        if (target === "typeId") {
-          setLoading(true);
-          try {
-            const typeId = Number(values.orderType?.typeId);
-            const last = await OrderFormService.getLastOrderByOrderType({ orderTypeId: typeId });
-            if (last) {
-              formUse.setValue("orderSupplier", last.orderSupplier);
-              if (last) {
-                formUse.setValue("orderType", last.orderType);
-                formUse.setValue("orderTaxPct", last.orderType?.typeTaxPct);
-                formUse.setValue("orderCcp", last.orderType?.typeCcp);
-                formUse.setValue("orderRate", await getExchangeRate(last.orderType?.typeCcp));
-                formUse.setValue("orderSupplier", last.orderSupplier);
-                formUse.setValue("orderCounter", last.orderCounter);
-                formUse.setValue("orderNum", last.orderNum);
-                formUse.setValue("orderDate", last.orderDate);
-                formUse.setValue("orderState", last.orderState);
-                orderTaxPct = last.orderType?.typeTaxPct;
-                target = "orderTaxPct";
-                await formUse.trigger();
-              }
-            }
-          }
-          finally {
-            setLoading(false);
-          }
-        }
-
-        if (target === "entryQuantity"
-          || target === "entryPrice"
-          || target === "selected"
-          || target === "entryDiscountPct"
-          || target === "orderTaxPct"
-        ) {
-          const current = p[1] !== undefined ? Number(p[1]) : undefined;
-          const summary = { orderDiscount: 0, orderSum: 0, orderTax: 0, orderTotal: 0 };
-          values.orderEntries?.forEach((entry, index) => {
-            if (entry) {
-              const normal = (entry.entryQuantity ?? 0) * (entry.entryPrice ?? 0);
-              const discount = normal * ((entry.entryDiscountPct ?? 0) / 100.0);
-              const sum = normal - discount;
-              const tax = sum * (orderTaxPct ?? 0) / 100;
-
-              summary.orderDiscount = summary.orderDiscount + discount;
-              summary.orderSum = summary.orderSum + sum;
-              summary.orderTax = summary.orderTax + tax;
-              summary.orderTotal = summary.orderTotal + sum + tax;
-
-              if (current === undefined || current === index) {
-                formUse.setValue(`orderEntries.${index}.entryDiscount`, toFixedNumber(discount, 2), programmatic);
-                formUse.setValue(`orderEntries.${index}.entrySum`, toFixedNumber(sum, 2), programmatic);
-                formUse.setValue(`orderEntries.${index}.entryTax`, toFixedNumber(tax, 2), programmatic);
-                formUse.setValue(`orderEntries.${index}.entryTotal`, toFixedNumber(sum + tax, 2), programmatic);
-              }
-            }
-          });
-          formUse.setValue("orderDiscount", toFixedNumber(summary?.orderDiscount, 2), programmatic);
-          formUse.setValue("orderSum", toFixedNumber(summary?.orderSum, 2), programmatic);
-          formUse.setValue("orderTax", toFixedNumber(summary?.orderTax, 2), programmatic);
-          formUse.setValue("orderTotal", toFixedNumber(summary?.orderTotal, 2), programmatic);
-        }
-        else if (target === "orderCcp") {
-          formUse.setValue("orderRate", await getExchangeRate(values.orderCcp), programmatic);
-        }
-        // console.log({type, name, path, target, values});
-      }
-    });
+    const subscription = formUse.watch(recalc);
 
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe();
@@ -343,30 +354,48 @@ function OrderForm() {
       await formUse.trigger();
     }
     else if (actionValue === "save") {
+      await recalc(values, { name: "orderTaxPct", type: "change" });
       const isValid = await formUse.trigger();
       if (isValid) {
         const zeroPrice: number[] = [];
         const zeroQuantity: number[] = [];
+        const unique = new Set<number>();
+        const repeated: number[] = [];
         values.orderEntries?.forEach((entry, index) => {
+          const row = index + 1;
+          const productId = entry.entryProduct?.productId ?? 0;
+          if (unique.has(productId)) {
+            repeated.push(row)
+          }
+          else {
+            unique.add(productId);
+          }
           if (entry.entryPrice == 0) {
-            zeroPrice.push(index + 1);
+            zeroPrice.push(row);
           }
           if (entry.entryQuantity == 0) {
-            zeroQuantity.push(index + 1);
+            zeroQuantity.push(row);
           }
         });
         let confirmed = true;
-        if (zeroPrice.length || zeroQuantity.length) {
-          const confirmation = await modalConfirm.value(
-            {
-              title: t("~confirm.question"),
-              content: <>{!!zeroPrice.length && `${t("~confirm.zeroPrice")}: ${zeroPrice}`}
-                {!!zeroPrice.length && <br/>}
-                {!!zeroQuantity.length && `${t("~confirm.zeroQuantity")}: ${zeroQuantity}`}
-              </>
-            }
-          );
-          confirmed = confirmation.result?.confirmed ?? false;
+        if (zeroPrice.length || zeroQuantity.length || repeated.length) {
+          const warning = [
+            ["~confirm.zeroPrice", zeroPrice.join(", ")],
+            ["~confirm.zeroQuantity", zeroQuantity.join(", ")],
+            ["~confirm.repeated", repeated.join(", ")],
+          ]
+
+          const question = await modalConfirm.value({
+            title: t("~confirm.question"),
+            content: <>
+              {warning
+                .filter(([, value]) => value.length > 0)
+                .map(([key, value]) => (
+                  <div key={key}>{t(key)}: {value}</div>
+                ))}
+            </>
+          });
+          confirmed = question.result?.confirmed ?? false;
         }
 
         if (confirmed) {
@@ -387,10 +416,11 @@ function OrderForm() {
             formUse.reset(response);
 
             if (response.orderId !== undefined) {
-              const confirmation = await modalConfirm.value(
-                { title: t("~confirm.print.title"), content: t("~confirm.question") }
-              );
-              if (confirmation.result?.confirmed) {
+              const question = await modalConfirm.value({
+                title: t("~confirm.print.title"),
+                content: t("~confirm.question")
+              });
+              if (question.result?.confirmed) {
                 printOrder(mapToReportDto(response));
               }
               navigate("/app/order", { replace: true });
@@ -404,28 +434,98 @@ function OrderForm() {
       }
     }
     else if (actionValue === "cancel") {
-      const confirmation = await modalConfirm.value(
-        { title: t("~confirm.undo.title"), content: t("~confirm.question") }
-      );
-      if (confirmation.result?.confirmed) {
+      const question = await modalConfirm.value({
+        title: t("~confirm.undo.title"),
+        content: t("~confirm.question")
+      });
+      if (question.result?.confirmed) {
         formUse.reset();
       }
     }
     else if (actionValue === "delete") {
-      if (values.selected?.length) {
-        const confirmation = await modalConfirm.value(
-          { title: t("~confirm.delete.title"), content: t("~confirm.question") }
-        );
-        if (confirmation.result?.confirmed) {
-          const ids = values.selected.map(id => Number(id));
-          orderEntries.remove(ids);
-          const len = orderEntries.fields.length - ids.length;
-          for (let i = 0; i < len; i++) {
-            formUse.setValue(`orderEntries.${i}.entryRow`, i + 1, programmatic);
-          }
-          formUse.setValue("selected", len === 0 ? [] : ids[0] < len ? [String(ids[0])] : [String(len - 1)], programmatic);
-          await formUse.trigger();
+      if (!values.selected?.length) {
+        await infoSelectRequired();
+        return;
+      }
+      const question = await modalConfirm.value({
+        title: t("~confirm.delete.title"),
+        content: t("~confirm.question")
+      });
+      if (question.result?.confirmed) {
+        const ids = values.selected.map(id => Number(id));
+        orderEntries.remove(ids);
+        const len = orderEntries.fields.length - ids.length;
+        for (let i = 0; i < len; i++) {
+          formUse.setValue(`orderEntries.${i}.entryRow`, i + 1, programmatic);
         }
+        formUse.setValue("selected", len === 0 ? [] : ids[0] < len ? [String(ids[0])] : [String(len - 1)], programmatic);
+        await formUse.trigger();
+      }
+    }
+    else if (actionValue === "merge") {
+      if (!values.selected?.length) {
+        await infoSelectRequired();
+        return;
+      }
+      const question = await modalConfirm.value({
+        title: t("~confirm.merge.title"),
+        content: t("~confirm.question")
+      });
+      if (question.result?.confirmed) {
+        const fields = orderEntries.fields;
+
+        const productIndexMap = new Map<number, number>();
+        const duplicateIndexes: number[] = [];
+
+        // important: process in ascending order so the first selected row wins
+        [...values.selected]
+          .forEach((key) => {
+            const index = Number(key);
+            const entry = fields[index];
+            if (!entry) return;
+
+            const productId = entry.entryProduct?.productId;
+            if (!productId) return;
+
+            if (productIndexMap.has(productId)) {
+              const firstIndex = productIndexMap.get(productId)!;
+
+              const firstQty =
+                formUse.getValues(
+                  `orderEntries.${firstIndex}.entryQuantity`
+                ) || 0;
+
+              const currentQty = entry.entryQuantity || 0;
+
+              // aggregate quantity into first selected row
+              formUse.setValue(
+                `orderEntries.${firstIndex}.entryQuantity`,
+                firstQty + currentQty,
+                programmatic
+              );
+
+              // mark this row for removal
+              duplicateIndexes.push(index);
+            } else {
+              productIndexMap.set(productId, index);
+            }
+          });
+
+        // remove duplicates (descending order is critical)
+        if (duplicateIndexes.length) {
+          orderEntries.remove(duplicateIndexes.sort((a, b) => b - a));
+        }
+
+        // re-number entryRow
+        const newLength =
+          orderEntries.fields.length - duplicateIndexes.length;
+
+        for (let i = 0; i < newLength; i++) {
+          formUse.setValue(`orderEntries.${i}.entryRow`, i + 1, programmatic);
+        }
+
+        formUse.setValue("selected", [], programmatic);
+        await formUse.trigger();
       }
     }
     else if (actionValue === "print") {
@@ -438,6 +538,17 @@ function OrderForm() {
         finally {
           setLoading(false);
         }
+      }
+    }
+    else if (actionValue === "export") {
+      if (!values.selected?.length) {
+        infoSelectRequired();
+        return;
+      }
+      const question = await modalExport.value({ title: t("~confirm.export.title") });
+      const csv = question.result;
+      if (csv?.confirmed) {
+        await downloadTable(tableRef, "order", csv.bom, csv.sep, csv.eol, csv.out);
       }
     }
     else {
@@ -474,7 +585,7 @@ function OrderForm() {
         }
         else if (fn === "location") {
           const res = (await modalContact.value(
-            { contactCode1: values.orderCustomer?.contactCode1 }
+            { contactText: values.orderCustomer?.contactCode1 }
           )).result?.at(-1);
           if (res) {
             if (path === "orderCustomer") {
@@ -485,7 +596,7 @@ function OrderForm() {
         }
         else if (fn === "contact.uic") {
           if (values.orderCustomer?.contactCode1) {
-            const found = await RequestService.requestJson({api: "uic", params: values.orderCustomer?.contactCode1});
+            const found = await UtilityService.requestJson({api: "uic", params: values.orderCustomer?.contactCode1}) as any;
             if (found) {
               formUse.setValue("orderCustomer.contactName", found["contactName"], programmatic);
               formUse.setValue("orderCustomer.contactAddress", found["contactAddress"], programmatic);
@@ -522,28 +633,29 @@ function OrderForm() {
                 });
               }
               const product = list[j];
-              formUse.setValue(`orderEntries.${k}.entryProduct`, product, programmatic);
-              formUse.setValue(`orderEntries.${k}.entryLabel`, product.productName, programmatic);
-              formUse.setValue(`orderEntries.${k}.entryUnits`, product.productUnits, programmatic);
-              formUse.setValue(`orderEntries.${k}.entryMeasure`, product.productMeasure, programmatic);
-              formUse.setValue(`orderEntries.${k}.entryCode`, product[codeField] as string, programmatic);
-              formUse.setValue(`orderEntries.${k}.entryBarcode`, product.productBarcode, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryId`, undefined);
+              formUse.setValue(`orderEntries.${k}.entryProduct`, product);
+              formUse.setValue(`orderEntries.${k}.entryLabel`, product.productName);
+              formUse.setValue(`orderEntries.${k}.entryUnits`, product.productUnits);
+              formUse.setValue(`orderEntries.${k}.entryMeasure`, product.productMeasure);
+              formUse.setValue(`orderEntries.${k}.entryCode`, product[codeField] as string);
+              formUse.setValue(`orderEntries.${k}.entryBarcode`, product.productBarcode);
               const price = (product?.[priceField] as number) ?? 0.0;
               if (values.orderCcp?.endsWith(product.productCy ?? "")) {
-                formUse.setValue(`orderEntries.${k}.entryPrice`, toFixedNumber(price / rate, 2), programmatic);
+                formUse.setValue(`orderEntries.${k}.entryPrice`, toFixedNumber(price / rate, 2));
               }
               else {
-                formUse.setValue(`orderEntries.${k}.entryPrice`, price, programmatic);
+                formUse.setValue(`orderEntries.${k}.entryPrice`, price);
               }
-              formUse.setValue(`orderEntries.${k}.entryAvailable`, product.productAvailable, programmatic);
+              formUse.setValue(`orderEntries.${k}.entryAvailable`, product.productAvailable);
             }
 
             const len = orderEntries.fields.length - 1;
             for (let j = len; j < len + list.length; j ++) {
-              formUse.setValue(`orderEntries.${j}.entryRow`, j + 1, programmatic);
+              formUse.setValue(`orderEntries.${j}.entryRow`, j + 1);
             }
-
             await formUse.trigger();
+            await recalc(formUse.getValues(), { type: "change", name: `orderEntries.${i}.entryPrice`});
             setTimeout(() => formUse.setFocus(`orderEntries.${i}.entryQuantity`, { shouldSelect: true }), 300);
           }
         }
@@ -592,9 +704,9 @@ function OrderForm() {
                     /*div*/>
                       {
                         item.name
-                          ? <Input<OrderFormDto>
+                          ? <Input<OrderFormDto, FormType>
                             key={item.name}
-                            form={formUse}
+                            form={formUse as any}
                             rules={item.rules}
                             variant={item.variant ?? "label"}
                             name={item.name as Path<OrderFormDto>}
@@ -620,6 +732,7 @@ function OrderForm() {
             return (
               <div key={group} className={`flex-1 overflow-y-auto`}>
                 <Table
+                  onTableRef={el => (tableRef.current = el)}
                   context={"order"}
                   data={orderEntries.fields}
                   dataKey={"entryId"}
@@ -647,9 +760,9 @@ function OrderForm() {
                   {(props) => {
                     return (
                       props.item.name
-                        ? <Input<OrderFormDto>
+                        ? <Input<OrderFormDto, FormType>
                           key={props.item.name}
-                          form={formUse}
+                          form={formUse as any}
                           rules={props.item.rules}
                           name={`orderEntries.${props.index}.${props.item.name}` as Path<OrderFormDto>}
                           type={props.item.mode === "hidden" ? "hidden" : props.item.type}
@@ -665,7 +778,7 @@ function OrderForm() {
                     )
                   }}
                 </Table>
-                <button type={"submit"} className={"btn w-full"} name={"action"} value={`product:orderEntries.${orderEntries.fields.length}.entryLabel`}>{t("~action.add")}</button>
+                <button type={"submit"} className={"btn w-full"} id={"add_row"} name={"action"} value={`product:orderEntries.${orderEntries.fields.length}.entryLabel`}>{t("~action.add")}</button>
               </div>
             )
           }
@@ -674,6 +787,7 @@ function OrderForm() {
     </AsyncFragment>
     {modalConfirm.component}
     {modalCalendar.component}
+    {modalExport.component}
     {modalContact.component}
     {modalProduct.component}
     {loading && <Loading/>}

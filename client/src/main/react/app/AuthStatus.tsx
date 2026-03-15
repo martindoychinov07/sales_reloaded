@@ -1,23 +1,6 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {useAuth} from "../context/auth/useAuth.tsx";
-import {useNavigate} from "react-router-dom";
-import { useI18n } from "../context/i18n/useI18n.tsx";
-import { useConfirm } from "../utils/modal/useConfirm.tsx";
+import { useAuth } from "../context/auth/useAuth.tsx";
+import { useNavigate } from "react-router-dom";
+import { useConfirm, useI18n } from "@crud-daisyui/utils";
 
 export function AuthStatus() {
   const { t } = useI18n();
@@ -25,19 +8,31 @@ export function AuthStatus() {
   const navigate = useNavigate();
   const modalConfirm = useConfirm();
 
+  async function handleLogout() {
+    const question = await modalConfirm.value({
+      title: t("~confirm.title"),
+      content: t("~confirm.question")
+    });
+    if (question.result?.confirmed) {
+      auth.signout(() => {
+        navigate("/", { replace: true })
+        navigate(0);
+      });
+    }
+  }
+
   if (!auth.username) {
-    return <p>Login</p>;
+    return <p>{t("~login.action")}</p>;
   }
 
   return (<>
-    <div className="tooltip tooltip-bottom">
-      <div className="tooltip-content">{t("~action.logout")}</div>
-      <div onClick={() => {
-        auth.signout(() => {
-          navigate("/", { replace: true })
-          navigate(0);
-        });
-      }}>{auth.fullname}</div>
+    <div className="dropdown dropdown-bottom dropdown-end">
+      <div tabIndex={0} role="button" className={"w-auto"}>{auth.fullname}</div>
+      <ul tabIndex={-1} className="dropdown-content menu bg-base-100 auto shadow-sm -mr-2 mt-2">
+        <li><div onClick={() => navigate("/app")}>{t("~home.title")}</div></li>
+        <li><div onClick={() => navigate("/app/admin")}>{t("~action.admin")}</div></li>
+        <li><div onClick={async() => handleLogout()}>{t("~action.logout")}</div></li>
+      </ul>
     </div>
     {modalConfirm.component}
   </>);

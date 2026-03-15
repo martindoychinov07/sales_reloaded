@@ -1,21 +1,5 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @import "tailwindcss";
-
+@source "../../../node_modules/@crud-daisyui/utils/dist/**/*.{js,ts,jsx,tsx}";
 @source inline("{,lg:,sm:}{grid-cols-,col-span-}{{1..24..1}}");
 @plugin "daisyui";
 
@@ -35,9 +19,13 @@
 
 .table {
   @apply border-r border-gray-300 rounded-none;
-  min-width: max-content;
-  width: fit-content;
-  /*contain: layout paint;*/
+  width: 50px;
+  table-layout: fixed;
+  contain: layout paint;
+
+  & .selector {
+    width: 36px
+  }
 
   & td, & th {
     @apply border-l border-b border-gray-300 px-[6px] py-[2px] max-w-[3em] align-middle whitespace-nowrap overflow-hidden;
@@ -50,10 +38,11 @@
       @apply hidden;
     }
 
-    & > span.text-right {
-      display: block;
+    & > div {
+      width: inherit;
     }
   }
+
 
   & td:has(input),
   & td:has(select) {

@@ -1,33 +1,8 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { type ReportDto, ReportService } from "../../api/sales";
-import {
-  type ListFormModel,
-} from "../../utils/ListFormModel.ts";
-import { getDateOffset } from "../../utils/DateUtils.ts";
-import {
-  getOptionDirection, getOptionOrderState,
-  getOptionOrderType,
-  getOptionPayment,
-  getOptionSort,
-  getOrderTypeList
-} from "./OptionModel.ts";
+import { type CrudFormModel, getDateOffset, } from "@crud-daisyui/utils";
+import { getOptionOrderState, getOptionOrderType, getOptionPayment, getOrderTypeList } from "./OptionModel.ts";
 
-export const ReportListModel: ListFormModel<Parameters<typeof ReportService.findReport>[number], ReportDto> = {
+export const ReportListModel: CrudFormModel<Parameters<typeof ReportService.findReport>[number], ReportDto> = {
   action: {
     search: ReportService.findReport,
     create: undefined,
@@ -39,7 +14,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
       fromDate: getDateOffset(0, "from").toISOString(),
       toDate: getDateOffset(0, "to").toISOString(),
 
-      page: 0,
+      page: 1,
       size: 1000,
       sort: "orderDate",
       direction: "ASC"
@@ -53,8 +28,15 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
   fields: {
     layout: {
       variant: "inner",
-      columns: 8,
+      columns: 16,
       items: [
+        {
+          group: "args",
+          name: "default",
+          label: "~action.default",
+          type: "submit",
+          mode: "hidden"
+        },
         {
           span: 2,
           group: "args",
@@ -85,35 +67,12 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         {
           span: 2,
           group: "args",
-          name: "search",
-          label: "~action.search",
-          type: "submit",
+          name: "orderNum",
+          label: "~report.ref",
+          type: "search",
         },
         {
           span: 2,
-          group: "args",
-          name: "customerName",
-          label: "~order.customer.name",
-          type: "dialog",
-          source: "contact",
-        },
-        {
-          span: 2,
-          group: "args",
-          name: "customerLocation",
-          label: "~order.customer.location",
-          type: "text",
-        },
-        {
-          span: 2,
-          group: "args",
-          name: "productName",
-          label: "~product.name",
-          type: "dialog",
-          source: "product",
-        },
-        {
-          span: 1,
           group: "args",
           name: "orderPayment",
           label: "~order.payment",
@@ -121,7 +80,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           source: "payment",
         },
         {
-          span: 1,
+          span: 2,
           group: "args",
           name: "orderState",
           label: "~order.state",
@@ -130,44 +89,63 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         },
         {
           span: 1,
-          group: "paging",
+          group: "args",
           name: "page",
           label: "~filter.page",
           type: "number",
+          rules: {
+            required: true,
+          }
         },
         {
           span: 1,
-          group: "paging",
+          group: "args",
           name: "size",
           label: "~filter.size",
           type: "number",
+          rules: {
+            required: true,
+          }
         },
         {
-          span: 1,
-          group: "paging",
-          name: "sort",
-          label: "~filter.sort",
-          type: "select",
-          source: "sort",
-        },
-        {
-          span: 1,
-          group: "paging",
-          name: "direction",
-          label: "~filter.direction",
-          type: "select",
-          source: "direction",
+          span: 2,
+          group: "args",
+          name: "search",
+          label: "~action.search",
+          type: "submit",
         },
         {
           span: 4,
-          group: "paging",
-          name: "view",
-          label: "~filter.view",
-          type: "select",
-          source: "view",
+          group: "args",
+          name: "customerName",
+          label: "~order.customer.name",
+          type: "dialog",
+          source: "contact",
         },
         {
-          span: 1,
+          span: 4,
+          group: "args",
+          name: "customerLocation",
+          label: "~order.customer.location",
+          type: "text",
+        },
+        {
+          span: 4,
+          group: "args",
+          name: "productText",
+          label: "~order.product",
+          type: "dialog",
+          source: "product",
+        },
+        {
+          span: 4,
+          group: "args",
+          name: "productNote",
+          label: "~product.note",
+          type: "search",
+        },
+        {
+          span: 2,
           group: "action",
           name: "create",
           label: "~action.create",
@@ -176,7 +154,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
-          span: 1,
+          span: 2,
           group: "action",
           name: "copy",
           label: "~action.copy",
@@ -185,7 +163,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
-          span: 1,
+          span: 2,
           group: "action",
           name: "edit",
           label: "~action.edit",
@@ -194,21 +172,21 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           disable: ["create", "copy", "edit", "delete", "export", "search", "close", "ok"],
         },
         {
-          span: 1,
+          span: 2,
           group: "action",
           name: "delete",
           label: "~action.delete",
           type: "button",
         },
         {
-          span: 1,
+          span: 2,
           group: "action",
           name: "export",
           label: "~action.export",
           type: "button",
         },
         {
-          span: 1,
+          span: 2,
           group: "action",
           name: "print",
           label: "~action.print",
@@ -253,6 +231,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~order.type",
           type: "text",
           format: "~",
+          source: "orderType"
         },
         {
           group: "input",
@@ -281,8 +260,20 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
         },
         {
           group: "input",
+          name: "entryBarcode",
+          label: "~entry.barcode",
+          type: "text"
+        },
+        {
+          group: "input",
           name: "productName",
           label: "~order.product",
+          type: "text"
+        },
+        {
+          group: "input",
+          name: "productNote",
+          label: "~product.note",
           type: "text"
         },
         {
@@ -298,6 +289,13 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~entry.quantity",
           type: "number",
           format: "~format.quantity",
+        },
+        {
+          group: "input",
+          name: "entryPrice",
+          label: "~entry.price",
+          type: "number",
+          format: "~format.total",
         },
         {
           group: "input",
@@ -327,6 +325,12 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           type: "text"
         },
         {
+          name: "entryDiscountPct",
+          label: "~entry.discountPct",
+          type: "number",
+          format: "~format.percent",
+        },
+        {
           group: "input",
           name: "orderCcp",
           label: "~order.ccp",
@@ -352,6 +356,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~order.payment",
           type: "text",
           format: "~payment.",
+          source: "payment",
         },
         {
           group: "input",
@@ -365,6 +370,7 @@ export const ReportListModel: ListFormModel<Parameters<typeof ReportService.find
           label: "~order.state",
           type: "text",
           format: "~orderState.",
+          source: "orderState"
         },
       ]
     },

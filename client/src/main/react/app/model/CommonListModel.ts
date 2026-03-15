@@ -1,20 +1,4 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type {LayoutModelItem} from "../../utils/LayoutModel.ts";
+import type { LayoutModelItem } from "@crud-daisyui/utils";
 
 export function getCommonActions<T>() {
   const actions: LayoutModelItem<T>[] = [
@@ -38,6 +22,13 @@ export function getCommonActions<T>() {
         required: true,
       }
     },
+    {
+      span: 2,
+      group: "args",
+      name: "search",
+      label: "~action.search",
+      type: "submit",
+    },
     // {
     //   span: 2,
     //   group: "args",
@@ -56,14 +47,6 @@ export function getCommonActions<T>() {
     // },
     {
       span: 2,
-      group: "args",
-      name: "view",
-      label: "~filter.view",
-      type: "select",
-      source: "view",
-    },
-    {
-      span: 1,
       group: "action",
       name: "create",
       label: "~action.create",
@@ -72,7 +55,7 @@ export function getCommonActions<T>() {
       disable: ["create", "copy", "edit", "delete", "export", "search", "close", "confirm", "mode"],
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "copy",
       label: "~action.copy",
@@ -81,7 +64,7 @@ export function getCommonActions<T>() {
       disable: ["create", "copy", "edit", "delete", "export", "search", "close", "confirm", "mode"],
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "edit",
       label: "~action.edit",
@@ -90,26 +73,26 @@ export function getCommonActions<T>() {
       disable: ["create", "copy", "edit", "delete", "export", "search", "close", "confirm", "mode"],
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "delete",
       label: "~action.delete",
       type: "button",
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "export",
       label: "~action.export",
       type: "button",
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       label: "",
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "cancel",
       label: "~action.cancel",
@@ -118,7 +101,7 @@ export function getCommonActions<T>() {
       disable: ["save", "cancel"],
     },
     {
-      span: 1,
+      span: 2,
       group: "action",
       name: "save",
       label: "~action.save",
@@ -127,26 +110,26 @@ export function getCommonActions<T>() {
       disable: ["save", "cancel"],
     },
     {
-      span: 1,
+      span: 2,
       group: "modal",
       name: "mode",
       label: "~action.mode",
       type: "toggle",
     },
     {
-      span: 5,
+      span: 10,
       group: "modal",
       label: "",
     },
     {
-      span: 1,
+      span: 2,
       group: "modal",
       name: "close",
       label: "~action.close",
       type: "button",
     },
     {
-      span: 1,
+      span: 2,
       group: "modal",
       name: "confirm",
       label: "~action.ok",

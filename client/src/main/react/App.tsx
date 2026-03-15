@@ -1,38 +1,22 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Route, Routes,} from "react-router-dom";
+import { Route, Routes, } from "react-router-dom";
 import './App.css'
-import {AuthProvider} from "./context/auth/AuthProvider.tsx";
-import {AuthLayout} from "./context/auth/AuthLayout.tsx";
+import { AuthProvider } from "./context/auth/AuthProvider.tsx";
+import { AuthLayout } from "./context/auth/AuthLayout.tsx";
 import OrderForm from "./app/OrderForm.tsx";
-import {PublicLayout} from "./app/PublicLayout.tsx";
-import {AppLayout} from "./app/AppLayout.tsx";
-import {PublicHome} from "./app/PublicHome.tsx";
-import {AdminLayout} from "./app/admin/AdminLayout.tsx";
-import {AdminHome} from "./app/admin/AdminHome.tsx";
-import {AppHome} from "./app/AppHome.tsx";
-import {ContactAdmin} from "./app/admin/ContactAdmin.tsx";
-import {ProductAdmin} from "./app/admin/ProductAdmin.tsx";
-import {ExchangeAdmin} from "./app/admin/ExchangeAdmin.tsx";
-import {TranslationAdmin} from "./app/admin/TranslationAdmin.tsx";
-import {SettingAdmin} from "./app/admin/SettingAdmin.tsx";
-import {TypeAdmin} from "./app/admin/TypeAdmin.tsx";
-import {I18nProvider} from "./context/i18n/I18nProvider.tsx";
-import {ReportForm} from "./app/ReportForm.tsx";
+import { PublicLayout } from "./app/PublicLayout.tsx";
+import { AppLayout } from "./app/AppLayout.tsx";
+import { PublicHome } from "./app/PublicHome.tsx";
+import { AdminLayout } from "./app/admin/AdminLayout.tsx";
+import { AdminHome } from "./app/admin/AdminHome.tsx";
+import { AppHome } from "./app/AppHome.tsx";
+import { ContactAdmin } from "./app/admin/ContactAdmin.tsx";
+import { ProductAdmin } from "./app/admin/ProductAdmin.tsx";
+import { ExchangeAdmin } from "./app/admin/ExchangeAdmin.tsx";
+import { TranslationAdmin } from "./app/admin/TranslationAdmin.tsx";
+import { SettingAdmin } from "./app/admin/SettingAdmin.tsx";
+import { TypeAdmin } from "./app/admin/TypeAdmin.tsx";
+import { I18nProvider } from "./context/i18n/I18nProvider.tsx";
+import { ReportForm } from "./app/ReportForm.tsx";
 import { Tooltip } from "react-tooltip";
 import { AppUserAdmin } from "./app/admin/AppUserAdmin.tsx";
 

@@ -1,19 +1,3 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
@@ -45,7 +29,7 @@ export const isBlob = (value: any): value is Blob => {
     typeof value.arrayBuffer === 'function' &&
     typeof value.constructor === 'function' &&
     typeof value.constructor.name === 'string' &&
-    /^(Blob|File)$/.test(value.constructor.name) &&
+    /$(Get-Content header.txt -Raw)(Blob|File)$/.test(value.constructor.name) &&
     /^(Blob|File)$/.test(value[Symbol.toStringTag])
   );
 };
@@ -248,14 +232,16 @@ export const getResponseHeader = (response: Response, responseHeader?: string): 
 export const getResponseBody = async (response: Response): Promise<any> => {
   if (response.status !== 204) {
     try {
-      const contentType = response.headers.get('Content-Type');
+      const contentType = response.headers.get('Content-Type')?.toLowerCase();
       if (contentType) {
-        const jsonTypes = ['application/json', 'application/problem+json']
-        const isJSON = jsonTypes.some(type => contentType.toLowerCase().startsWith(type));
-        if (isJSON) {
+        if (contentType.includes("json")) {
           return await response.json();
-        } else {
+        }
+        else if (/(text|html|xml|csv)/.test(contentType)) {
           return await response.text();
+        }
+        else {
+          return await response.blob();
         }
       }
     } catch (error) {
@@ -263,6 +249,7 @@ export const getResponseBody = async (response: Response): Promise<any> => {
     }
   }
   return undefined;
+
 };
 
 export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {

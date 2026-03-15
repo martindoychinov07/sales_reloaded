@@ -1,26 +1,7 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import { I18nContext, type I18nContextType } from "./I18nContext.tsx";
+import { AsyncFragment, I18nContext, type I18nContextType, Loading, useAsyncState } from "@crud-daisyui/utils";
 import { type ReactNode, useCallback, useState } from "react";
 import { type TranslationDto, TranslationService } from "../../api/sales";
 import type { Path } from "react-hook-form";
-import { useAsyncState } from "../../utils/async/useAsyncState.tsx";
-import { AsyncFragment } from "../../utils/async/AsyncFragment.tsx";
-import { Loading } from "../../utils/Loading.tsx";
 
 interface I18nProviderProps {
   children: ReactNode;
@@ -62,6 +43,7 @@ export function I18nProvider(props: I18nProviderProps) {
       const t = (text: string | undefined | null, lang?: string) => {
         if (!text) return undefined;
         if (!text.startsWith("~")) return text;
+        if (text.length <= 1) return "";
         const i18n = translation?.[text]?.[(lang ?? language) as Path<TranslationDto>] as (string | undefined);
         if (i18n === undefined) console.log(text);
         return i18n ?? text;

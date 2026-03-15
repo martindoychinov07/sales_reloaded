@@ -1,29 +1,13 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type { InputOption } from "../../utils/Input.tsx";
+import type { InputOption, LayoutModelItem } from "@crud-daisyui/utils";
 import {
   type ExchangeDto,
   ExchangeService,
   OrderFormDto,
   OrderTypeDto,
-  OrderTypeService, type SettingDto,
+  OrderTypeService,
+  type SettingDto,
   SettingService
 } from "../../api/sales";
-import type { LayoutModelItem } from "../../utils/LayoutModel.ts";
 
 function optionAll(option?: string) {
   return { label: option === undefined ? "" : option || "~option.all", value: option !== undefined ? "" : undefined }
@@ -39,11 +23,23 @@ export function getOptionPayment(option?: string): InputOption[] {
   )
 }
 
+export function getOptionOrderEval(option?: string): InputOption[] {
+  return (
+    [
+      optionAll(option),
+      { value: "none", label: "~orderEval.none" },
+      { value: "push", label: "~orderEval.push" },
+      { value: "pull", label: "~orderEval.pull" },
+      { value: "init", label: "~orderEval.init" },
+    ]
+  )
+}
+
 export function getOptionOrderState(option?: string): InputOption[] {
   return [optionAll(option), ...Object.values(OrderFormDto.orderState)
     .reverse()
     .map(value => (
-      { value: value, label: `~orderState.${value}` }
+      { value: value, label: `~orderState.${value}`, disabled: option ? undefined : value === OrderFormDto.orderState.CANCELED }
     ))];
 }
 
@@ -58,13 +54,13 @@ export function getOptionOrderType(list?: OrderTypeDto[], option?: string): Inpu
 }
 
 export async function getExchangeList() {
-  return (await ExchangeService.findExchange({ sort: "exchangeBase" })).content;
+  return (await ExchangeService.findExchange({ sort: "exchangeSource" })).content;
 }
 
-export function getOptionExchange(list?: ExchangeDto[]): InputOption[] {
-  return list?.map(item => (
-    { value: `${item.exchangeTarget}/${item.exchangeBase}`, label: `${item.exchangeTarget} (${item.exchangeBase})` }
-  )) ?? [];
+export function getOptionExchange(list?: ExchangeDto[], option?: string): InputOption[] {
+  return [optionAll(option), ...list?.map(item => (
+    { value: `${item.exchangeSource}/${item.exchangeTarget}`, label: `${item.exchangeSource} (${item.exchangeTarget})` }
+  )) ?? []];
 }
 
 export async function getViewList(name: string) {

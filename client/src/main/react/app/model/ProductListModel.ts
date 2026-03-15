@@ -1,28 +1,10 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {type ProductDto, ProductService} from "../../api/sales";
-import {
-  type ListFormModel,
-} from "../../utils/ListFormModel.ts";
-import {getCommonActions} from "./CommonListModel.ts";
+import { type ProductDto, ProductService } from "../../api/sales";
+import { type CrudFormModel, } from "@crud-daisyui/utils";
+import { getCommonActions } from "./CommonListModel.ts";
 import { getOptionDirection, getOptionSort, getOptionView, getViewList } from "./OptionModel.ts";
 
 type ProductArgs = Parameters<typeof ProductService.findProduct>[number];
-export const ProductListModel: ListFormModel<ProductArgs, ProductDto> = {
+export const ProductListModel: CrudFormModel<ProductArgs, ProductDto> = {
   action: {
     search: async (args: ProductArgs) => {
       // console.trace("call", {args});
@@ -38,11 +20,11 @@ export const ProductListModel: ListFormModel<ProductArgs, ProductDto> = {
       productName: undefined,
       productNote: undefined,
 
-      page: 0,
+      page: 1,
       size: import.meta.env.VITE_PAGE_SIZE,
       sort: "productName",
       direction: "ASC",
-      view: "00:^(?:productCode(.)|productPrice(.))",
+      view: "00:$(Get-Content header.txt -Raw)(?:productCode(.)|productPrice(.))",
     },
     action: undefined,
     selected: [],
@@ -54,35 +36,43 @@ export const ProductListModel: ListFormModel<ProductArgs, ProductDto> = {
   fields: {
     layout: {
       variant: "inner",
-      columns: 8,
+      columns: 16,
       items: [
         {
           span: 2,
           group: "args",
-          name: "productCode",
-          label: "~product.code",
-          type: "search",
+          name: "view",
+          label: "~filter.view",
+          type: "select",
+          source: "view",
         },
         {
-          span: 2,
+          span: 1,
           group: "args",
-          name: "productName",
-          label: "~product.name",
-          type: "search",
+          name: "fromAvailable",
+          label: "~product.available.from",
+          type: "number",
         },
         {
-          span: 2,
+          span: 1,
+          group: "args",
+          name: "toAvailable",
+          label: "~product.available.to",
+          type: "number",
+        },
+        {
+          span: 4,
           group: "args",
           name: "productNote",
           label: "~product.note",
           type: "search",
         },
         {
-          span: 2,
+          span: 4,
           group: "args",
-          name: "search",
-          label: "~action.search",
-          type: "submit",
+          name: "productText",
+          label: "~text.search",
+          type: "search",
         },
         ...getCommonActions()
       ],
@@ -287,13 +277,36 @@ export const ProductListModel: ListFormModel<ProductArgs, ProductDto> = {
       ]
     },
     options: {},
-    defaults: (entry) => {
+    defaults: (entry, action) => {
       return {
-        productUnits: entry?.productUnits,
-        productMeasure: entry?.productMeasure,
-        productCy: entry?.productCy,
+        ...entry,
+        ...(action !== "copy" ? {
+          productUnits: entry?.productUnits ?? 1,
+          productMeasure: entry?.productMeasure ?? "бр.",
+          productCy: entry?.productCy  ?? import.meta.env.VITE_CCY,
+        } : undefined),
+        productBarcode: "",
+        productCode: "",
+        productCode1: "",
+        productCode2: "",
+        productCode3: "",
+        productCode4: "",
+        productCode5: "",
+        productCode6: "",
+        productCode7: "",
+        productCode8: "",
+        productCode9: "",
         productAvailable: 0,
         productPrice: 0,
+        productPrice1: 0,
+        productPrice2: 0,
+        productPrice3: 0,
+        productPrice4: 0,
+        productPrice5: 0,
+        productPrice6: 0,
+        productPrice7: 0,
+        productPrice8: 0,
+        productPrice9: 0,
       }
     }
   },

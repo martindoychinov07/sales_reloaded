@@ -63,7 +63,9 @@ src/App.css:
 7. npm install react-tooltip@latest
 
 
+8. npm install -D @tailwindcss/postcss postcss
 
+9. update postcss.config.js
 
 
 # React + TypeScript + Vite

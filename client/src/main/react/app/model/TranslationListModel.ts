@@ -1,27 +1,9 @@
-/**
- * Copyright 2026 Martin Doychinov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {type TranslationDto, TranslationService} from "../../api/sales";
-import {
-  type ListFormModel,
-} from "../../utils/ListFormModel.ts";
-import {getCommonActions} from "./CommonListModel.ts";
+import { type TranslationDto, TranslationService } from "../../api/sales";
+import { type CrudFormModel, } from "@crud-daisyui/utils";
+import { getCommonActions } from "./CommonListModel.ts";
 import { getOptionDirection, getOptionSort } from "./OptionModel.ts";
 
-export const TranslationListModel: ListFormModel<Parameters<typeof TranslationService.findTranslation>[number], TranslationDto> = {
+export const TranslationListModel: CrudFormModel<Parameters<typeof TranslationService.findTranslation>[number], TranslationDto> = {
   action: {
     search: TranslationService.findTranslation,
     create: TranslationService.createTranslation,
@@ -34,7 +16,7 @@ export const TranslationListModel: ListFormModel<Parameters<typeof TranslationSe
       en: undefined,
       bg: undefined,
 
-      page: 0,
+      page: 1,
       size: import.meta.env.VITE_PAGE_SIZE,
       sort: "translationKey",
       direction: "ASC"
@@ -48,35 +30,28 @@ export const TranslationListModel: ListFormModel<Parameters<typeof TranslationSe
   fields: {
     layout: {
       variant: "inner",
-      columns: 8,
+      columns: 16,
       items: [
         {
-          span: 2,
+          span: 4,
           group: "args",
           name: "translationKey",
           label: "~translation.key",
           type: "search",
         },
         {
-          span: 2,
+          span: 4,
           group: "args",
           name: "en",
           label: "~translation.en",
           type: "search",
         },
         {
-          span: 2,
+          span: 4,
           group: "args",
           name: "bg",
           label: "~translation.bg",
           type: "search",
-        },
-        {
-          span: 2,
-          group: "args",
-          name: "search",
-          label: "~action.search",
-          type: "submit",
         },
         ...getCommonActions()
       ]
