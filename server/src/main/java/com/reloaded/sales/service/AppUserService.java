@@ -1,22 +1,21 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
 import com.reloaded.sales.dto.AppUserDto;
 import com.reloaded.sales.dto.filter.AppUserFilter;
-import com.reloaded.sales.exception.AlreadyReported;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.AppUser;
 import com.reloaded.sales.repository.AppUserRepository;
 import com.reloaded.sales.security.AppUserDetails;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,18 +28,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-import static com.reloaded.sales.util.ServiceUtils.orBlank;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AppUserService implements UserDetailsService {
 
   private final AppUserRepository appUserRepository;
   private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-  public AppUserService(AppUserRepository appUserRepository) {
-    this.appUserRepository = appUserRepository;
-  }
 
   @Override
   @Transactional(readOnly = true)
@@ -56,9 +52,6 @@ public class AppUserService implements UserDetailsService {
   }
 
   public AppUser createAppUser(AppUserDto user) {
-    if (appUserRepository.findByUsername(user.getUsername()).isPresent()) {
-      throw new AlreadyReported("User already exists");
-    }
     if (user.getNewPassword() == null
       || Strings.isBlank(user.getNewPassword())
     ) {
@@ -111,7 +104,7 @@ public class AppUserService implements UserDetailsService {
   private String getCurrentUsername() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || auth.getName() == null) {
-      throw new AlreadyReported("User is not logged in");
+      throw new NotFound("User is not logged in");
     }
     return auth.getName();
   }
@@ -124,21 +117,13 @@ public class AppUserService implements UserDetailsService {
   public Page<AppUser> findAllAppUser(AppUserFilter filter) {
     PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    AppUser probe = AppUser.builder()
-      .username(orBlank(filter.getUsername()))
-      .userRole(orBlank(filter.getUserRole()))
-      .fullname(orBlank(filter.getFullname()))
-      .build();
+    Specification<AppUser> spec = (root, query, cb) -> cb.conjunction();
 
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(AppUser.Fields.username, match -> match.contains().ignoreCase())
-      .withMatcher(AppUser.Fields.userRole, match -> match.contains().ignoreCase())
-      .withMatcher(AppUser.Fields.fullname, match -> match.contains().ignoreCase());
+    spec = spec.and(anyLike(filter.getUsername(), r -> r.get(AppUser.Fields.username)));
+    spec = spec.and(anyLike(filter.getFullname(), r -> r.get(AppUser.Fields.fullname)));
+    spec = spec.and(anyLike(filter.getUserRole(), r -> r.get(AppUser.Fields.userRole)));
 
-    Example<AppUser> example = Example.of(probe, matcher);
-    return appUserRepository.findAll(example, paging);
+    return appUserRepository.findAll(spec, paging);
   }
 
 }

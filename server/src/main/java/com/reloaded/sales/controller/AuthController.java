@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.security.AppUserDetails;
@@ -10,15 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "auth", description = "auth service") // Swagger documentation
-@RestController // Marks this as a REST controller
-@RequestMapping("/auth") // Base path for authentication-related endpoints
+@Tag(name = "auth", description = "auth service")
+@RestController
+@RequestMapping("/auth")
 @NoArgsConstructor
 public class AuthController {
 
   /**
    * Returns the CSRF token to the frontend.
-   *
    * Used by SPA to read the token and send it in future requests.
    */
   @GetMapping(

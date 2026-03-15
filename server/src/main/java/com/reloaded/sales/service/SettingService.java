@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -11,26 +9,26 @@ import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Setting;
 import com.reloaded.sales.repository.SettingRepository;
 import com.reloaded.sales.util.ServiceUtils;
-import org.apache.logging.log4j.util.Strings;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.reloaded.sales.util.ServiceUtils.orBlank;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SettingService {
+
   private final SettingRepository settingRepository;
 
-  public SettingService(SettingRepository settingRepository) {
-    this.settingRepository = settingRepository;
-  }
-
   public Setting createSetting(Setting setting) {
+    setting.setSettingId(null);
     return settingRepository.save(setting);
   }
 
@@ -68,21 +66,13 @@ public class SettingService {
   public Page<Setting> findSetting(SettingFilter filter) {
     PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    Setting probe = Setting.builder()
-      .settingKey(orBlank(filter.getSettingKey()))
-      .settingGroup(orBlank(filter.getSettingGroup()))
-      .settingNote(orBlank(filter.getSettingNote()))
-      .build();
+    Specification<Setting> spec = (root, query, cb) -> cb.conjunction();
 
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(Setting.Fields.settingKey , match -> match.exact().ignoreCase())
-      .withMatcher(Setting.Fields.settingGroup, match -> match.exact().ignoreCase())
-      .withMatcher(Setting.Fields.settingNote, match -> match.contains().ignoreCase());
+    spec = spec.and(anyLike(filter.getSettingKey(), r -> r.get(Setting.Fields.settingKey)));
+    spec = spec.and(anyLike(filter.getSettingGroup(), r -> r.get(Setting.Fields.settingGroup)));
+    spec = spec.and(anyLike(filter.getSettingNote(), r -> r.get(Setting.Fields.settingNote)));
 
-    Example<Setting> example = Example.of(probe, matcher);
-    return settingRepository.findAll(example, paging);
+    return settingRepository.findAll(spec, paging);
   }
 
 }

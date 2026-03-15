@@ -1,5 +1,10 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -7,13 +12,17 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Generic CRUD controller interface.
- *
  * D - DTO type
  * F - Filter type
  * E - Entity type
- *
- * Provides common REST endpoints for create, update, delete,
- * find (paginated), and getById operations.
+ * ---
+ * REST controller for managing translations.
+ * Provides standard CRUD operations:
+ *  - create
+ *  - update
+ *  - delete
+ *  - find (paginated with filter)
+ *  - get by ID
  */
 public interface CrudController<D, F, E> {
 
@@ -21,12 +30,12 @@ public interface CrudController<D, F, E> {
    * Creates a new resource
    */
   @PostMapping(
-          value = "/",
+          value = "",
           consumes = "application/json",
           produces = "application/json"
   )
   @ResponseStatus(HttpStatus.CREATED)
-  D create(@RequestBody D dto);
+  D create(@Valid @RequestBody D dto);
 
   /**
    * Updates an existing resource by ID
@@ -37,7 +46,7 @@ public interface CrudController<D, F, E> {
           produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  D update(@PathVariable int id, @RequestBody D dto);
+  D update(@PathVariable int id, @Valid @RequestBody D dto);
 
   /**
    * Deletes resource by ID
@@ -56,7 +65,7 @@ public interface CrudController<D, F, E> {
           produces = "application/json"
   )
   @ResponseStatus(HttpStatus.OK)
-  Page<D> find(@ParameterObject @ModelAttribute F filter);
+  Page<D> find(@Valid @ParameterObject @ModelAttribute F filter);
 
   /**
    * Returns resource by ID

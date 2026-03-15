@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.security;
 
@@ -27,6 +25,8 @@ public class AppUserDetails implements UserDetails {
     return List.of(new SimpleGrantedAuthority(user.getUserRole()));
   }
 
+  public Integer getId() { return user.getUserId(); }
+
   public String getFullname() {
     return user.getFullname();
   }
@@ -48,4 +48,5 @@ public class AppUserDetails implements UserDetails {
 
   @Override
   public boolean isEnabled() { return true; }
+
 }

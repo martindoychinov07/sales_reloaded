@@ -1,16 +1,15 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.repository;
 
 import com.reloaded.sales.model.Exchange;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExchangeRepository extends JpaRepository<Exchange, Integer> {
+public interface ExchangeRepository extends JpaRepository<Exchange, Integer>, JpaSpecificationExecutor<Exchange> {
 
 }

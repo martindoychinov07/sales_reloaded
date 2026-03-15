@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -12,26 +10,26 @@ import com.reloaded.sales.model.OrderType;
 import com.reloaded.sales.model.OrderTypeState;
 import com.reloaded.sales.repository.OrderTypeRepository;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.reloaded.sales.util.ServiceUtils.orBlank;
-import static com.reloaded.sales.util.ServiceUtils.orElse;
+import static com.reloaded.sales.util.ServiceUtils.*;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderTypeService {
   private final OrderTypeRepository orderTypeRepository;
 
-  public OrderTypeService(OrderTypeRepository orderTypeRepository) {
-    this.orderTypeRepository = orderTypeRepository;
-  }
-
   public OrderType createOrderType(OrderType orderType) {
+    orderType.setTypeId(null);
     return orderTypeRepository.save(orderType);
   }
 
@@ -65,20 +63,12 @@ public class OrderTypeService {
   public Page<OrderType> findOrderType(OrderTypeFilter filter) {
     PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    OrderType probe = OrderType.builder()
-      .typeCounter(orElse(filter.getTypeCounter(), null))
-      .typeEval(orElse(filter.getTypeEval(), null))
-      .typeNote(orBlank(filter.getTypeNote()))
-      .build();
+    Specification<OrderType> spec = (root, query, cb) -> cb.conjunction();
 
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(OrderType.Fields.typeCounter, match -> match.exact())
-      .withMatcher(OrderType.Fields.typeEval, match -> match.exact())
-      .withMatcher(OrderType.Fields.typeNote, match -> match.contains().ignoreCase());
+    spec = spec.and(eq(filter.getTypeCounter(), r -> r.get(OrderType.Fields.typeCounter)));
+    spec = spec.and(eq(filter.getTypeEval(), r -> r.get(OrderType.Fields.typeEval)));
+    spec = spec.and(anyLike(filter.getTypeNote(), r -> r.get(OrderType.Fields.typeNote)));
 
-    Example<OrderType> example = Example.of(probe, matcher);
-    return orderTypeRepository.findAll(example, paging);
+    return orderTypeRepository.findAll(spec, paging);
   }
 }

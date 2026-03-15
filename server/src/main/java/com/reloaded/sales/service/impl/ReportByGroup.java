@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service.impl;
 
@@ -19,15 +17,23 @@ import static com.reloaded.sales.model.Exchange.getFxKey;
 @Slf4j
 public abstract class ReportByGroup {
 
-  public static final String CURRENCY = "EUR";
-
-  protected abstract boolean isNewGroup(ReportDto group, ReportDto row);
+protected abstract boolean isNewGroup(ReportDto group, ReportDto row);
 
   protected abstract boolean prepareGroup(ReportDto group, ReportDto row);
 
   protected abstract boolean prepareRow(ReportDto row, ReportDto group);
 
+  private String ccy = "EUR";
+
   private Map<String, BigDecimal> rateMap;
+
+  public String getCcy() {
+    return ccy;
+  }
+
+  public void setCcy(String ccy) {
+    this.ccy = ccy;
+  }
 
   public Map<String, BigDecimal> getRateMap() {
     return rateMap;
@@ -40,7 +46,7 @@ public abstract class ReportByGroup {
   public List<ReportDto> group(List<ReportDto> rows) {
     List<ReportDto> result = new ArrayList<>();
     int count = 0;
-    String target = CURRENCY;
+    String target = ccy;
 
     ReportDto total = null;
     total = ReportDto.builder()
@@ -64,18 +70,23 @@ public abstract class ReportByGroup {
     for (ReportDto row : rows) {
       String ccp = row.getOrderCcp();
       BigDecimal rate = row.getOrderRate();
-      if ( ccp.startsWith(target)) {
+      if (ccp.startsWith(target)) {
         rate = BigDecimal.ONE;
       }
       else if (!ccp.endsWith(target)) {
-        String base = ccp.substring(0, 3);
-        String key = getFxKey(base, target);
+        String source = ccp.substring(0, 3);
+        String key = getFxKey(source, target);
         rate = rateMap.getOrDefault(key, BigDecimal.ZERO);
         row.setOrderCcp(key);
         row.setOrderRate(rate);
       }
 
-      row.setEntryPrice(row.getEntryPrice().multiply(rate));
+      row.setEntryPrice(row.getEntryPrice().multiply(rate)
+//        .multiply(
+//          BigDecimal.ONE.subtract(
+//            row.getEntryDiscountPct().divide(BigDecimal.valueOf(100))
+//          ))
+      );
       row.setEntrySum(row.getEntrySum().multiply(rate));
       row.setEntryTax(row.getEntryTax().multiply(rate));
       row.setEntryTotal(row.getEntryTotal().multiply(rate));

@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,7 +21,8 @@ import java.math.BigDecimal;
 @FieldNameConstants
 @Entity
 @Table(name = "product")
-public class Product {
+@EntityListeners(TextNormalizationListener.class)
+public class Product extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_id_gen")
   @SequenceGenerator(name = "product_id_gen", sequenceName = "product_sequence", allocationSize = 1)
@@ -40,14 +41,17 @@ public class Product {
 
   @Size(max = 50)
   @Column(name = "p_barcode", length = 50)
+  @NormalizeText
   private String productBarcode;
 
   @Size(max = 200)
   @Column(name = "p_name", length = 200)
+  @NormalizeText
   private String productName;
 
   @Size(max = 200)
   @Column(name = "p_note", length = 200)
+  @NormalizeText
   private String productNote;
 
   @Column(name = "p_units")
@@ -55,6 +59,7 @@ public class Product {
 
   @Size(max = 30)
   @Column(name = "p_measure", length = 30)
+  @NormalizeText
   private String productMeasure;
 
   @Column(name = "p_available")
@@ -62,46 +67,57 @@ public class Product {
 
   @Size(max = 50)
   @Column(name = "p_code", length = 50)
+  @NormalizeText
   private String productCode;
 
   @Size(max = 50)
   @Column(name = "p_code1", length = 50)
+  @NormalizeText
   private String productCode1;
 
   @Size(max = 50)
   @Column(name = "p_code2", length = 50)
+  @NormalizeText
   private String productCode2;
 
   @Size(max = 50)
   @Column(name = "p_code3", length = 50)
+  @NormalizeText
   private String productCode3;
 
   @Size(max = 50)
   @Column(name = "p_code4", length = 50)
+  @NormalizeText
   private String productCode4;
 
   @Size(max = 50)
   @Column(name = "p_code5", length = 50)
+  @NormalizeText
   private String productCode5;
 
   @Size(max = 50)
   @Column(name = "p_code6", length = 50)
+  @NormalizeText
   private String productCode6;
 
   @Size(max = 50)
   @Column(name = "p_code7", length = 50)
+  @NormalizeText
   private String productCode7;
 
   @Size(max = 50)
   @Column(name = "p_code8", length = 50)
+  @NormalizeText
   private String productCode8;
 
   @Size(max = 50)
   @Column(name = "p_code9", length = 50)
+  @NormalizeText
   private String productCode9;
 
   @Size(max = 50)
   @Column(name = "p_cy", length = 3)
+  @NormalizeText
   private String productCy;
 
   @Column(name = "p_price", precision = 16, scale = 4)

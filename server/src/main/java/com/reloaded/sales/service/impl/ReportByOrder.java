@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service.impl;
 
@@ -25,6 +23,8 @@ public class ReportByOrder extends ReportByGroup {
     group.setOrderNum(row.getOrderNum());
     group.setOrderState(row.getOrderState());
     group.setCustomerName(row.getCustomerName());
+    group.setCustomerLocation(row.getCustomerLocation());
+    group.setCustomerCode2(row.getCustomerCode2());
     group.setOrderResp(row.getOrderResp());
     group.setOrderPayment(row.getOrderPayment());
     group.setOrderPaymentDate(row.getOrderPaymentDate());
@@ -38,6 +38,8 @@ public class ReportByOrder extends ReportByGroup {
     row.setOrderNum(null);
     row.setOrderState(null);
     row.setCustomerName(null);
+    row.setCustomerLocation(null);
+    row.setCustomerCode2(null);
     row.setOrderCcp(null);
     row.setOrderRate(null);
     row.setOrderResp(null);

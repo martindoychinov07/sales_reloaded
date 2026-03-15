@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -13,6 +11,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.reloaded.sales.model.Setting;
 import com.reloaded.sales.util.JsonFlattener;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -30,19 +29,13 @@ import static com.reloaded.sales.util.ParseText.parseStringToMap;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class IntegrationService {
 
   private final WebClient webClient;
   private final ObjectMapper objectMapper;
-  private Environment env;
-  private SettingService settingService;
-
-  public IntegrationService(WebClient webClient, ObjectMapper objectMapper, Environment env, SettingService settingService) {
-    this.webClient = webClient;
-    this.objectMapper = objectMapper;
-    this.env = env;
-    this.settingService = settingService;
-  }
+  private final Environment env;
+  private final SettingService settingService;
 
   private WebClient.ResponseSpec retrieve(String uri, String params) {
     return webClient.get().uri(uri, params.split(",")).retrieve();

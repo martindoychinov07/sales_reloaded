@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,7 +21,8 @@ import java.math.BigDecimal;
 @FieldNameConstants
 @Entity
 @Table(name = "order_type")
-public class OrderType {
+@EntityListeners(TextNormalizationListener.class)
+public class OrderType extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_type_id_gen")
   @SequenceGenerator(name = "order_type_id_gen", sequenceName = "order_type_sequence", allocationSize = 1)
@@ -39,6 +40,7 @@ public class OrderType {
 
   @Size(max = 100)
   @Column(name = "a_key", length = 100)
+  @NormalizeText
   private String typeKey;
 
   @Column(name = "a_num")
@@ -46,6 +48,7 @@ public class OrderType {
 
   @Size(max = 100)
   @Column(name = "a_print", length = 100)
+  @NormalizeText
   private String typePrint;
 
   @Column(name = "a_eval")
@@ -53,6 +56,7 @@ public class OrderType {
 
   @Size(max = 7)
   @Column(name = "a_ccp", length = 7)
+  @NormalizeText
   private String typeCcp;
 
   @Column(name = "a_tax_pct", precision = 16, scale = 4)

@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.ExchangeDto;
@@ -12,14 +16,14 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "exchange", description = "exchange service") // Swagger documentation
-@RestController // Marks this as REST controller
-@RequestMapping("/api/exchange") // Base URL for exchange endpoints
-@RequiredArgsConstructor // Generates constructor for final fields
+@Tag(name = "exchange", description = "exchange service")
+@RestController
+@RequestMapping("/api/exchange")
+@RequiredArgsConstructor
 public class ExchangeController implements CrudController<ExchangeDto, ExchangeFilter, Exchange> {
 
-  private final ExchangeService exchangeService; // Business logic layer
-  private final ModelMapper modelMapper; // Used for Entity <-> DTO mapping
+  private final ExchangeService exchangeService;
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new exchange record

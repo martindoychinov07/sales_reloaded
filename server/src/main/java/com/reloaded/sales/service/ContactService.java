@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -12,6 +10,7 @@ import com.reloaded.sales.model.Contact;
 import com.reloaded.sales.model.ContactState;
 import com.reloaded.sales.repository.ContactRepository;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,14 +24,13 @@ import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ContactService {
+
   private final ContactRepository contactRepository;
 
-  public ContactService(ContactRepository contactRepository) {
-    this.contactRepository = contactRepository;
-  }
-
   public Contact createContact(Contact contact) {
+    contact.setContactId(null);
     contact.setContactState(ContactState.active);
     return contactRepository.save(contact);
   }
@@ -71,10 +69,19 @@ public class ContactService {
 
     Specification<Contact> spec = (root, query, cb) -> cb.conjunction();
 
-    spec.and(eq(Contact.Fields.contactState, ContactState.active));
-    spec.and(anyLike(filter.getContactLocation(), Contact.Fields.contactLocation));
-    spec.and(anyLike(filter.getContactCode(), Contact.Fields.contactCode, Contact.Fields.contactCode1, Contact.Fields.contactCode2 ));
-    spec.and(anyLike(filter.getContactText(), Contact.Fields.contactName, Contact.Fields.contactLocation, Contact.Fields.contactCode, Contact.Fields.contactCode1 ));
+    spec = spec.and(eq(ContactState.active, r -> r.get(Contact.Fields.contactState)));
+    spec = spec.and(anyLike(filter.getContactLocation(), r -> r.get(Contact.Fields.contactLocation)));
+    spec = spec.and(anyLike(filter.getContactCode(),
+      r -> r.get(Contact.Fields.contactCode),
+      r -> r.get(Contact.Fields.contactCode1),
+      r -> r.get(Contact.Fields.contactCode2)
+    ));
+    spec = spec.and(anyLike(filter.getContactText(),
+      r -> r.get(Contact.Fields.contactName),
+      r -> r.get(Contact.Fields.contactLocation),
+      r -> r.get(Contact.Fields.contactCode),
+      r -> r.get(Contact.Fields.contactCode1)
+    ));
 
     return contactRepository.findAll(spec, paging);
   }

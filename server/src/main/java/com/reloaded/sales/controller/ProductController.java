@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.ProductDto;
@@ -15,23 +19,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-/**
- * REST controller for managing products.
- * Provides standard CRUD operations:
- *  - create
- *  - update
- *  - delete
- *  - find (with filter and pagination)
- *  - get by ID
- */
-@Tag(name = "product", description = "product service") // Swagger documentation
+@Tag(name = "product", description = "product service")
 @RestController
-@RequestMapping("/api/product") // Base URL for product endpoints
+@RequestMapping("/api/product")
 @RequiredArgsConstructor
 public class ProductController implements CrudController<ProductDto, ProductFilter, Product> {
 
-  private final ProductService productService; // Service for business logic
-  private final ModelMapper modelMapper;       // Used for Entity <-> DTO mapping
+  private final ProductService productService;
+  private final ModelMapper modelMapper;      
 
   /**
    * Creates a new product

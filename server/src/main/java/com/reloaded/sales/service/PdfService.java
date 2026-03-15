@@ -1,14 +1,14 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.reloaded.sales.config.AppConfig;
 import com.reloaded.sales.model.OrderForm;
 import com.reloaded.sales.dto.PrintVariantDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
@@ -22,21 +22,13 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PdfService {
 
   private final SpringTemplateEngine templateEngine;
   private final ApplicationContext applicationContext;
   private final ConversionService conversionService;
-
-  public PdfService(
-    SpringTemplateEngine templateEngine,
-    ApplicationContext applicationContext,
-    ConversionService conversionService
-  ) {
-    this.templateEngine = templateEngine;
-    this.applicationContext = applicationContext;
-    this.conversionService = conversionService;
-  }
+  private final AppConfig appConfig;
 
   public byte[] generatePdf(OrderForm orderForm, PrintVariantDto printVariant) throws IOException {
     Context context = new Context(LocaleContextHolder.getLocale());
@@ -46,6 +38,7 @@ public class PdfService {
       new ThymeleafEvaluationContext(applicationContext, conversionService)
     );
     context.setVariable("orderForm", orderForm);
+    context.setVariable("ccy", appConfig.getCcy());
     context.setVariable("sourceCy", orderForm.getOrderCcp().substring(0, 3));
     context.setVariable("targetCy", orderForm.getOrderCcp().substring(4));
 

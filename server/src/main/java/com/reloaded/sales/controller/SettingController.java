@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.SettingDto;
@@ -12,23 +16,14 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for managing application settings.
- * Provides standard CRUD operations:
- *  - create
- *  - update
- *  - delete
- *  - find (paginated with filter)
- *  - get by ID
- */
-@Tag(name = "setting", description = "setting service") // Swagger documentation
+@Tag(name = "setting", description = "setting service")
 @RestController
-@RequestMapping("/api/setting") // Base URL for setting endpoints
+@RequestMapping("/api/setting")
 @RequiredArgsConstructor
 public class SettingController implements CrudController<SettingDto, SettingFilter, Setting> {
 
-  private final SettingService settingService; // Service layer for business logic
-  private final ModelMapper modelMapper;       // Mapper for DTO <-> Entity
+  private final SettingService settingService;
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new setting

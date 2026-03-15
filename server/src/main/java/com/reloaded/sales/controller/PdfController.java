@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.PrintVariantDto;
@@ -60,22 +64,16 @@ public class PdfController {
     OrderForm orderForm = orderFormService.getOrderById(orderId);
 
     // Generate the PDF using the order data and print configuration
-    byte[] pdf = pdfService.generatePdf(
-            orderForm,
-            new PrintVariantDto(lang, sign)
-    );
+    byte[] pdf = pdfService.generatePdf(orderForm, new PrintVariantDto(lang, sign));
 
     // Encode filename to ensure proper handling of spaces and special characters
     String encodedFilename = URLEncoder.encode(name + ".pdf", StandardCharsets.UTF_8)
-            .replaceAll("\\+", "%20");
+      .replaceAll("\\+", "%20");
 
     // Return PDF in HTTP response
     return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_PDF) // Set content type to PDF
-            .header(
-                    HttpHeaders.CONTENT_DISPOSITION,
-                    "inline; filename*=UTF-8''" + encodedFilename // Display inline in browser
-            )
-            .body(pdf); // Attach PDF bytes as response body
+      .contentType(MediaType.APPLICATION_PDF) // Set content type to PDF
+      .header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename*=UTF-8''" + encodedFilename) // Display inline in browser
+      .body(pdf); // Attach PDF bytes as response body
   }
 }

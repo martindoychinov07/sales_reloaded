@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -11,25 +9,26 @@ import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Exchange;
 import com.reloaded.sales.repository.ExchangeRepository;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.reloaded.sales.util.ServiceUtils.orBlank;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ExchangeService {
-  final ExchangeRepository exchangeRepository;
 
-  ExchangeService(ExchangeRepository exchangeRepository) {
-    this.exchangeRepository = exchangeRepository;
-  }
+  private final ExchangeRepository exchangeRepository;
 
   public Exchange createExchange(Exchange exchange) {
+    exchange.setExchangeId(null);
     return exchangeRepository.save(exchange);
   }
 
@@ -62,18 +61,12 @@ public class ExchangeService {
   public Page<Exchange> findExchange(ExchangeFilter filter) {
     PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    Exchange probe = Exchange.builder()
-      .exchangeBase(orBlank(filter.getExchangeBase()))
-      .exchangeTarget(orBlank(filter.getExchangeTarget()))
-      .build();
+    Specification<Exchange> spec = (root, query, cb) -> cb.conjunction();
 
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(Exchange.Fields.exchangeBase, match -> match.contains().ignoreCase())
-      .withMatcher(Exchange.Fields.exchangeTarget, match -> match.contains().ignoreCase());
+    spec = spec.and(anyLike(filter.getExchangeTarget(), r -> r.get(Exchange.Fields.exchangeTarget)));
+    spec = spec.and(anyLike(filter.getExchangeSource(), r -> r.get(Exchange.Fields.exchangeSource)));
 
-    Example<Exchange> example = Example.of(probe, matcher);
-    return exchangeRepository.findAll(example, paging);
+    return exchangeRepository.findAll(spec, paging);
   }
+
 }

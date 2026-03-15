@@ -1,12 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.dto.filter;
 
 import com.reloaded.sales.model.OrderState;
+import com.reloaded.sales.util.PageFilter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,10 +22,11 @@ public class ReportFilter implements PageFilter {
 
   private OffsetDateTime fromDate;
   private OffsetDateTime toDate;
-  private Long orderNum;
+  private String orderNum;
   private String customerName;
   private String customerLocation;
-  private String productName;
+  private String productText;
+  private String productNote;
   private Integer orderTypeId;
   private String orderPayment;
   private OrderState orderState;

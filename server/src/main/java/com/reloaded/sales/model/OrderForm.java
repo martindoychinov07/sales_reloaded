@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -23,7 +23,8 @@ import java.util.List;
 @FieldNameConstants
 @Entity
 @Table(name = "order_form")
-public class OrderForm {
+@EntityListeners(TextNormalizationListener.class)
+public class OrderForm extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_form_id_gen")
   @SequenceGenerator(name = "order_form_id_gen", sequenceName = "order_form_sequence", allocationSize = 1)
@@ -69,6 +70,7 @@ public class OrderForm {
 
   @Size(max = 100)
   @Column(name = "o_resp", length = 100)
+  @NormalizeText
   private String orderResp;
 
   @Column(name = "o_resp_date")
@@ -76,6 +78,7 @@ public class OrderForm {
 
   @Size(max = 100)
   @Column(name = "o_dlvd", length = 100)
+  @NormalizeText
   private String orderDlvd;
 
   @Column(name = "o_dlvd_date")
@@ -83,6 +86,7 @@ public class OrderForm {
 
   @Size(max = 100)
   @Column(name = "o_rcvd", length = 100)
+  @NormalizeText
   private String orderRcvd;
 
   @Column(name = "o_rcvd_date")
@@ -94,6 +98,7 @@ public class OrderForm {
 
   @Size(max = 20)
   @Column(name = "o_payment", length = 20)
+  @NormalizeText
   private String orderPayment;
 
   @Column(name = "o_payment_date")

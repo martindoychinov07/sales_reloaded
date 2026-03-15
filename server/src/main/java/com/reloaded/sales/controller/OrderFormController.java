@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.OrderFormDto;
@@ -14,14 +18,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@Tag(name = "orderForm", description = "orderForm service") // Swagger documentation
-@RestController // Marks this as REST controller
-@RequestMapping("/api/order") // Base URL for order endpoints
+@Tag(name = "orderForm", description = "orderForm service")
+@RestController
+@RequestMapping("/api/order")
 @RequiredArgsConstructor
 public class OrderFormController {
 
-  private final OrderFormService orderFormService; // Business logic layer
-  private final ModelMapper modelMapper; // Used for Entity <-> DTO mapping
+  private final OrderFormService orderFormService;
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new order

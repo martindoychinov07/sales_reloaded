@@ -1,4 +1,11 @@
 <configuration>
+    <springProperty
+        scope="context"
+        name="APP_LOG_PATH"
+        source="app.log.path"
+        defaultValue="logs"
+    />
+
     <!-- Console appender for general logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -6,21 +13,72 @@
         </encoder>
     </appender>
 
-    <!-- Appender for login-specific logs -->
-    <appender name="LOGIN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/app/logs/login.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/app/logs/login-%d{yyyy-MM-dd}.log</fileNamePattern>
+    <appender name="SECURITY_ROLLING_LOG"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_PATH}/security.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${APP_LOG_PATH}/security.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <maxFileSize>50MB</maxFileSize>
             <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
+
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Logger only for UserService -->
-    <logger name="com.reloaded.com.reloaded.sales.service.UserService" level="INFO" additivity="false">
-        <appender-ref ref="LOGIN_FILE"/>
+    <appender name="APP_ROLLING_LOG"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_PATH}/app.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${APP_LOG_PATH}/app.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="AUDIT_ROLLING_LOG"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_PATH}/audit.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${APP_LOG_PATH}/audit.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="security.auth" level="INFO" additivity="false">
+        <appender-ref ref="SECURITY_ROLLING_LOG"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="audit" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_ROLLING_LOG"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="app" level="INFO" additivity="false">
+        <appender-ref ref="APP_ROLLING_LOG"/>
         <appender-ref ref="CONSOLE"/>
     </logger>
 

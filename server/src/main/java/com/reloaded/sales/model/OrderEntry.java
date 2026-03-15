@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,6 +23,7 @@ import java.util.Set;
 @FieldNameConstants
 @Entity
 @Table(name = "order_entry")
+@EntityListeners(TextNormalizationListener.class)
 public class OrderEntry {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_entry_id_gen")
@@ -46,14 +47,17 @@ public class OrderEntry {
 
   @Size(max = 50)
   @Column(name = "e_barcode", length = 50)
+  @NormalizeText
   private String entryBarcode;
 
   @Size(max = 50)
   @Column(name = "e_code", length = 50)
+  @NormalizeText
   private String entryCode;
 
   @Size(max = 200)
   @Column(name = "e_label", length = 200)
+  @NormalizeText
   private String entryLabel;
 
   @Column(name = "e_units")
@@ -61,6 +65,7 @@ public class OrderEntry {
 
   @Size(max = 30)
   @Column(name = "e_measure", length = 30)
+  @NormalizeText
   private String entryMeasure;
 
   @Column(name = "e_available")

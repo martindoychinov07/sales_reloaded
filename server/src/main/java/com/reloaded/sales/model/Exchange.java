@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,7 +23,8 @@ import java.time.OffsetDateTime;
 @FieldNameConstants
 @Entity
 @Table(name = "exchange")
-public class Exchange {
+@EntityListeners(TextNormalizationListener.class)
+public class Exchange extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exchange_id_gen")
   @SequenceGenerator(name = "exchange_id_gen", sequenceName = "exchange_sequence", allocationSize = 1)
@@ -35,19 +36,21 @@ public class Exchange {
 
   @Size(max = 3)
   @NotNull
-  @Column(name = "x_base", nullable = false, length = 3)
-  private String exchangeBase;
+  @Column(name = "x_target", nullable = false, length = 3)
+  @NormalizeText
+  private String exchangeTarget;
 
   @Size(max = 3)
   @NotNull
-  @Column(name = "x_target", nullable = false, length = 3)
-  private String exchangeTarget;
+  @Column(name = "x_source", nullable = false, length = 3)
+  @NormalizeText
+  private String exchangeSource;
 
   @NotNull
   @Column(name = "x_rate", nullable = false, precision = 16, scale = 4)
   private BigDecimal exchangeRate;
 
-  public static String getFxKey(String base, String target) {
-    return base + "/" + target;
+  public static String getFxKey(String target, String source) {
+    return target + "/" + source;
   }
 }

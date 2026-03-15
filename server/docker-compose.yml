@@ -8,4 +8,23 @@ services:
       - "8081:8081"
     env_file:
       - ./.env
-    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - "C:/dev/sales:/mnt"   # full Windows path to your project
+
+  db:
+    image: postgres:17.7
+    container_name: mydb
+    environment:
+      POSTGRES_DB: public
+      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data  # persist Postgres data
+      - "C:/dev/sales:/mnt"              # same bind mount for the backup file
+
+volumes:
+  db_data:

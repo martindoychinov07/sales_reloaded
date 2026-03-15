@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.AppUserDto;
@@ -12,14 +16,14 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "appUser", description = "user service") // Swagger documentation
-@RestController // Marks this as a REST controller
-@RequestMapping("/api/user") // Base URL for all endpoints in this controller
-@RequiredArgsConstructor // Lombok: generates constructor for final fields
+@Tag(name = "appUser", description = "user service")
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class AppUserController implements CrudController<AppUserDto, AppUserFilter, AppUser> {
 
-  private final AppUserService appUserService; // Business logic layer
-  private final ModelMapper modelMapper; // Used to map Entity <-> DTO
+  private final AppUserService appUserService;
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new user

@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.dto;
 
@@ -33,6 +31,7 @@ public class ReportDto {
   private String supplierLocation;
   private String customerName;
   private String customerLocation;
+  private String customerCode2;
   private String orderCcp;
   private String orderCy;
   private BigDecimal orderRate;
@@ -40,7 +39,10 @@ public class ReportDto {
   private String orderPayment;
   private OffsetDateTime orderPaymentDate;
   private String productName;
+  private String productNote;
   private Integer entryRow;
+  private String entryCode;
+  private String entryBarcode;
   private String entryLabel;
   private Integer entryUnits;
   private String entryMeasure;

@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,7 +21,8 @@ import java.time.Instant;
 @FieldNameConstants
 @Entity
 @Table(name = "app_user")
-public class AppUser {
+@EntityListeners(TextNormalizationListener.class)
+public class AppUser extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_user_id_gen")
   @SequenceGenerator(name = "app_user_id_gen", sequenceName = "app_user_sequence", allocationSize = 1)
@@ -29,7 +30,8 @@ public class AppUser {
   private Integer userId;
 
   @Size(max = 100)
-  @Column(name = "u_username", length = 100)
+  @Column(name = "u_username", unique = true, nullable = false, length = 100)
+  @NormalizeText
   private String username;
 
   @Size(max = 200)
@@ -38,6 +40,7 @@ public class AppUser {
 
   @Size(max = 100)
   @Column(name = "u_role", length = 100)
+  @NormalizeText
   private String userRole;
 
   @Column(name = "u_expire_date")
@@ -48,6 +51,7 @@ public class AppUser {
 
   @Size(max = 100)
   @Column(name = "u_fullname", length = 100)
+  @NormalizeText
   private String fullname;
 
 }

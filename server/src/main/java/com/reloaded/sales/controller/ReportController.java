@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.ReportDto;
@@ -13,16 +17,14 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller for report generation and retrieval.
- * Currently provides a paginated endpoint for fetching reports
- * based on filtering criteria.
  */
-@Tag(name = "report", description = "report service") // Swagger documentation
+@Tag(name = "report", description = "report service")
 @RestController
-@RequestMapping("/api/report") // Base URL for report endpoints
+@RequestMapping("/api/report")
 @RequiredArgsConstructor
 public class ReportController {
 
-  private final ReportService reportService; // Service handling report logic
+  private final ReportService reportService;
 
   /**
    * Returns a paginated list of reports based on filter criteria.

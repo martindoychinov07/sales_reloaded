@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.dto;
 
@@ -10,10 +8,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
@@ -28,10 +24,10 @@ public class ExchangeDto {
   private OffsetDateTime exchangeDate;
   @NotNull
   @Size(max = 3)
-  private String exchangeBase;
+  private String exchangeTarget;
   @NotNull
   @Size(max = 3)
-  private String exchangeTarget;
+  private String exchangeSource;
   @NotNull
   private BigDecimal exchangeRate;
 }

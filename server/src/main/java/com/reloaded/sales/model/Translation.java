@@ -1,11 +1,11 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.model;
 
+import com.reloaded.sales.util.NormalizeText;
+import com.reloaded.sales.util.TextNormalizationListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -19,7 +19,8 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 @Entity
 @Table(name = "translation")
-public class Translation {
+@EntityListeners(TextNormalizationListener.class)
+public class Translation extends AutoAuditedEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "translation_id_gen")
   @SequenceGenerator(name = "translation_id_gen", sequenceName = "translation_sequence", allocationSize = 1)
@@ -27,7 +28,8 @@ public class Translation {
   private Integer translationId;
 
   @Size(max = 200)
-  @Column(name = "t_key", nullable = false, length = 200)
+  @Column(name = "t_key", unique = true, nullable = false, length = 200)
+  @NormalizeText
   private String translationKey;
 
   @Size(max = 200)

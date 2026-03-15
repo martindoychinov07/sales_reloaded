@@ -1,3 +1,7 @@
+/*
+ *  * Copyright 2026 Martin Doychinov
+ *  * Licensed under the Apache License, Version 2.0
+ */
 package com.reloaded.sales.controller;
 
 import com.reloaded.sales.dto.TranslationDto;
@@ -12,23 +16,14 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for managing translations.
- * Provides standard CRUD operations:
- *  - create
- *  - update
- *  - delete
- *  - find (paginated with filter)
- *  - get by ID
- */
-@Tag(name = "translation", description = "translation service") // Swagger documentation
+@Tag(name = "translation", description = "translation service")
 @RestController
-@RequestMapping("/api/translation") // Base URL for translation endpoints
+@RequestMapping("/api/translation")
 @RequiredArgsConstructor
 public class TranslationController implements CrudController<TranslationDto, TranslationFilter, Translation> {
 
-  private final TranslationService translationService; // Service handling translation logic
-  private final ModelMapper modelMapper;               // Mapper for DTO <-> Entity
+  private final TranslationService translationService;
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new translation

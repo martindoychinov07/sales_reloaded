@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.repository;
 
@@ -21,12 +19,33 @@ import java.util.Optional;
 @Repository
 public interface OrderFormRepository extends JpaRepository<OrderForm, Integer> {
 
-  Optional<OrderForm> findTopByOrderType_TypeIdOrderByOrderNumDesc(Integer typeId);
-
-  Optional<OrderNumDto> getFirstByOrderNumAndOrderCounterAndOrderStateGreaterThanOrderByOrderNumDesc(
-    Long num,
-    Integer counter,
-    OrderState state
+  @Query("""
+    select o
+    from OrderForm o
+    where o.orderType.typeId = :orderTypeId
+      and o.orderState > com.reloaded.sales.model.OrderState.archived
+    order by o.orderNum desc
+  """)
+  List<OrderForm> findLastActiveForType(
+    @Param("orderTypeId") Integer orderTypeId,
+    Pageable pageable
   );
 
+  @Query("""
+    select 
+      o.orderCounter as orderCounter,
+      o.orderNum as orderNum,
+      o.orderDate as orderDate
+    from OrderForm o
+    where o.orderNum = :orderNum
+      and o.orderCounter = :orderCounter
+      and o.orderState > com.reloaded.sales.model.OrderState.archived
+    """)
+  List<OrderNumDto> findOrderNum(
+    @Param("orderNum") Long orderNum,
+    @Param("orderCounter") Integer orderCounter,
+    Pageable pageable
+  );
+
+  List<OrderForm> findByOrderIdInOrderByOrderDateAsc(Iterable<Integer> integers);
 }

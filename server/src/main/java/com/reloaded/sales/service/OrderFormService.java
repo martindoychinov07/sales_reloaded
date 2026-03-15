@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -13,59 +11,41 @@ import com.reloaded.sales.repository.ContactRepository;
 import com.reloaded.sales.repository.OrderFormRepository;
 import com.reloaded.sales.repository.OrderTypeRepository;
 import com.reloaded.sales.repository.ProductRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class OrderFormService {
+
+  private static final Logger auditLog = LoggerFactory.getLogger("audit");
+
   private final OrderFormRepository orderFormRepository;
   private final OrderTypeRepository orderTypeRepository;
   private final ContactRepository contactRepository;
   private final ProductRepository productRepository;
 
-  @PersistenceContext
-  private EntityManager em;
-
-  /**
-   *
-   * @param orderFormRepository
-   * @param orderTypeRepository
-   * @param contactRepository
-   * @param productRepository
-   */
-  OrderFormService(
-    OrderFormRepository orderFormRepository,
-    OrderTypeRepository orderTypeRepository,
-    ContactRepository contactRepository,
-    ProductRepository productRepository
-  ) {
-    this.orderFormRepository = orderFormRepository;
-    this.orderTypeRepository = orderTypeRepository;
-    this.contactRepository = contactRepository;
-    this.productRepository = productRepository;
+  private static void audit(String action, OrderForm res) {
+    auditLog.info("[{}:{}] S:{} T:{} N:{} D:{} U:{}", action, res.getOrderId(), res.getOrderState(), res.getOrderType().getTypeId(), res.getOrderNum(), res.getOrderDate(), res.getUpdatedBy());
   }
 
-  /**
-   *
-   * @param orderForm
-   */
   private void updateOrderCustomer(OrderForm orderForm) {
     Contact customer;
     List<Contact> list = contactRepository.findAllByContactNameAndContactAddressAndContactCode1AndContactCode2OrderByContactIdDesc(
@@ -110,15 +90,19 @@ public class OrderFormService {
     orderForm.setOrderCustomer(customer);
   }
 
-  /**
-   *
-   * @param orderForm
-   */
   private void evaluateOrderEntries(OrderForm orderForm) {
     List<OrderEntry> entries = orderForm.getOrderEntries();
     if (entries == null || entries.isEmpty()) {
       throw new NotFound("orderEntries");
     }
+
+    BigDecimal orderDiscount = BigDecimal.ZERO;
+    BigDecimal orderSum = BigDecimal.ZERO;
+    BigDecimal orderTax = BigDecimal.ZERO;
+    BigDecimal orderTotal = BigDecimal.ZERO;
+
+    BigDecimal taxPct = nvl(orderForm.getOrderTaxPct());
+
     for (int i = 0; i < entries.size(); i++) {
       OrderEntry entry = entries.get(i);
       entry.setEntryRow(i + 1);
@@ -126,14 +110,54 @@ public class OrderFormService {
         entry.setEntryId(null);
       }
       entry.setEntryProduct(productRepository.getReferenceById(entry.getEntryProduct().getProductId()));
+
+      BigDecimal qty = nvl(entry.getEntryQuantity());
+      BigDecimal price = nvl(entry.getEntryPrice());
+      BigDecimal discountPct = nvl(entry.getEntryDiscountPct());
+
+      // normal = qty * price
+      BigDecimal normal = qty.multiply(price);
+
+      // discount = normal * (pct / 100)
+      BigDecimal discount = normal
+        .multiply(discountPct)
+        .divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
+
+      // sum = normal - discount
+      BigDecimal sum = normal.subtract(discount);
+
+      // tax = sum * taxPct / 100
+      BigDecimal tax = sum
+        .multiply(taxPct)
+        .divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
+
+      BigDecimal total = sum.add(tax);
+
+      entry.setEntryDiscount(scale(discount));
+      entry.setEntrySum(scale(sum));
+      entry.setEntryTax(scale(tax));
+      entry.setEntryTotal(scale(total));
+
+      orderDiscount = orderDiscount.add(discount);
+      orderSum = orderSum.add(sum);
+      orderTax = orderTax.add(tax);
+      orderTotal = orderTotal.add(total);
     }
+
+    orderForm.setOrderDiscount(scale(orderDiscount));
+    orderForm.setOrderSum(scale(orderSum));
+    orderForm.setOrderTax(scale(orderTax));
+    orderForm.setOrderTotal(scale(orderTotal));
   }
 
-  /**
-   *
-   * @param typeEval
-   * @param availabilityUpdate
-   */
+  private BigDecimal nvl(BigDecimal v) {
+    return v == null ? BigDecimal.ZERO : v;
+  }
+
+  private BigDecimal scale(BigDecimal v) {
+    return v.setScale(2, RoundingMode.HALF_UP);
+  }
+
   private void updateAvailability(OrderEval typeEval, Map<Integer, BigDecimal> availabilityUpdate) {
     List<Integer> ids = availabilityUpdate.keySet().stream().toList();
     if (!ids.isEmpty()) {
@@ -142,14 +166,14 @@ public class OrderFormService {
       if (typeEval != OrderEval.none) {
         for (Product product: productForUpdate) {
           BigDecimal quantity = availabilityUpdate.get(product.getProductId());
+          BigDecimal available = product.getProductAvailable();
           if (typeEval == OrderEval.push) {
-            quantity = product.getProductAvailable().add(quantity);
+            quantity = available.add(quantity);
           }
           else if (typeEval == OrderEval.pull) {
-            quantity = product.getProductAvailable().subtract(quantity);
+            quantity = available.subtract(quantity);
           }
-//          log.info("updateAvailability: {} {} {} {}", typeEval, product.getProductId(), availabilityUpdate.get(product.getProductId()), quantity);
-
+          auditLog.info("[Q:{}] {} {} {}", product.getProductId(), typeEval, available, quantity);
           product.setProductAvailable(quantity);
         }
 
@@ -158,11 +182,6 @@ public class OrderFormService {
     }
   }
 
-  /**
-   *
-   * @param orderEntries
-   * @return
-   */
   private static @NonNull Map<Integer, BigDecimal> getQuantities(List<OrderEntry> orderEntries) {
     Map<Integer, BigDecimal> map = orderEntries.stream().collect(Collectors.groupingBy(
       entry -> entry.getEntryProduct().getProductId(),
@@ -175,11 +194,6 @@ public class OrderFormService {
     return map;
   }
 
-  /**
-   *
-   * @param orderForm
-   * @return
-   */
   public OrderForm createOrder(OrderForm orderForm) {
     orderForm.setOrderId(null);
     updateOrderCustomer(orderForm);
@@ -197,39 +211,48 @@ public class OrderFormService {
       updateAvailability(orderForm.getOrderType().getTypeEval(), getQuantities(orderForm.getOrderEntries()));
     }
 
-    return orderFormRepository.save(orderForm);
+    OrderForm res = orderFormRepository.save(orderForm);
+    audit("C", res);
+    return res;
   }
 
-  /**
-   *
-   * @param changes
-   * @return
-   */
   public OrderForm updateOrder(OrderForm changes) {
     OrderForm orderForm = orderFormRepository
       .findById(changes.getOrderId())
       .orElseThrow(() -> new NotFound("Order form not found"));
 
-    boolean archived = changes.getOrderState() == OrderState.archived;
-    boolean scheduled = changes.getOrderState() == OrderState.scheduled;
-    if (archived) {
-      orderForm.setOrderState(changes.getOrderState());
+    OrderState orderState = orderForm.getOrderState();
+    if (changes.getOrderState() == OrderState.canceled) {
+      throw new RuntimeException("cannot update canceled order");
     }
-    else if (orderForm.getOrderState() == OrderState.canceled) {
+
+    boolean archiving = changes.getOrderState() == OrderState.archived;
+    boolean scheduling = changes.getOrderState() == OrderState.scheduled;
+    if (archiving || scheduling) {
+
+    }
+    else if (orderState == OrderState.canceled) {
       throw new RuntimeException("order is already canceled");
     }
 
-    if (!orderForm.getOrderType().getTypeId().equals(changes.getOrderType().getTypeId())) {
-      if (!archived && !scheduled) {
-        updateOrderNum(orderForm, +1);
-      }
+    audit("E", orderForm);
+
+    OrderEval oldEval = archiving ? OrderEval.none : orderForm.getOrderType().getTypeEval();
+
+    if (scheduling || archiving) {
+      orderForm.setOrderNum(changes.getOrderNum());
+      orderForm.setOrderDate(changes.getOrderDate());
+    }
+    else if (!orderForm.getOrderCounter().equals(changes.getOrderCounter())) {
+      updateOrderNum(orderForm, -1);
+      orderForm.setOrderCounter(changes.getOrderCounter());
+      orderForm.setOrderDate(changes.getOrderDate());
+      updateOrderNum(orderForm, +1);
     }
 
-    OrderEval oldEval = archived ? OrderEval.none : orderForm.getOrderType().getTypeEval();
-    BeanUtils.copyProperties(changes, orderForm, "orderEntries");
-
+    BeanUtils.copyProperties(changes, orderForm, "orderNum", "orderDate", "orderEntries");
     updateOrderCustomer(orderForm);
-    evaluateOrderEntries(orderForm);
+    evaluateOrderEntries(changes);
 
     List<OrderEntry> existingEntries = orderForm.getOrderEntries();
 
@@ -247,23 +270,47 @@ public class OrderFormService {
         .filter(e -> e.getEntryId() != null)
         .collect(Collectors.toMap(OrderEntry::getEntryId, Function.identity()));
 
+      List<OrderEntry> removed = new ArrayList<>();
+      for (OrderEntry existing : existingEntries) {
+        OrderEntry changed = changeMap.get(existing.getEntryId());
+
+        // no changed entry -> removed
+        if (changed == null) {
+          removed.add(existing);
+          continue;
+        }
+
+        // changed entry exists but product is different
+        if (!Objects.equals(existing.getEntryProduct().getProductId(), changed.getEntryProduct().getProductId())) {
+          throw new RuntimeException("product cannot be changed in existing row");
+        }
+      }
+
+      // Add new entries (id == null)
+      List<OrderEntry> newEntries = changes.getOrderEntries().stream()
+        .filter(e -> e.getEntryId() == null)
+        .toList();
+
       List<OrderEntry> initOrderEntry = new ArrayList<>();
       List<OrderEntry> pushOrderEntry = new ArrayList<>();
       List<OrderEntry> pullOrderEntry = new ArrayList<>();
 
-      // Remove entries that are no longer present
-      List<OrderEntry> removed = existingEntries.stream().filter(entry -> !changeMap.containsKey(entry.getEntryId())).toList();
       if (oldEval == OrderEval.pull) {
         pushOrderEntry.addAll(removed);
       }
       else if (oldEval == OrderEval.push) {
         pullOrderEntry.addAll(removed);
       }
+      else if (oldEval == OrderEval.init) {
+        removed.forEach(row -> row.setEntryQuantity(row.getEntryAvailable()));
+        initOrderEntry.addAll(removed);
+      }
+
       existingEntries.removeAll(removed);
       removed.forEach(entry -> entry.setEntryOrder(null));
 
       // Update existing entries
-      OrderEval newEval = archived ? OrderEval.none : changes.getOrderType().getTypeEval();
+      OrderEval newEval = archiving ? OrderEval.none : changes.getOrderType().getTypeEval();
       for (OrderEntry entry : existingEntries) {
         OrderEntry change = changeMap.get(entry.getEntryId());
         if (!change.getEntryQuantity().equals(entry.getEntryQuantity())) {
@@ -286,11 +333,6 @@ public class OrderFormService {
         }
       }
 
-      // Add new entries (id == null)
-      List<OrderEntry> newEntries = changes.getOrderEntries().stream()
-        .filter(e -> e.getEntryId() == null)
-        .toList();
-
       if (newEval == OrderEval.pull) {
         pullOrderEntry.addAll(newEntries);
       }
@@ -312,19 +354,19 @@ public class OrderFormService {
         if (change != null) {
           BeanUtils.copyProperties(change, entry, "entryId", "entryOrder");
         }
-        if (!archived) {
+        if (!archiving) {
           entry.setEntryAvailable(entry.getEntryProduct().getProductAvailable());
         }
       }
     }
 
-    return orderFormRepository.save(orderForm);
+    OrderForm res = orderFormRepository.save(orderForm);
+    res.getOrderEntries().sort(Comparator.comparing(OrderEntry::getEntryRow));
+
+    audit("U", res);
+    return res;
   }
 
-  /**
-   *
-   * @param id
-   */
   public void deleteOrder(Integer id) {
     OrderForm orderForm = orderFormRepository
       .findById(id)
@@ -345,113 +387,119 @@ public class OrderFormService {
     }
 
     orderForm.setOrderState(OrderState.canceled);
-    orderFormRepository.save(orderForm);
+    OrderForm res = orderFormRepository.save(orderForm);
+    audit("D", res);
   }
 
-  /**
-   *
-   * @param id
-   * @return
-   */
   @Transactional(readOnly = true)
   public OrderForm getOrderById(Integer id) {
     return orderFormRepository.findById(id)
       .orElseThrow(() -> new NotFound("Order form not found"));
   }
 
-  /**
-   *
-   * @param id
-   * @return
-   */
   @Transactional(readOnly = true)
-  public OrderForm getOrderCopyById(Integer id, boolean content) {
-    OrderForm res = new OrderForm();
-    OrderForm found = orderFormRepository.findById(id)
-      .orElseThrow(() -> new NotFound("Order form not found"));
-
-    BeanUtils.copyProperties(
-      found,
-      res,
-      OrderForm.Fields.orderId,
-      OrderForm.Fields.orderEntries
-    );
-
+  public OrderForm getOrderCopyById(List<Integer> ids, boolean content) {
+    OrderForm res = null;
     List<OrderEntry> newEntries = new ArrayList<>();
-    if (content) {
-      List<OrderEntry> entries = found.getOrderEntries();
-      for (int i = 0; i < entries.size(); i++) {
-        OrderEntry entry = entries.get(i);
-        OrderEntry newEntry = new OrderEntry();
+    List<OrderForm> list = orderFormRepository.findByOrderIdInOrderByOrderDateAsc(ids);
+    int row = 1;
+    for (OrderForm found: list) {
+      if (res == null) {
+        res = new OrderForm();
         BeanUtils.copyProperties(
-          entry,
-          newEntry,
-          OrderEntry.Fields.entryId,
-          OrderEntry.Fields.entryOrder
+          found,
+          res,
+          OrderForm.Fields.orderId,
+          OrderForm.Fields.orderEntries
         );
-        newEntry.setEntryRow(i + 1);
-        newEntry.setEntryAvailable(newEntry.getEntryProduct().getProductAvailable());
-        newEntries.add(newEntry);
-//        Product product = productRepository.findById(entry.getEntryProduct().getProductId()).orElseThrow();
-//        entry.setEntryProduct(product);
+      }
+
+      if (content) {
+        List<OrderEntry> entries = found.getOrderEntries();
+        for (int i = 0; i < entries.size(); i++) {
+          OrderEntry entry = entries.get(i);
+          OrderEntry newEntry = new OrderEntry();
+          BeanUtils.copyProperties(
+            entry,
+            newEntry,
+            OrderEntry.Fields.entryId,
+            OrderEntry.Fields.entryOrder
+          );
+          newEntry.setEntryRow(row++);
+          newEntry.setEntryAvailable(newEntry.getEntryProduct().getProductAvailable());
+          newEntries.add(newEntry);
+        }
       }
     }
-    res.setOrderEntries(newEntries);
 
+    if (res == null) throw new NotFound("OrderForm " + ids);
+
+    res.setOrderEntries(newEntries);
     res.setOrderState(OrderState.draft);
     return res;
   }
 
-  /**
-   *
-   * @param orderForm
-   */
   private void updateOrderNum(OrderForm orderForm, int step) {
-    Integer counter = orderForm.getOrderType().getTypeCounter();
+    Integer counter = orderForm.getOrderCounter();
     OrderType orderType = orderTypeRepository.getOrderTypeForUpdate(counter);
 
     Long num = orderType.getTypeNum();
-    OffsetDateTime date = orderForm.getOrderDate();
-    OrderNumDto orderNum = null;
+    OrderNumDto orderNum;
     if (step == +1) {
       do {
-        orderNum = orderFormRepository.getFirstByOrderNumAndOrderCounterAndOrderStateGreaterThanOrderByOrderNumDesc(
-          num, counter, OrderState.archived
-        ).orElse(null);
+        orderNum = orderFormRepository
+          .findOrderNum(num, counter, PageRequest.of(0, 1))
+          .stream().findFirst().orElse(null);
+
         if (orderNum != null) {
           num = num + 1;
-          if (orderForm.getOrderDate().isBefore(orderNum.getOrderDate())) {
-            date = orderNum.getOrderDate().plusSeconds(1);
-          }
         }
-      } while (orderNum != null);
+      }
+      while (orderNum != null);
 
       orderForm.setOrderNum(num);
-      orderForm.setOrderDate(date);
       orderType.setTypeNum(num + 1);
       orderTypeRepository.save(orderType);
-      log.info("COUNTER+: " + num);
+      auditLog.info("COUNTER " + orderType.getTypeId() + " [+] " + orderType.getTypeNum());
     }
     else if (step == -1) {
-      if (num > orderForm.getOrderNum()) {
+      if (orderForm.getOrderNum() < num) {
         num = orderForm.getOrderNum();
-        orderType.setTypeNum(num);
-        orderTypeRepository.save(orderType);
-        log.info("COUNTER-: " + num);
+        while (num > 1) {
+          num = num - 1;
+          orderNum = orderFormRepository
+            .findOrderNum(num, counter, PageRequest.of(0, 1))
+            .stream().findFirst().orElse(null);
+          if (orderNum != null) {
+            num = num + 1;
+            break;
+          }
+        }
+
+        if (orderType.getTypeNum() != num) {
+          orderType.setTypeNum(num);
+          orderTypeRepository.save(orderType);
+          auditLog.info("COUNTER " + orderType.getTypeId() + " [-] " + num);
+        }
       }
     }
   }
 
-  /**
-   *
-   * @param orderTypeId
-   * @return
-   */
   @Transactional(readOnly = true)
-  public Optional<OrderForm> getLastOrderByOrderType(Integer orderTypeId) {
-    Optional<OrderForm> last = orderFormRepository.findTopByOrderType_TypeIdOrderByOrderNumDesc(orderTypeId);
-    OrderType orderType;
+  public Optional<OrderForm> getLastOrderByOrderType(Integer orderTypeId, Integer orderId) {
     OrderForm orderForm;
+    if (orderId != null) {
+      orderForm = orderFormRepository.findById(orderId).orElse(null);
+      if (orderForm != null && orderForm.getOrderType().getTypeId().equals(orderTypeId)) {
+        return Optional.of(orderForm);
+      }
+    }
+
+    Optional<OrderForm> last = orderFormRepository
+      .findLastActiveForType(orderTypeId, PageRequest.of(0, 1))
+      .stream().findFirst();
+
+    OrderType orderType;
     if (last.isPresent()) {
       orderForm = last.get();
       orderType = orderForm.getOrderType();
@@ -460,9 +508,10 @@ public class OrderFormService {
       orderForm = new OrderForm();
       orderType = orderTypeRepository.findById(orderTypeId).get();
       orderForm.setOrderType(orderType);
-      orderForm.setOrderDate(OffsetDateTime.now());
     }
 
+    orderForm.setOrderCounter(orderType.getTypeCounter());
+    orderForm.setOrderDate(OffsetDateTime.now());
     orderForm.setOrderState(OrderState.draft);
     if (!orderType.getTypeId().equals(orderType.getTypeCounter())) {
       orderType = orderTypeRepository.findById(orderType.getTypeCounter()).get();

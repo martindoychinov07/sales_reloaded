@@ -1,39 +1,35 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
 import com.reloaded.sales.dto.filter.TranslationFilter;
-import com.reloaded.sales.exception.AlreadyExistsException;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.Translation;
 import com.reloaded.sales.repository.TranslationRepository;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.reloaded.sales.util.ServiceUtils.orBlank;
+import static com.reloaded.sales.util.ServiceUtils.anyLike;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TranslationService {
   private final TranslationRepository translationRepository;
 
-  public TranslationService(TranslationRepository translationRepository) {
-    this.translationRepository = translationRepository;
-  }
-
   public Translation createTranslation(Translation translation) {
-    if (translationRepository.existsTranslationByTranslationKey(translation.getTranslationKey())) {
-      throw new AlreadyExistsException("Translation with this key already exists");
-    }
+    translation.setTranslationId(null);
     return translationRepository.save(translation);
   }
 
@@ -67,25 +63,18 @@ public class TranslationService {
   public Page<Translation> findTranslation(TranslationFilter filter) {
     PageRequest paging = ServiceUtils.paging(filter, defaultSort);
 
-    Translation probe = Translation.builder()
-      .translationKey(orBlank(filter.getTranslationKey()))
-      .en(orBlank(filter.getEn()))
-      .bg(orBlank(filter.getBg()))
-      .build();
+    Specification<Translation> spec = (root, query, cb) -> cb.conjunction();
 
-    ExampleMatcher matcher = ExampleMatcher
-      .matchingAll()
-      .withIgnoreNullValues()
-      .withMatcher(Translation.Fields.translationKey , match -> match.contains().ignoreCase())
-      .withMatcher(Translation.Fields.en, match -> match.contains().ignoreCase())
-      .withMatcher(Translation.Fields.bg, match -> match.contains().ignoreCase());
+    spec = spec.and(anyLike(filter.getTranslationKey(), r -> r.get(Translation.Fields.translationKey)));
+    spec = spec.and(anyLike(filter.getEn(), r -> r.get(Translation.Fields.en)));
+    spec = spec.and(anyLike(filter.getBg(), r -> r.get(Translation.Fields.bg)));
 
-    Example<Translation> example = Example.of(probe, matcher);
-    return translationRepository.findAll(example, paging);
+    return translationRepository.findAll(spec, paging);
   }
 
   @Transactional(readOnly = true)
   public List<Translation> findAllTranslations() {
     return translationRepository.findAll();
   }
+
 }

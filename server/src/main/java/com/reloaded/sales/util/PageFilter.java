@@ -1,10 +1,8 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
-package com.reloaded.sales.dto.filter;
+package com.reloaded.sales.util;
 
 import org.springframework.data.domain.Sort;
 

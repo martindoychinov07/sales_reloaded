@@ -153,7 +153,8 @@
 <div th:each="variant, stat : ${variants}"
      th:with="
        isDifferent=${!#strings.equals(sourceCy, targetCy)},
-       isTarget=${#strings.equals(targetCy, 'EUR')}
+       isTarget=${#strings.equals(targetCy, ccy)},
+       hasDiscount=${orderForm.getOrderDiscount().signum() != 0}
      "
 >
   <table class="w-1-1">
@@ -193,11 +194,13 @@
       </td>
     </tr>
     <tr>
-      <td colspan="2" class="bold grey gap-right">
-        [[${orderForm.orderCustomer.contactAddress}]]
+      <td colspan="2" class="bold grey gap-right wrap">
+        <span th:utext="${#strings.replace(orderForm.orderCustomer.contactAddress, ';', '<br/>')}"></span>
+        <div th:if="${!#strings.isEmpty(orderForm.orderCustomer.contactLocation)}">[[${@print.t('order.customer.location', variant.lang)}]]: [[${orderForm.orderCustomer.contactLocation}]]</div>
       </td>
-      <td colspan="2" class="bold grey gap-left">
-        [[${orderForm.orderSupplier.contactAddress}]]
+      <td colspan="2" class="bold grey gap-left wrap">
+        <span th:utext="${#strings.replace(orderForm.orderSupplier.contactAddress, ';', '<br/>')}"></span>
+        <div th:if="${!#strings.isEmpty(orderForm.orderSupplier.contactLocation)}">[[${@print.t('order.supplier.location', variant.lang)}]]: [[${orderForm.orderSupplier.contactLocation}]]</div>
       </td>
     </tr>
     <tr>
@@ -246,7 +249,7 @@
       <td class="grey gap-left">
         [[${@print.t('order.payment.bic', variant.lang)}]]:
       </td>
-      <td class="bold right">
+      <td class="bold right nowrap">
         [[${@print.t('order.payment.bic.' + targetCy, variant.lang)}]]
       </td>
     </tr>
@@ -259,10 +262,10 @@
           = [[${#numbers.formatDecimal(orderForm.orderRate, 1, 4)}]] [[${targetCy}]]
         </span>
       </td>
-      <td class="grey gap-left nowrap">
+      <td class="grey gap-left">
         [[${@print.t('order.payment.iban', variant.lang)}]]:
       </td>
-      <td class="bold right">
+      <td class="bold right nowrap">
         [[${@print.t('order.payment.iban.' + targetCy, variant.lang)}]]
       </td>
     </tr>
@@ -280,7 +283,7 @@
 <!--      <th>[[${@print.t('entry.measure', variant.lang)}]]</th>-->
       <th class="nowrap">[[${@print.t('entry.quantity.print', variant.lang)}]]</th>
       <th>[[${@print.t('entry.price', variant.lang)}]]</th>
-      <th>[[${@print.t('entry.discount', variant.lang)}]]<div>%</div></th>
+      <th th:if="${hasDiscount}">[[${@print.t('entry.discount', variant.lang)}]]<div>%</div></th>
       <th>[[${@print.t('entry.sum', variant.lang)}]]</th>
       <th>[[${@print.t('entry.tax', variant.lang)}]]</th>
       <th>[[${@print.t('entry.total', variant.lang)}]]</th>
@@ -296,7 +299,8 @@
         [[${entry.entryBarcode}]]
       </td>
       <td class="left" style="width: 200px">
-        [[${entry.entryLabel}]]<span th:if="${entry.entryCode != null && !#strings.contains(entry.entryLabel, entry.entryCode)}">, [[${entry.entryCode}]]</span>, [[${entry.entryUnits}]] [[${entry.entryMeasure}]]
+        [[${entry.entryLabel}]]<span th:if="${entry.entryCode != null && !#strings.contains(entry.entryLabel, entry.entryCode)}">, [[${entry.entryCode}]]</span>
+<!--        , [[${entry.entryUnits}]] [[${entry.entryMeasure}]]-->
       </td>
       <td class="right bold">
         [[${#numbers.formatDecimal(entry.entryQuantity, 1, 0)}]]
@@ -311,7 +315,7 @@
           <i th:if="${isDifferent}"><br/>[[${#numbers.formatDecimal(@print.rate(entry.entryPrice, orderForm.orderRate), 1, 2)}]]&#160;</i>
         </span>
       </td>
-      <td class="right">
+      <td th:if="${hasDiscount}" class="right">
         [[${#numbers.formatDecimal(entry.entryDiscountPct, 1, 1)}]]
       </td>
       <td class="right">

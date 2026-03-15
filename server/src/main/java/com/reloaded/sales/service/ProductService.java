@@ -1,8 +1,6 @@
 /*
- * /*
  *  * Copyright 2026 Martin Doychinov
  *  * Licensed under the Apache License, Version 2.0
- *  */
  */
 package com.reloaded.sales.service;
 
@@ -10,7 +8,9 @@ import com.reloaded.sales.dto.filter.ProductFilter;
 import com.reloaded.sales.exception.NotFound;
 import com.reloaded.sales.model.*;
 import com.reloaded.sales.repository.ProductRepository;
+import com.reloaded.sales.security.AuditUtils;
 import com.reloaded.sales.util.ServiceUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,20 +18,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import static com.reloaded.sales.util.ServiceUtils.*;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ProductService {
-  final ProductRepository productRepository;
 
-  public ProductService(ProductRepository productRepository) {
-    this.productRepository = productRepository;
-  }
+  private final ProductRepository productRepository;
 
   public Product createProduct(Product product) {
+    product.setProductId(null);
     product.setProductState(ProductState.active);
     return productRepository.save(product);
   }
@@ -81,10 +81,16 @@ public class ProductService {
 
     Specification<Product> spec = (root, query, cb) -> cb.conjunction();
 
-    spec.and(eq(Product.Fields.productState, ProductState.active));
-    spec.and(anyLike(filter.getProductName(), Product.Fields.productName));
-    spec.and(between(Product.Fields.productAvailable, filter.getFromAvailable(), filter.getToAvailable()));
-    spec.and(anyLike(filter.getProductText(), Product.Fields.productName, Product.Fields.productNote, Product.Fields.productCode, Product.Fields.productBarcode));
+    spec = spec.and(eq(ProductState.active, r -> r.get(Product.Fields.productState)));
+    spec =  spec.and(anyLike(filter.getProductName(), r -> r.get(Product.Fields.productName)));
+    spec =  spec.and(anyLike(filter.getProductNote(), r -> r.get(Product.Fields.productNote)));
+    spec = spec.and(between(filter.getFromAvailable(), filter.getToAvailable(), r -> r.get(Product.Fields.productAvailable)));
+    spec = spec.and(anyLike(filter.getProductText(),
+    r -> r.get(Product.Fields.productName),
+    r -> r.get(Product.Fields.productNote),
+    r -> r.get(Product.Fields.productCode),
+    r -> r.get(Product.Fields.productBarcode)
+    ));
 
     return productRepository.findAll(spec, paging);
   }
