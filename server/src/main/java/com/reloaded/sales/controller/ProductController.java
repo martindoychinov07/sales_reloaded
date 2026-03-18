@@ -19,6 +19,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+/**
+ * REST controller for managing products.
+ * Provides standard CRUD operations:
+ *  - create
+ *  - update
+ *  - delete
+ *  - find (with filter and pagination)
+ *  - get by ID
+ */
 @Tag(name = "product", description = "product service")
 @RestController
 @RequestMapping("/api/product")
@@ -26,7 +35,7 @@ import java.util.Optional;
 public class ProductController implements CrudController<ProductDto, ProductFilter, Product> {
 
   private final ProductService productService;
-  private final ModelMapper modelMapper;      
+  private final ModelMapper modelMapper;
 
   /**
    * Creates a new product
@@ -44,7 +53,7 @@ public class ProductController implements CrudController<ProductDto, ProductFilt
   @Override
   public ProductDto update(@PathVariable int id, @RequestBody ProductDto productDto) {
     Product product = toEntity(productDto);
-    product.setProductId(id); // Ensure the ID comes from the path
+    product.setProductId(id);
     return toDto(productService.updateProduct(product));
   }
 

@@ -65,14 +65,14 @@ public class SecurityConfig {
             // Configure form login (session-based)
             .formLogin(form -> form
                     .loginProcessingUrl("/login") // URL to submit username/password
-                    .successHandler((req, res, auth) -> res.setStatus(200)) // return 200 on success
-                    .failureHandler((req, res, ex) -> res.setStatus(401)) // return 401 on failure
+                    .successHandler((req, res, auth) -> res.setStatus(200))
+                    .failureHandler((req, res, ex) -> res.setStatus(401))
             )
 
             // Configure logout
             .logout(logout -> logout
                     .logoutUrl("/logout")
-                    .logoutSuccessHandler((req, res, auth) -> res.setStatus(200)) // return 200 after logout
+                    .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
             );
 
     return http.build();

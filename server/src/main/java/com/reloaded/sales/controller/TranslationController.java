@@ -16,6 +16,15 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for managing translations.
+ * Provides standard CRUD operations:
+ *  - create
+ *  - update
+ *  - delete
+ *  - find (paginated with filter)
+ *  - get by ID
+ */
 @Tag(name = "translation", description = "translation service")
 @RestController
 @RequestMapping("/api/translation")

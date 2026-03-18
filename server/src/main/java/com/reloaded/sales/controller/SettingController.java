@@ -16,7 +16,16 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "setting", description = "setting service")
+/**
+ * REST controller for managing application settings.
+ * Provides standard CRUD operations:
+ *  - create
+ *  - update
+ *  - delete
+ *  - find (paginated with filter)
+ *  - get by ID
+ */
+@Tag(name = "setting", description = "setting service") // Swagger documentation
 @RestController
 @RequestMapping("/api/setting")
 @RequiredArgsConstructor
@@ -41,7 +50,7 @@ public class SettingController implements CrudController<SettingDto, SettingFilt
   @Override
   public SettingDto update(@PathVariable int id, @RequestBody SettingDto settingDto) {
     Setting setting = toEntity(settingDto);
-    setting.setSettingId(id); // Ensure ID comes from the path
+    setting.setSettingId(id);
     return toDto(settingService.updateSetting(setting));
   }
 

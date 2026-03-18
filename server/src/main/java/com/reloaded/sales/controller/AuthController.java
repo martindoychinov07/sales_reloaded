@@ -22,6 +22,7 @@ public class AuthController {
 
   /**
    * Returns the CSRF token to the frontend.
+   *
    * Used by SPA to read the token and send it in future requests.
    */
   @GetMapping(
@@ -29,7 +30,7 @@ public class AuthController {
           produces = "application/json"
   )
   public CsrfToken csrf(CsrfToken token) {
-    return token; // Spring automatically injects the current CSRF token
+    return token;
   }
 
   /**

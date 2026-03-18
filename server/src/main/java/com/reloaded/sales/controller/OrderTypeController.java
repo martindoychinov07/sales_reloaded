@@ -41,7 +41,7 @@ public class OrderTypeController implements CrudController<OrderTypeDto, OrderTy
   @Override
   public OrderTypeDto update(@PathVariable int id, @RequestBody OrderTypeDto orderTypeDto) {
     OrderType orderType = toEntity(orderTypeDto);
-    orderType.setTypeId(id); // Ensures ID comes from path
+    orderType.setTypeId(id);
     return toDto(orderTypeService.updateOrderType(orderType));
   }
 

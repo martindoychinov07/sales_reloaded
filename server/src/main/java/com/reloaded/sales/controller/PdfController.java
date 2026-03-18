@@ -36,10 +36,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class PdfController {
 
-  // Service responsible for generating PDF files
   private final PdfService pdfService;
 
-  // Service responsible for retrieving order data
   private final OrderFormService orderFormService;
 
   /**
@@ -60,20 +58,22 @@ public class PdfController {
           @PathVariable String name
   ) throws IOException {
 
-    // Fetch the order entity from the database
     OrderForm orderForm = orderFormService.getOrderById(orderId);
 
-    // Generate the PDF using the order data and print configuration
-    byte[] pdf = pdfService.generatePdf(orderForm, new PrintVariantDto(lang, sign));
+    byte[] pdf = pdfService.generatePdf(
+            orderForm,
+            new PrintVariantDto(lang, sign)
+    );
 
-    // Encode filename to ensure proper handling of spaces and special characters
     String encodedFilename = URLEncoder.encode(name + ".pdf", StandardCharsets.UTF_8)
-      .replaceAll("\\+", "%20");
+            .replaceAll("\\+", "%20");
 
-    // Return PDF in HTTP response
     return ResponseEntity.ok()
-      .contentType(MediaType.APPLICATION_PDF) // Set content type to PDF
-      .header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename*=UTF-8''" + encodedFilename) // Display inline in browser
-      .body(pdf); // Attach PDF bytes as response body
+            .contentType(MediaType.APPLICATION_PDF)
+            .header(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    "inline; filename*=UTF-8''" + encodedFilename // Display inline in browser
+            )
+            .body(pdf);
   }
 }

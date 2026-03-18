@@ -41,7 +41,7 @@ public class ExchangeController implements CrudController<ExchangeDto, ExchangeF
   @Override
   public ExchangeDto update(@PathVariable int id, @RequestBody ExchangeDto exchangeDto) {
     Exchange exchange = toEntity(exchangeDto);
-    exchange.setExchangeId(id); // Ensures ID comes from URL path
+    exchange.setExchangeId(id);
     return toDto(exchangeService.updateExchange(exchange));
   }
 

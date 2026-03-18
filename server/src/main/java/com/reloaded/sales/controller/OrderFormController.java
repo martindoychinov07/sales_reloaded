@@ -51,7 +51,7 @@ public class OrderFormController {
   @ResponseStatus(HttpStatus.OK)
   public OrderFormDto updateOrder(@PathVariable int id, @RequestBody OrderFormDto orderFormDto) {
     OrderForm orderForm = toEntity(orderFormDto);
-    orderForm.setOrderId(id); // Ensures ID comes from path
+    orderForm.setOrderId(id);
     return toDto(orderFormService.updateOrder(orderForm));
   }
 
@@ -114,35 +114,27 @@ public class OrderFormController {
             .orElse(null);
   }
 
-  /**
-   * Converts DTO to Entity.
-   * Handles nested objects and relationships manually.
-   */
   private OrderForm toEntity(OrderFormDto dto) {
     OrderForm entity = modelMapper.map(dto, OrderForm.class);
 
-    // Map supplier
     if (dto.getOrderSupplier() != null) {
       entity.setOrderSupplier(
               modelMapper.map(dto.getOrderSupplier(), Contact.class)
       );
     }
 
-    // Map customer
     if (dto.getOrderCustomer() != null) {
       entity.setOrderCustomer(
               modelMapper.map(dto.getOrderCustomer(), Contact.class)
       );
     }
 
-    // Map order type
     if (dto.getOrderType() != null) {
       entity.setOrderType(
               modelMapper.map(dto.getOrderType(), OrderType.class)
       );
     }
 
-    // Set back-reference for order entries
     if (dto.getOrderEntries() != null) {
       entity.getOrderEntries()
               .forEach(item -> item.setEntryOrder(entity));

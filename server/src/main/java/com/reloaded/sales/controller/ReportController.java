@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller for report generation and retrieval.
+ * Currently provides a paginated endpoint for fetching reports
+ * based on filtering criteria.
  */
 @Tag(name = "report", description = "report service")
 @RestController

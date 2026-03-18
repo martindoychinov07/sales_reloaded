@@ -41,7 +41,7 @@ public class ContactController implements CrudController<ContactDto, ContactFilt
   @Override
   public ContactDto update(@PathVariable int id, @RequestBody ContactDto contactDto) {
     Contact contact = toEntity(contactDto);
-    contact.setContactId(id); // Ensures ID comes from URL path
+    contact.setContactId(id);
     return toDto(contactService.updateContact(contact));
   }
 

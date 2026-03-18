@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
 
-@Configuration // Marks this as a Spring configuration class
+@Configuration
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 // Enables Spring Data support for web (e.g., Pageable in controllers)
 // VIA_DTO: serializes page info through DTOs instead of exposing entity directly
