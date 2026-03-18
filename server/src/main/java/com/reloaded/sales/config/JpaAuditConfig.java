@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * Used for automatically filling audit fields
  * such as createdAt, updatedAt, createdBy, updatedBy.
  */
-@Configuration // Marks this class as a Spring configuration
+@Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class JpaAuditConfig {
 
