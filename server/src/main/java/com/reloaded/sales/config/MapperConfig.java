@@ -9,11 +9,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuration class for ModelMapper, used for mapping
- * between DTOs and entities in the application.
- */
-@Configuration // Marks this as a Spring configuration class
+@Configuration
 public class MapperConfig {
 
   /**
