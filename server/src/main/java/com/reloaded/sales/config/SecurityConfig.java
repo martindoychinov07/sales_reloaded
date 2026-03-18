@@ -23,7 +23,7 @@ import java.util.List;
 
 @Slf4j
 @Configuration
-@EnableWebSecurity // Enables Spring Security for the app
+@EnableWebSecurity
 public class SecurityConfig {
 
   private final AppUserService appUserService;
