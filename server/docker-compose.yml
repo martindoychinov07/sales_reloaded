@@ -11,7 +11,7 @@ services:
     depends_on:
       - db
     volumes:
-      - "C:/dev/sales:/mnt"   # full Windows path to your project
+      - "${WINDOWS_PROJECT_PATH}:/mnt"  # full Windows path to your project
 
   db:
     image: postgres:17.7
@@ -24,7 +24,7 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data  # persist Postgres data
-      - "C:/dev/sales:/mnt"              # same bind mount for the backup file
+      - "${WINDOWS_PROJECT_PATH}:/mnt"            # same bind mount for the backup file
 
 volumes:
   db_data:
